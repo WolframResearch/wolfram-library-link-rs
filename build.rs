@@ -7,7 +7,7 @@ use std::env;
 
 lazy_static! {
     static ref WOLFRAM_INSTALLATION: PathBuf =
-        PathBuf::from("/Applications/Mathematica 2.app/Contents/");
+        PathBuf::from("/Applications/Mathematica.app/Contents/");
 
     static ref WOLFRAM_INCLUDE_C: PathBuf = WOLFRAM_INSTALLATION
         .join("SystemFiles/IncludeFiles/C/");
@@ -46,7 +46,9 @@ fn generate_bindings() {
         .expect("unable to generate Rust bindings to Wolfram LibraryLink using bindgen");
 
     let filename = "LibraryLink_bindings.rs";
-    // OUT_DIR is set by cargo before running this build.rs file.
+    // OUT_DIR is set by cargo before running this build.rs file. This will be set to a
+    // some mangled subdirectory of the "target" directory normally, and will not persist
+    // between builds.
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap()).join(filename);
     bindings.write_to_file(out_path)
         .expect("failed to write Rust bindings with IO error");
