@@ -6,3 +6,6 @@ edition = "2018"
 
 [dependencies]
 wl-library-link-sys = { path = "../wl-library-link-sys" }
+wl-expr = { path = "../wl-expr" }
+wl-lang = { path = "../wl-lang" }
+wl-parser = { path = "../wl-parser" }
