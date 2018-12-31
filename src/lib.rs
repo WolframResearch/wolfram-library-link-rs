@@ -5,7 +5,7 @@ use std::ops::Try;
 
 use wl_expr::{Expr, SymbolTable};
 use wl_lang::sym;
-use wl_parser;
+use wl_parse;
 
 pub use wl_library_link_sys::{
     WolframLibraryData, mint, MArgument,
@@ -109,7 +109,7 @@ pub unsafe fn marg_str(arg: &MArgument) -> Result<&str, LibraryLinkStatus> {
 /// extremely rare, however, assuming the function is properly used.
 pub fn marg_str_expr(string: &str) -> Result<Expr, Expr> {
     let mut st = SymbolTable::new("Global`", &[] as &[String]);
-    match wl_parser::parse(&mut st, string) {
+    match wl_parse::parse(&mut st, string) {
         Ok(expr) => Ok(expr),
         // TODO: Possible to show a message through LibraryLink?
         Err(err) => Err(failure_expr("ParseError", format!("{:?}", err))),
