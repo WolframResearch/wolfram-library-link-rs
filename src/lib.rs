@@ -120,6 +120,9 @@ pub fn marg_str_expr(string: &str) -> Result<Expr, Expr> {
 // Macros
 //======================================
 
+// TODO: Expose the LibraryLink printing function to users of this library. This will help
+//       with debugging the compiler from the FE significantly.
+
 #[macro_export]
 macro_rules! link_wrapper {
     (fn $name:ident($lib_data:ident, $args:ident, $res:ident) -> LibraryLinkStatus $body:block) => {
