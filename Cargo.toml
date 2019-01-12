@@ -5,7 +5,7 @@ authors = ["Connor Gray <accounts@connorgray.com>"]
 edition = "2018"
 
 [dependencies]
-wl-library-link-sys = { path = "../wl-library-link-sys" }
-wl-expr = { path = "../wl-expr" }
-wl-lang = { path = "../wl-lang" }
-wl-parse = { path = "../wl-parse" }
+wl-library-link-sys = { git = "ssh://github.com/ConnorGray/wl-library-link-sys.git" }
+wl-expr = { git = "ssh://github.com/ConnorGray/wl-expr.git" }
+wl-lang = { git = "ssh://github.com/ConnorGray/wl-lang.git" }
+wl-parse = { git = "ssh://github.com/ConnorGray/wl-parse.git" }
