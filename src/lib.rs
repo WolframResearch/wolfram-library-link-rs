@@ -163,10 +163,11 @@ macro_rules! generate_wrapper {
                                args: *const $crate::MArgument,
                                res: $crate::MArgument) -> u32 {
             use std::convert::TryFrom;
+            use std::panic;
             use wl_lang::forms::ToPrettyExpr;
             use $crate::{
                 marg_str, marg_str_expr, write_expr, LibraryLinkStatus,
-                catch_panic,
+                catch_panic::{self, CaughtPanic},
                 // Re-exported from wl-library-link-sys
                 MArgument,
                 LIBRARY_NO_ERROR, LIBRARY_FUNCTION_ERROR,
@@ -209,7 +210,23 @@ macro_rules! generate_wrapper {
 
             let func: fn($($arg: Expr),*) -> Expr = $func;
 
-            let res_expr: Expr = match catch_panic::call_and_catch_panic(|| func($($arg),*)) {
+            let arc_expr_wrapper = |$($arg: ArcExpr),*| -> Expr {
+                $(
+                    let $arg: Expr = $arg.to_rc_expr();
+                );*
+                func($($arg,)*)
+            };
+
+            let res_expr: Result<Expr, CaughtPanic> = {
+                $(
+                    let $arg: ArcExpr = $arg.to_arc_expr();
+                );*
+
+                catch_panic::call_and_catch_panic(panic::AssertUnwindSafe(
+                    || arc_expr_wrapper($($arg),*)
+                ))
+            };
+            let res_expr: Expr = match res_expr {
                 Ok(res_expr) => res_expr,
                 Err(caught_panic) => caught_panic.to_pretty_expr(),
             };
