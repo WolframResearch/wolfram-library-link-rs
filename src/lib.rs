@@ -127,31 +127,31 @@ pub fn marg_str_expr(string: &str) -> Result<Expr, Expr> {
 // TODO: Expose the LibraryLink printing function to users of this library. This will help
 //       with debugging the compiler from the FE significantly.
 
-#[macro_export]
-macro_rules! link_wrapper {
-    (fn $name:ident($lib_data:ident, $args:ident, $res:ident) -> LibraryLinkStatus $body:block) => {
-        #[no_mangle]
-        #[allow(non_snake_case)]
-        pub unsafe fn $name($lib_data: $crate::WolframLibraryData, arg_count: $crate::mint,
-                            $args: *const $crate::MArgument, $res: $crate::MArgument)
-                         -> u32 {
-            use std::convert::TryFrom;
+// #[macro_export]
+// macro_rules! link_wrapper {
+//     (fn $name:ident($lib_data:ident, $args:ident, $res:ident) -> LibraryLinkStatus $body:block) => {
+//         #[no_mangle]
+//         #[allow(non_snake_case)]
+//         pub unsafe fn $name($lib_data: $crate::WolframLibraryData, arg_count: $crate::mint,
+//                             $args: *const $crate::MArgument, $res: $crate::MArgument)
+//                          -> u32 {
+//             use std::convert::TryFrom;
 
-            let arg_count = match usize::try_from(arg_count) {
-                Ok(count) => count,
-                // NOTE: This will never happen as long as LibraryLink doesn't give us a
-                //       negative argument count. If that happens, something else has
-                //       gone seriously wrong, so let's do the least unhelpful thing.
-                // TODO: Is there a better error we could return here?
-                Err(_) => return $crate::LIBRARY_FUNCTION_ERROR,
-            };
-            let $args: &[$crate::MArgument] = ::std::slice::from_raw_parts($args, arg_count);
-            let closure = || $body;
-            let status: LibraryLinkStatus = closure();
-            u32::from(status)
-        }
-    }
-}
+//             let arg_count = match usize::try_from(arg_count) {
+//                 Ok(count) => count,
+//                 // NOTE: This will never happen as long as LibraryLink doesn't give us a
+//                 //       negative argument count. If that happens, something else has
+//                 //       gone seriously wrong, so let's do the least unhelpful thing.
+//                 // TODO: Is there a better error we could return here?
+//                 Err(_) => return $crate::LIBRARY_FUNCTION_ERROR,
+//             };
+//             let $args: &[$crate::MArgument] = ::std::slice::from_raw_parts($args, arg_count);
+//             let closure = || $body;
+//             let status: LibraryLinkStatus = closure();
+//             u32::from(status)
+//         }
+//     }
+// }
 
 #[macro_export]
 macro_rules! generate_wrapper {
