@@ -1,4 +1,8 @@
 #![feature(try_trait)]
+#![feature(panic_info_message)]
+#![feature(proc_macro_hygiene)]
+
+pub mod catch_panic;
 
 use std::ffi::{CStr, CString};
 use std::ops::Try;
@@ -159,8 +163,10 @@ macro_rules! generate_wrapper {
                                args: *const $crate::MArgument,
                                res: $crate::MArgument) -> u32 {
             use std::convert::TryFrom;
+            use wl_lang::forms::ToPrettyExpr;
             use $crate::{
                 marg_str, marg_str_expr, write_expr, LibraryLinkStatus,
+                catch_panic,
                 // Re-exported from wl-library-link-sys
                 MArgument,
                 LIBRARY_NO_ERROR, LIBRARY_FUNCTION_ERROR,
@@ -201,10 +207,12 @@ macro_rules! generate_wrapper {
                 arg_idx += 1;
             );*
 
-            // PRE-COMMIT: wrap in catch_panic_message()
             let func: fn($($arg: Expr),*) -> Expr = $func;
 
-            let res_expr: Expr = func($($arg),*);
+            let res_expr: Expr = match catch_panic::call_and_catch_panic(|| func($($arg),*)) {
+                Ok(res_expr) => res_expr,
+                Err(caught_panic) => caught_panic.to_pretty_expr(),
+            };
 
             write_expr(res_expr, res);
             LIBRARY_NO_ERROR

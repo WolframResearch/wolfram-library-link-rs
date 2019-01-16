@@ -10,3 +10,6 @@ wl-library-link-sys = { git = "ssh://github.com/ConnorGray/wl-library-link-sys.g
 wl-expr = { git = "ssh://github.com/ConnorGray/wl-expr.git" }
 wl-lang = { git = "ssh://github.com/ConnorGray/wl-lang.git" }
 wl-parse = { git = "ssh://github.com/ConnorGray/wl-parse.git" }
+wl-expr-proc-macro = { git = "ssh://github.com/ConnorGray/wl-expr-proc-macro.git", tag = "0.1.1" }
+
+lazy_static = "^1"
