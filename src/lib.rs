@@ -164,6 +164,7 @@ macro_rules! generate_wrapper {
                                res: $crate::MArgument) -> u32 {
             use std::convert::TryFrom;
             use std::panic;
+            use wl_expr::ArcExpr;
             use wl_lang::forms::ToPrettyExpr;
             use $crate::{
                 marg_str, marg_str_expr, write_expr, LibraryLinkStatus,
