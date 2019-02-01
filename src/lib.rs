@@ -11,6 +11,8 @@ use wl_expr::{Expr, SymbolTable};
 use wl_lang::sym;
 use wl_parse;
 
+// TODO: Maybe don't reexport mint? Standardize on using u32/u64/isize? Type aliases
+//       aren't always helpful.
 pub use wl_library_link_sys::{
     WolframLibraryData, mint, MArgument,
     // Errors
@@ -30,6 +32,17 @@ pub trait EngineInterface {
     /// to the kernel as quickly as possible. They should not exit the process or
     /// otherwise terminate execution, simply return up the call stack.
     fn aborted(&self) -> bool;
+
+    // TODO:
+    // /// Convenience wrapper around evaluate `Print`.
+    // fn print(&self, args: impl Into<PrintArgs>);
+
+    // TODO:
+    // /// Evaluate an expression in the current kernel.
+    // ///
+    // /// TODO: What does Stack[] give in this situation? What does Stack[] give inside any
+    // ///       builtin function?
+    // fn evaluate(&self, expr: Expr) -> EvaluationData;
 }
 
 /// This struct should be considered private.
