@@ -1,3 +1,22 @@
+//! A safe wrapper around wl-library-link-sys.
+//!
+//! # Automatically generating LibraryLink wrappers around Rust functions.
+//!
+//! See the `generate_wrapper!()` macro.
+//!
+//! ## Getting backtraces when a panic occurs
+//!
+//! `generate_wrapper!()` will automatically catch any Rust panic's which occur in the
+//! wrapped code, and show an error in the FE with the panic message and source file/line
+//! number. It also can optionally show the backtrace. This is configured by the
+//! "LIBRARY_LINK_RUST_BACKTRACE" environment variable. Enable it by evaluating:
+//!
+//! ```wolfram
+//! SetEnvironment["LIBRARY_LINK_RUST_BACKTRACE" -> "True"]
+//! ```
+//!
+//! Now the error shown when a panic occurs will include
+
 #![feature(try_trait)]
 #![feature(panic_info_message)]
 #![feature(proc_macro_hygiene)]
@@ -18,6 +37,8 @@ pub use wl_library_link_sys::{
     // Errors
     LIBRARY_NO_ERROR, LIBRARY_FUNCTION_ERROR, LIBRARY_TYPE_ERROR,
 };
+
+const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 
 //======================================
 // Engine Interface
@@ -253,6 +274,11 @@ pub fn marg_str_expr(string: &str) -> Result<Expr, Expr> {
 //     }
 // }
 
+// TODO: Make this a procedural macro.
+//       This has a number of benefits:
+//         1) Could ensure the function is `pub` and `#[no_mangle]`
+//         2) Wouldn't have to duplicate parameter types in function definition and
+//            generate_wrapper!() invokation.
 #[macro_export]
 macro_rules! generate_wrapper {
     ($wrapper:ident # $func:ident ( $($arg:ident : Expr),* ) -> Expr) => {

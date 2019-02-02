@@ -13,3 +13,4 @@ wl-parse = { git = "ssh://github.com/ConnorGray/wl-parse.git" }
 wl-expr-proc-macro = { git = "ssh://github.com/ConnorGray/wl-expr-proc-macro.git" }
 
 lazy_static = "^1"
+backtrace = "^0.3"

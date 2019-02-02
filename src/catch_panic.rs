@@ -6,6 +6,7 @@ use std::process;
 use std::time::Instant;
 
 use lazy_static::lazy_static;
+use backtrace::Backtrace;
 
 use wl_expr::Expr;
 use wl_lang::forms::{ToExpr, ToPrettyExpr};
@@ -26,23 +27,82 @@ pub struct CaughtPanic {
     ///
     ///       An inaccurate instance of `CaughtPanic` can also be reported when panic's
     ///       occur in multiple threads at once.
-    pub message: Option<String>,
-    pub location: Option<String>,
+    message: Option<String>,
+    location: Option<String>,
+    backtrace: Option<Backtrace>,
 }
 
 impl ToPrettyExpr for CaughtPanic {
     fn to_pretty_expr(&self) -> Expr {
-        let CaughtPanic { message, location } = self.clone();
+        let CaughtPanic { message, location, backtrace } = self.clone();
+
 
         let message = Expr::string(message.unwrap_or("Rust panic (no message)".into()));
         let location = Expr::string(location.unwrap_or("Unknown".into()));
+        let backtrace = display_backtrace(backtrace);
+
+        let head = Expr::symbol(wl_parse::parse_symbol("LibraryLink`Panic").unwrap());
 
         wlexpr! {
-            Failure["Panic", <|
-                "Message" -> 'message,
-                "SourceLocation" -> 'location
-            |>]
+            'head[Panel[Column[{
+                Row[{Style["Message", Bold], ": ", 'message}],
+                Row[{Style["SourceLocation", Bold], ": ", 'location}],
+                'backtrace
+            }]]]
         }
+    }
+}
+
+fn should_show_backtrace() -> bool {
+    std::env::var(crate::BACKTRACE_ENV_VAR).is_ok()
+}
+
+fn display_backtrace(bt: Option<Backtrace>) -> Expr {
+    if !should_show_backtrace() {
+        // This Sequence[] will not show up in the FE.
+        return wlexpr! { Sequence[] }
+    }
+
+    let bt: Expr = if let Some(mut bt) = bt {
+        // Resolve the symbols in the frames of the backtrace.
+        bt.resolve();
+
+        Expr::string(format!("{:?}", bt))
+
+        // let mut frames = Vec::new();
+        // for frame in bt.frames() {
+        //     use backtrace::{BacktraceSymbol, SymbolName};
+
+        //     // TODO: Show all the symbols, not just the last one. A frame will be
+        //     //       associated with more than one symbol if any inlining occured, so this
+        //     //       would help show better backtraces in optimized builds.
+        //     let symbol: Option<&str> = frame.symbols()
+        //         .last()
+        //         .and_then(BacktraceSymbol::name)
+        //         .as_ref()
+        //         .and_then(SymbolName::as_str);
+
+        //     let symbol = match symbol {
+        //         Some(sym) => sym,
+        //         // Stop building the backtrace once we reach a symbol we can't resolve.
+        //         // TODO: Show symbols which can't be resolved as <unresolved> or similar.
+        //         //       Missing["NotAvailable"]?
+        //         None => break,
+        //     };
+        // }
+        // let frames = Expr::normal(*sym::List, frames);
+        // let frames = Expr::normal(*sym::Column, vec![frames]);
+        // frames
+    } else {
+        Expr::string("<unable to capture backtrace>")
+    };
+
+    wlexpr!{
+        Row[{
+            Style["Backtrace", Bold],
+            ": ",
+            Style['bt, FontSize -> 13, FontFamily -> "Source Code Pro"]
+        }]
     }
 }
 
@@ -93,7 +153,8 @@ fn get_caught_panic() -> CaughtPanic {
                     // we set above).
                     let message = format!("could not get panic info for current thread. \
                         Operation of custom panic hook was interrupted");
-                    CaughtPanic { message: Some(message), location: None }
+                    CaughtPanic { message: Some(message), location: None,
+                                  backtrace: None }
                 },
                 // This case can occur when a panic occurs in a thread spawned by the
                 // current thread: the ThreadId stored in CAUGHT_PANICS's is not
@@ -128,7 +189,11 @@ fn custom_hook(info: &panic::PanicInfo) {
             None
         };
         let location: Option<String> = info.location().map(ToString::to_string);
-        CaughtPanic { message, location }
+        // Don't resolve the backtrace inside the panic hook. This seems to hang for a
+        // long time (maybe forever?). Resolving it later, in the ToPrettyExpr impl, seems
+        // to work (though it is noticeably slower, takes maybe ~0.5s-1s).
+        let backtrace = Some(Backtrace::new_unresolved());
+        CaughtPanic { message, location, backtrace }
     };
 
     // The `ThreadId` of the thread which is currently panic'ing.
