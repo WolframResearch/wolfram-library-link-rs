@@ -1,4 +1,4 @@
-//! A safe wrapper around wl-library-link-sys.
+//! A safe and convenient wrapper around wl-library-link-sys.
 //!
 //! # Automatically generating LibraryLink wrappers around Rust functions.
 //!
