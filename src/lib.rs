@@ -279,6 +279,7 @@ pub fn marg_str_expr(string: &str) -> Result<Expr, Expr> {
 //         1) Could ensure the function is `pub` and `#[no_mangle]`
 //         2) Wouldn't have to duplicate parameter types in function definition and
 //            generate_wrapper!() invokation.
+// TODO: Allow any type which implements FromExpr in wrapper parameter lists?
 #[macro_export]
 macro_rules! generate_wrapper {
     ($wrapper:ident # $func:ident ( $($arg:ident : Expr),* ) -> Expr) => {
