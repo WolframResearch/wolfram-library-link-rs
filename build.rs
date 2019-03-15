@@ -25,7 +25,13 @@ fn main() {
     //     panic!("no Wolfram System includes files exist at '{}'", WOLFRAM_INCLUDE_C.display());
     // }
 
-    let path = PathBuf::from(env!("WL_LIBRARY_LINK_SYS_HEADER"));
+    const ENV_VAR: &str = "WL_LIBRARY_LINK_SYS_HEADER";
+
+    let path = match std::env::var(ENV_VAR) {
+        Ok(path) => PathBuf::from(path),
+        Err(err) => panic!("wl-library-link-sys: could not get environment variable: \
+            {}: {}", ENV_VAR, err),
+    };
     if !path.is_file() {
         panic!("wl-library-link-sys: header file does not exist: {}", path.display());
     }
