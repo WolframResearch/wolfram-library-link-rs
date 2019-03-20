@@ -321,7 +321,7 @@ macro_rules! generate_wrapper {
                     Some(marg) => marg,
                     /// This implies that the LibraryFunction wrapper in top-level does
                     /// not have enough arguments.
-                    None => return LIBRARY_ARGUMENT_ERROR,
+                    None => return LIBRARY_FUNCTION_ERROR,
                 };
                 let string = match marg_str(marg) {
                     Ok(s) => s,
