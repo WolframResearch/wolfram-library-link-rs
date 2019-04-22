@@ -199,11 +199,11 @@ pub unsafe fn failure_msg(res: MArgument, kind: &str, msg: String) -> LibraryLin
 // TODO: Rename `err` to `message`.
 pub fn failure_expr(kind: &str, err: String) -> Expr {
     let assoc = {
-        let msg_rule = Expr::normal(*sym::Rule, vec![
+        let msg_rule = Expr::normal(&*sym::Rule, vec![
             Expr::string("Message"), Expr::string(err)]);
-        Expr::normal(*sym::Association, vec![msg_rule])
+        Expr::normal(&*sym::Association, vec![msg_rule])
     };
-    Expr::normal(*sym::Failure, vec![Expr::string(kind), assoc])
+    Expr::normal(&*sym::Failure, vec![Expr::string(kind), assoc])
 }
 
 pub unsafe fn write_expr(expr: Expr, arg: MArgument) {
