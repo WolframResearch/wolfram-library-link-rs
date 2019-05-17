@@ -44,11 +44,11 @@ impl ToPrettyExpr for CaughtPanic {
         let head = Expr::symbol(wl_parse::parse_symbol("LibraryLink`Panic").unwrap());
 
         wlexpr! {
-            'head[Panel[Column[{
+            Failure['head[Panel[Column[{
                 Row[{Style["Message", Bold], ": ", 'message}],
                 Row[{Style["SourceLocation", Bold], ": ", 'location}],
                 'backtrace
-            }]]]
+            }]]]]
         }
     }
 }
