@@ -6,11 +6,11 @@ edition = "2018"
 publish = false
 
 [dependencies]
-wl-library-link-sys = { git = "ssh://github.com/ConnorGray/wl-library-link-sys.git" }
-wl-expr = { git = "ssh://github.com/ConnorGray/wl-expr.git" }
-wl-lang = { git = "ssh://github.com/ConnorGray/wl-lang.git" }
-wl-parse = { git = "ssh://github.com/ConnorGray/wl-parse.git" }
-wl-expr-proc-macro = { git = "ssh://github.com/ConnorGray/wl-expr-proc-macro.git" }
+wl-library-link-sys = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-library-link-sys.git" }
+wl-expr             = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr.git" }
+wl-lang             = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-lang.git" }
+wl-parse            = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-parse.git" }
+wl-expr-proc-macro  = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr-proc-macro.git" }
 
 lazy_static = "^1"
 backtrace = "^0.3"
