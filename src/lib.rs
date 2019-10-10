@@ -421,7 +421,7 @@ macro_rules! generate_wrapper {
                 };
 
                 arg_idx += 1;
-            );*
+            )*
 
             // Contruct the engine
             let engine: $crate::Engine = Box::new($crate::EngineCallbacks::from(lib_data));
@@ -431,7 +431,7 @@ macro_rules! generate_wrapper {
             let arc_expr_wrapper = |$($arg: ArcExpr),*| -> Expr {
                 $(
                     let $arg: Expr = $arg.to_rc_expr();
-                );*
+                )*
                 func(engine, $($arg,)*)
             };
 
