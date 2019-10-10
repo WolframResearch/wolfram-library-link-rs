@@ -336,7 +336,7 @@ macro_rules! generate_wrapper {
                 };
 
                 arg_idx += 1;
-            );*
+            )*
 
             let func: fn($($arg: Expr),*) -> Expr = $func;
 
