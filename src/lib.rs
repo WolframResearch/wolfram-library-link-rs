@@ -343,14 +343,14 @@ macro_rules! generate_wrapper {
             let arc_expr_wrapper = |$($arg: ArcExpr),*| -> Expr {
                 $(
                     let $arg: Expr = $arg.to_rc_expr();
-                );*
+                )*
                 func($($arg,)*)
             };
 
             let res_expr: Result<Expr, CaughtPanic> = {
                 $(
                     let $arg: ArcExpr = $arg.to_arc_expr();
-                );*
+                )*
 
                 catch_panic::call_and_catch_panic(panic::AssertUnwindSafe(
                     || arc_expr_wrapper($($arg),*)
@@ -438,7 +438,7 @@ macro_rules! generate_wrapper {
             let res_expr: Result<Expr, CaughtPanic> = {
                 $(
                     let $arg: ArcExpr = $arg.to_arc_expr();
-                );*
+                )*
 
                 catch_panic::call_and_catch_panic(panic::AssertUnwindSafe(
                     || arc_expr_wrapper($($arg),*)
