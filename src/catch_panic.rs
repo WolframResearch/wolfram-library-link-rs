@@ -9,7 +9,7 @@ use lazy_static::lazy_static;
 use backtrace::Backtrace;
 
 use wl_expr::Expr;
-use wl_lang::forms::{ToExpr, ToPrettyExpr};
+use wl_lang::{sym, forms::{ToExpr, ToPrettyExpr}};
 use wl_expr_proc_macro::wlexpr;
 
 lazy_static! {
@@ -67,32 +67,52 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
         // Resolve the symbols in the frames of the backtrace.
         bt.resolve();
 
-        Expr::string(format!("{:?}", bt))
+        // Expr::string(format!("{:?}", bt))
 
-        // let mut frames = Vec::new();
-        // for frame in bt.frames() {
-        //     use backtrace::{BacktraceSymbol, SymbolName};
+        let mut frames = Vec::new();
+        for (index, frame) in bt.frames().into_iter().enumerate() {
+            use backtrace::{BacktraceSymbol, SymbolName};
 
-        //     // TODO: Show all the symbols, not just the last one. A frame will be
-        //     //       associated with more than one symbol if any inlining occured, so this
-        //     //       would help show better backtraces in optimized builds.
-        //     let symbol: Option<&str> = frame.symbols()
-        //         .last()
-        //         .and_then(BacktraceSymbol::name)
-        //         .as_ref()
-        //         .and_then(SymbolName::as_str);
+            // TODO: Show all the symbols, not just the last one. A frame will be
+            //       associated with more than one symbol if any inlining occured, so this
+            //       would help show better backtraces in optimized builds.
+            let bt_symbol: Option<&BacktraceSymbol> = frame
+                .symbols()
+                .last();
 
-        //     let symbol = match symbol {
-        //         Some(sym) => sym,
-        //         // Stop building the backtrace once we reach a symbol we can't resolve.
-        //         // TODO: Show symbols which can't be resolved as <unresolved> or similar.
-        //         //       Missing["NotAvailable"]?
-        //         None => break,
-        //     };
-        // }
-        // let frames = Expr::normal(*sym::List, frames);
-        // let frames = Expr::normal(*sym::Column, vec![frames]);
-        // frames
+            let name: String = bt_symbol
+                .and_then(BacktraceSymbol::name)
+                .as_ref()
+                .map(|sym: &SymbolName| format!("{}", sym))
+                .unwrap_or("<unknown>".into());
+
+            // Skip frames from within the `backtrace` crate itself.
+            if name.starts_with("backtrace::") {
+                continue;
+            }
+
+            let filename = bt_symbol.and_then(BacktraceSymbol::filename);
+            let lineno = bt_symbol.and_then(BacktraceSymbol::lineno);
+            let file_and_line: String = match (filename, lineno) {
+                (Some(path), Some(lineno)) => format!("{}:{}", path.display(), lineno),
+                (Some(path), None) => format!("{}", path.display()),
+                _ => "".into(),
+            };
+
+            frames.push(wlexpr! {
+                Row[{
+                    %[index.to_string()],
+                    ": ",
+                    'file_and_line,
+                    'name
+                }]
+            });
+        }
+
+        let frames = Expr::normal(&*sym::List, frames);
+        // Set ImageSize so that the lines don't wordwrap for very long function names,
+        // which makes the backtrace hard to read.
+        wlexpr! { Column['frames, ImageSize -> {1200, Automatic}] }
     } else {
         Expr::string("<unable to capture backtrace>")
     };
