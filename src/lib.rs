@@ -16,6 +16,24 @@
 //! ```
 //!
 //! Now the error shown when a panic occurs will include a backtrace.
+//!
+//! # Some thoughts on efficiency and long-term compatibility
+//!
+//! Primary interface could be a KExpr, which eliminates the serialization/deserialization
+//! overhead going from Kernel -> Library code and back again.
+//!
+//! There could be a fallback interface which will serialize an expression to a plain
+//! InputForm string, or write it over a WSTP connection.
+//!
+//! The library would declare which ABI version of the KExpr struct it expects, and a
+//! compatibility check could be run when the library is loaded. If the check succeeds,
+//! expressions are passed using the Primary interface; otherwise, they are passed using
+//! the Secondary interface, and a message is emited to the user to indicate that their
+//! library is not running at full speed (but with no loss in functionality) A
+//! compatibility check could be run when the library is loaded.
+//!
+//! This scheme would allow us the freedom to make ABI-incompatible changes to the Kernel
+//! expression structure without breaking (completely) user code.
 
 #![feature(try_trait)]
 #![feature(panic_info_message)]
