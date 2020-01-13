@@ -1,0 +1,6 @@
+max_width = 90
+comment_width = 90
+match_block_trailing_comma = true
+blank_lines_upper_bound = 2
+merge_derives = false
+overflow_delimited_expr = true

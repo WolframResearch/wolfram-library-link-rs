@@ -51,9 +51,13 @@ use wl_parse;
 // TODO: Maybe don't reexport mint? Standardize on using u32/u64/isize? Type aliases
 //       aren't always helpful.
 pub use wl_library_link_sys::{
-    WolframLibraryData, mint, MArgument,
+    mint,
+    MArgument,
+    WolframLibraryData,
+    LIBRARY_FUNCTION_ERROR,
     // Errors
-    LIBRARY_NO_ERROR, LIBRARY_FUNCTION_ERROR, LIBRARY_TYPE_ERROR,
+    LIBRARY_NO_ERROR,
+    LIBRARY_TYPE_ERROR,
 };
 
 const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
@@ -185,14 +189,15 @@ impl Try for LibraryLinkStatus {
         match self {
             LibraryLinkStatus::NoError => Ok(()),
             s @ LibraryLinkStatus::FunctionError => Err(s),
-            s @LibraryLinkStatus::TypeError => Err(s),
+            s @ LibraryLinkStatus::TypeError => Err(s),
         }
     }
 
     fn from_error(err: Self) -> Self {
         match err {
-            LibraryLinkStatus::NoError =>
-                panic!("Try::from_error for LibraryLinkStatus: got NoError"),
+            LibraryLinkStatus::NoError => {
+                panic!("Try::from_error for LibraryLinkStatus: got NoError")
+            },
             LibraryLinkStatus::FunctionError | LibraryLinkStatus::TypeError => err,
         }
     }
@@ -218,7 +223,9 @@ pub unsafe fn failure_msg(res: MArgument, kind: &str, msg: String) -> LibraryLin
 pub fn failure_expr(kind: &str, err: String) -> Expr {
     let assoc = {
         let msg_rule = Expr::normal(&*sym::Rule, vec![
-            Expr::string("Message"), Expr::string(err)]);
+            Expr::string("Message"),
+            Expr::string(err),
+        ]);
         Expr::normal(&*sym::Association, vec![msg_rule])
     };
     Expr::normal(&*sym::Failure, vec![Expr::string(kind), assoc])

@@ -1,21 +1,23 @@
-use std::panic::{self, UnwindSafe};
-use std::sync::{self, Mutex};
 use std::collections::HashMap;
-use std::thread::{self, ThreadId};
+use std::panic::{self, UnwindSafe};
 use std::process;
+use std::sync::{self, Mutex};
+use std::thread::{self, ThreadId};
 use std::time::Instant;
 
-use lazy_static::lazy_static;
 use backtrace::Backtrace;
+use lazy_static::lazy_static;
 
 use wl_expr::Expr;
-use wl_lang::{sym, forms::{ToExpr, ToPrettyExpr}};
 use wl_expr_proc_macro::wlexpr;
+use wl_lang::{
+    forms::{ToExpr, ToPrettyExpr},
+    sym,
+};
 
 lazy_static! {
-    static ref CAUGHT_PANICS: Mutex<HashMap<ThreadId, (Instant, CaughtPanic)>> = {
-        Mutex::new(HashMap::new())
-    };
+    static ref CAUGHT_PANICS: Mutex<HashMap<ThreadId, (Instant, CaughtPanic)>> =
+        { Mutex::new(HashMap::new()) };
 }
 
 #[derive(Clone)]
@@ -34,8 +36,11 @@ pub struct CaughtPanic {
 
 impl ToPrettyExpr for CaughtPanic {
     fn to_pretty_expr(&self) -> Expr {
-        let CaughtPanic { message, location, backtrace } = self.clone();
-
+        let CaughtPanic {
+            message,
+            location,
+            backtrace,
+        } = self.clone();
 
         let message = Expr::string(message.unwrap_or("Rust panic (no message)".into()));
         let location = Expr::string(location.unwrap_or("Unknown".into()));
@@ -60,7 +65,7 @@ fn should_show_backtrace() -> bool {
 fn display_backtrace(bt: Option<Backtrace>) -> Expr {
     if !should_show_backtrace() {
         // This Sequence[] will not show up in the FE.
-        return wlexpr! { Sequence[] }
+        return wlexpr! { Sequence[] };
     }
 
     let bt: Expr = if let Some(mut bt) = bt {
@@ -76,9 +81,7 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
             // TODO: Show all the symbols, not just the last one. A frame will be
             //       associated with more than one symbol if any inlining occured, so this
             //       would help show better backtraces in optimized builds.
-            let bt_symbol: Option<&BacktraceSymbol> = frame
-                .symbols()
-                .last();
+            let bt_symbol: Option<&BacktraceSymbol> = frame.symbols().last();
 
             let name: String = bt_symbol
                 .and_then(BacktraceSymbol::name)
@@ -117,7 +120,7 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
         Expr::string("<unable to capture backtrace>")
     };
 
-    wlexpr!{
+    wlexpr! {
         Row[{
             Style["Backtrace", Bold],
             ": ",
@@ -135,7 +138,9 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
 /// NOTE: If `func` contains any `Expr` arguments it will not work (Expr cannot be sent
 ///       between threads). Change to `ArcExpr` and it will work.
 pub unsafe fn call_and_catch_panic<T, F>(func: F) -> Result<T, CaughtPanic>
-        where F: FnOnce() -> T + UnwindSafe {
+where
+    F: FnOnce() -> T + UnwindSafe,
+{
     // Set up the panic hook. If calling `func` triggers a panic, the panic message string
     // and location will be saved into CAUGHT_PANICS.
     //
@@ -171,10 +176,15 @@ fn get_caught_panic() -> CaughtPanic {
                     // This can occur when the user code sets their own panic hook, but
                     // fails to restore the previous panic hook (i.e., the `custom_hook`
                     // we set above).
-                    let message = format!("could not get panic info for current thread. \
-                        Operation of custom panic hook was interrupted");
-                    CaughtPanic { message: Some(message), location: None,
-                                  backtrace: None }
+                    let message = format!(
+                        "could not get panic info for current thread. \
+                         Operation of custom panic hook was interrupted"
+                    );
+                    CaughtPanic {
+                        message: Some(message),
+                        location: None,
+                        backtrace: None,
+                    }
                 },
                 // This case can occur when a panic occurs in a thread spawned by the
                 // current thread: the ThreadId stored in CAUGHT_PANICS's is not
@@ -187,11 +197,12 @@ fn get_caught_panic() -> CaughtPanic {
                 // same time (meaning there's more than one entry in the map).
                 1 => map.values().next().unwrap().1.clone(),
                 // Pick the most recent panic, and hope it's the right one.
-                _ => map.values()
+                _ => map
+                    .values()
                     .max_by(|a, b| a.0.cmp(&b.0))
                     .map(|(_time, info)| info)
                     .cloned()
-                    .unwrap()
+                    .unwrap(),
             }
         },
     };
@@ -213,7 +224,11 @@ fn custom_hook(info: &panic::PanicInfo) {
         // long time (maybe forever?). Resolving it later, in the ToPrettyExpr impl, seems
         // to work (though it is noticeably slower, takes maybe ~0.5s-1s).
         let backtrace = Some(Backtrace::new_unresolved());
-        CaughtPanic { message, location, backtrace }
+        CaughtPanic {
+            message,
+            location,
+            backtrace,
+        }
     };
 
     // The `ThreadId` of the thread which is currently panic'ing.
@@ -237,11 +252,14 @@ fn custom_hook(info: &panic::PanicInfo) {
 
 /// Attempt to acquire a lock on CAUGHT_PANIC. Exit the current process if we can not,
 /// without panic'ing.
-fn acquire_lock() -> sync::MutexGuard<'static, HashMap<ThreadId, (Instant, CaughtPanic)>> {
+fn acquire_lock() -> sync::MutexGuard<'static, HashMap<ThreadId, (Instant, CaughtPanic)>>
+{
     let lock = match CAUGHT_PANICS.lock() {
         Ok(lock) => lock,
         Err(_err) => {
-            println!("catch_panic: acquire_lock: failed to acquire lock. Exiting process.");
+            println!(
+                "catch_panic: acquire_lock: failed to acquire lock. Exiting process."
+            );
             process::exit(-1);
         },
     };
