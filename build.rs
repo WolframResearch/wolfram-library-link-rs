@@ -1,8 +1,8 @@
 extern crate bindgen;
 
-use std::path::PathBuf;
 use std::env;
 use std::ffi::OsStr;
+use std::path::PathBuf;
 
 const GENERATED_BINDINGS_FILE: &str = "LibraryLink_bindings.rs";
 
@@ -29,28 +29,40 @@ fn main() {
 
     let path = match std::env::var(ENV_VAR) {
         Ok(path) => PathBuf::from(path),
-        Err(err) => panic!("wl-library-link-sys: could not get environment variable: \
-            {}: {}", ENV_VAR, err),
+        Err(err) => panic!(
+            "wl-library-link-sys: could not get environment variable: \
+             {}: {}",
+            ENV_VAR, err
+        ),
     };
     if !path.is_file() {
-        panic!("wl-library-link-sys: header file does not exist: {}", path.display());
+        panic!(
+            "wl-library-link-sys: header file does not exist: {}",
+            path.display()
+        );
     }
     if !path.is_absolute() {
-        panic!("wl-library-link-sys: expected path to header to be absolute: {}",
-            path.display())
+        panic!(
+            "wl-library-link-sys: expected path to header to be absolute: {}",
+            path.display()
+        )
     }
     generate_bindings(path);
 }
 
 fn generate_bindings(header_file: PathBuf) {
     // For the time being there is no reason this shouldn't be "WolframLibrary.h"
-    assert_eq!(header_file.file_name().and_then(OsStr::to_str),
-               Some("WolframLibrary.h"));
+    assert_eq!(
+        header_file.file_name().and_then(OsStr::to_str),
+        Some("WolframLibrary.h")
+    );
 
     let header_dir = match header_file.parent() {
         Some(parent) => parent,
-        None => panic!("wl-library-link-sys: header path has no parent directory: {}",
-            header_file.display()),
+        None => panic!(
+            "wl-library-link-sys: header path has no parent directory: {}",
+            header_file.display()
+        ),
     };
 
     let bindings = bindgen::Builder::default()
@@ -73,8 +85,9 @@ fn generate_bindings(header_file: PathBuf) {
     // OUT_DIR is set by cargo before running this build.rs file. This will be set to a
     // some mangled subdirectory of the "target" directory normally, and will not persist
     // between builds.
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap())
-        .join(GENERATED_BINDINGS_FILE);
-    bindings.write_to_file(out_path)
+    let out_path =
+        PathBuf::from(env::var("OUT_DIR").unwrap()).join(GENERATED_BINDINGS_FILE);
+    bindings
+        .write_to_file(out_path)
         .expect("failed to write Rust bindings with IO error");
 }

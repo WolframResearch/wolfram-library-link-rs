@@ -9,10 +9,6 @@
 //!       tracking the version numbers, the same should likely be done for
 //!       wl-library-link (the safe wrappers).
 
-#![allow(
-    non_snake_case,
-    non_upper_case_globals,
-    non_camel_case_types,
-)]
+#![allow(non_snake_case, non_upper_case_globals, non_camel_case_types)]
 // The name of this file comes from `build.rs`.
 include!(concat!(env!("OUT_DIR"), "/LibraryLink_bindings.rs"));
