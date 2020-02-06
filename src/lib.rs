@@ -102,7 +102,7 @@ impl From<WolframLibraryData> for EngineCallbacks {
     fn from(libdata: WolframLibraryData) -> Self {
         EngineCallbacks {
             // TODO(!): Audit this
-            abortq: unsafe { (*libdata) }.AbortQ,
+            abortq: unsafe { *libdata }.AbortQ,
         }
     }
 }
@@ -361,20 +361,9 @@ macro_rules! generate_wrapper {
 
             let func: fn($($arg: Expr),*) -> Expr = $func;
 
-            let arc_expr_wrapper = |$($arg: ArcExpr),*| -> Expr {
-                $(
-                    let $arg: Expr = $arg.to_rc_expr();
-                )*
-                func($($arg,)*)
-            };
-
             let res_expr: Result<Expr, CaughtPanic> = {
-                $(
-                    let $arg: ArcExpr = $arg.to_arc_expr();
-                )*
-
                 catch_panic::call_and_catch_panic(panic::AssertUnwindSafe(
-                    || arc_expr_wrapper($($arg),*)
+                    || func($($arg),*)
                 ))
             };
             let res_expr: Expr = match res_expr {
@@ -449,20 +438,9 @@ macro_rules! generate_wrapper {
 
             let func: fn($engine: $crate::Engine $(, $arg: Expr)*) -> Expr = $func;
 
-            let arc_expr_wrapper = |$($arg: ArcExpr),*| -> Expr {
-                $(
-                    let $arg: Expr = $arg.to_rc_expr();
-                )*
-                func(engine, $($arg,)*)
-            };
-
             let res_expr: Result<Expr, CaughtPanic> = {
-                $(
-                    let $arg: ArcExpr = $arg.to_arc_expr();
-                )*
-
                 catch_panic::call_and_catch_panic(panic::AssertUnwindSafe(
-                    || arc_expr_wrapper($($arg),*)
+                    || func(engine, $($arg),*)
                 ))
             };
             let res_expr: Expr = match res_expr {
