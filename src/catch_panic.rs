@@ -9,7 +9,7 @@ use backtrace::Backtrace;
 use lazy_static::lazy_static;
 
 use wl_expr::Expr;
-use wl_expr_proc_macro::wlexpr;
+use wl_expr_macro::wlexpr;
 use wl_lang::forms::{ToExpr, ToPrettyExpr};
 use wl_symbol_table as sym;
 

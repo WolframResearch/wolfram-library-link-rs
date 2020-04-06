@@ -19,7 +19,6 @@
 
 #![feature(try_trait)]
 #![feature(panic_info_message)]
-#![feature(proc_macro_hygiene)]
 
 pub mod catch_panic;
 
@@ -27,7 +26,7 @@ use std::ffi::{CStr, CString};
 use std::ops::Try;
 
 use wl_expr::{Expr, SymbolTable};
-use wl_expr_proc_macro::wlexpr;
+use wl_expr_macro::wlexpr;
 use wl_lang::forms::ToExpr;
 use wl_parse;
 
