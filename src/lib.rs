@@ -194,14 +194,6 @@ impl Try for LibraryLinkStatus {
 // Utilities
 //======================================
 
-/// Set `res` to a "UTF8String" which is the printed form of a
-/// `Failure[$kind, <| "Message" -> $err |>]`.
-pub unsafe fn failure_msg(res: MArgument, kind: &str, msg: String) -> LibraryLinkStatus {
-    let failure = failure_expr(kind, msg);
-    write_expr(failure, res);
-    LibraryLinkStatus::NoError
-}
-
 // TODO: Rename `err` to `message`.
 pub fn failure_expr(kind: &str, err: String) -> Expr {
     wlexpr! {
