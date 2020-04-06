@@ -15,7 +15,7 @@ use wl_symbol_table as sym;
 
 lazy_static! {
     static ref CAUGHT_PANICS: Mutex<HashMap<ThreadId, (Instant, CaughtPanic)>> =
-        { Mutex::new(HashMap::new()) };
+        Mutex::new(HashMap::new());
 }
 
 #[derive(Clone)]
