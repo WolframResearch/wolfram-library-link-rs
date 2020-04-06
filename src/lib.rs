@@ -194,13 +194,6 @@ impl Try for LibraryLinkStatus {
 // Utilities
 //======================================
 
-// TODO: Rename `err` to `message`.
-pub fn failure_expr(kind: &str, err: String) -> Expr {
-    wlexpr! {
-        Failure['kind, <| "Message" -> 'err |> ]
-    }
-}
-
 pub unsafe fn write_expr(expr: Expr, arg: MArgument) {
     // `Display for Expr` handles escaping any special characters which need it. This
     // string is therefore safe for consumption by ToExpression.
@@ -232,7 +225,9 @@ pub fn marg_str_expr(string: &str) -> Result<Expr, Expr> {
     match wl_parse::parse(&mut st, string) {
         Ok(expr) => Ok(expr),
         // TODO: Possible to show a message through LibraryLink?
-        Err(err) => Err(failure_expr("ParseError", format!("{:?}", err))),
+        Err(err) => Err(wlexpr! {
+            Failure["ParseError", <| "Message" -> %[format!("{:?}", err)]]
+        }),
     }
 }
 
