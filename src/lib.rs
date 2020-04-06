@@ -17,7 +17,6 @@
 //!
 //! Now the error shown when a panic occurs will include a backtrace.
 
-#![feature(try_trait)]
 #![feature(panic_info_message)]
 
 pub mod catch_panic;
