@@ -211,14 +211,7 @@ fn get_caught_panic() -> CaughtPanic {
 
 fn custom_hook(info: &panic::PanicInfo) {
     let caught_panic = {
-        let message = info.payload().downcast_ref::<&str>();
-        let message: Option<String> = if let Some(string) = message {
-            Some(string.to_string())
-        } else if let Some(fmt_arguments) = info.message() {
-            Some(format!("{}", fmt_arguments))
-        } else {
-            None
-        };
+        let message: Option<String> = get_panic_message(info);
         let location: Option<String> = info.location().map(ToString::to_string);
         // Don't resolve the backtrace inside the panic hook. This seems to hang for a
         // long time (maybe forever?). Resolving it later, in the ToPrettyExpr impl, seems
@@ -247,6 +240,31 @@ fn custom_hook(info: &panic::PanicInfo) {
         // also set their own panic hook) will create an entry in CAUGHT_PANICS's. That
         // entry is never cleared, because the panic is caught before reaching the call to
         // `remove()` in `call_and_catch_panic()`.
+    }
+}
+
+cfg_if::cfg_if! {
+    if #[cfg(feature = "nightly")] {
+        fn get_panic_message(info: &panic::PanicInfo) -> Option<String> {
+
+            let message = info.payload().downcast_ref::<&str>();
+            if let Some(string) = message {
+                Some(string.to_string())
+            } else if let Some(fmt_arguments) = info.message() {
+                Some(format!("{}", fmt_arguments))
+            } else {
+                None
+            }
+        }
+    } else {
+        fn get_panic_message(info: &panic::PanicInfo) -> Option<String> {
+            let message = info.payload().downcast_ref::<&str>();
+            if let Some(string) = message {
+                Some(string.to_string())
+            } else {
+                None
+            }
+        }
     }
 }
 

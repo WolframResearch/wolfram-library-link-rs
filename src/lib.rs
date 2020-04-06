@@ -17,7 +17,7 @@
 //!
 //! Now the error shown when a panic occurs will include a backtrace.
 
-#![feature(panic_info_message)]
+#![cfg_attr(feature = "nightly", feature(panic_info_message))]
 
 pub mod catch_panic;
 
