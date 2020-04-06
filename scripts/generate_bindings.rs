@@ -1,9 +1,16 @@
-extern crate bindgen;
+//! ```cargo
+//! [dependencies]
+//! # Use an exact, known-good version, since we really don't want small bugs in bindgen to a
+//! # be a problem when running `cargo build` for the first time.
+//! bindgen = "=0.32"
+//! # lazy_static = "^1.1"
+//! ```
 
 use std::env;
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
+const ENV_VAR: &str = "WL_LIBRARY_LINK_SYS_HEADER";
 const GENERATED_BINDINGS_FILE: &str = "LibraryLink_bindings.rs";
 
 // lazy_static! {
@@ -24,8 +31,6 @@ fn main() {
     //     //       prototype / custom Kernel build, it's
     //     panic!("no Wolfram System includes files exist at '{}'", WOLFRAM_INCLUDE_C.display());
     // }
-
-    const ENV_VAR: &str = "WL_LIBRARY_LINK_SYS_HEADER";
 
     let path = match std::env::var(ENV_VAR) {
         Ok(path) => PathBuf::from(path),
@@ -85,8 +90,10 @@ fn generate_bindings(header_file: PathBuf) {
     // OUT_DIR is set by cargo before running this build.rs file. This will be set to a
     // some mangled subdirectory of the "target" directory normally, and will not persist
     // between builds.
-    let out_path =
-        PathBuf::from(env::var("OUT_DIR").unwrap()).join(GENERATED_BINDINGS_FILE);
+    let out_path: PathBuf = std::env::current_dir()
+        .expect("failed to get current directory")
+        .join(GENERATED_BINDINGS_FILE);
+
     bindings
         .write_to_file(out_path)
         .expect("failed to write Rust bindings with IO error");
