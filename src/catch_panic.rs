@@ -33,6 +33,8 @@ pub struct CaughtPanic {
 }
 
 impl ToPrettyExpr for CaughtPanic {
+    type Options = ();
+
     fn to_pretty_expr(&self) -> Expr {
         let CaughtPanic {
             message,
