@@ -226,7 +226,7 @@ pub fn marg_str_expr(string: &str) -> Result<Expr, Expr> {
         Ok(expr) => Ok(expr),
         // TODO: Possible to show a message through LibraryLink?
         Err(err) => Err(wlexpr! {
-            Failure["ParseError", <| "Message" -> %[format!("{:?}", err)]]
+            Failure["ParseError", <| "Message" -> %[format!("{:?}", err)] |>]
         }),
     }
 }
