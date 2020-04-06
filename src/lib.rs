@@ -23,7 +23,6 @@
 pub mod catch_panic;
 
 use std::ffi::{CStr, CString};
-use std::ops::Try;
 
 use wl_expr::{Expr, SymbolTable};
 use wl_expr_macro::wlexpr;
@@ -163,31 +162,31 @@ impl From<LibraryLinkStatus> for u32 {
     }
 }
 
-impl Try for LibraryLinkStatus {
-    type Ok = ();
-    type Error = Self;
+// impl Try for LibraryLinkStatus {
+//     type Ok = ();
+//     type Error = Self;
 
-    fn into_result(self) -> Result<Self::Ok, Self::Error> {
-        match self {
-            LibraryLinkStatus::NoError => Ok(()),
-            s @ LibraryLinkStatus::FunctionError => Err(s),
-            s @ LibraryLinkStatus::TypeError => Err(s),
-        }
-    }
+//     fn into_result(self) -> Result<Self::Ok, Self::Error> {
+//         match self {
+//             LibraryLinkStatus::NoError => Ok(()),
+//             s @ LibraryLinkStatus::FunctionError => Err(s),
+//             s @ LibraryLinkStatus::TypeError => Err(s),
+//         }
+//     }
 
-    fn from_error(err: Self) -> Self {
-        match err {
-            LibraryLinkStatus::NoError => {
-                panic!("Try::from_error for LibraryLinkStatus: got NoError")
-            },
-            LibraryLinkStatus::FunctionError | LibraryLinkStatus::TypeError => err,
-        }
-    }
+//     fn from_error(err: Self) -> Self {
+//         match err {
+//             LibraryLinkStatus::NoError => {
+//                 panic!("Try::from_error for LibraryLinkStatus: got NoError")
+//             },
+//             LibraryLinkStatus::FunctionError | LibraryLinkStatus::TypeError => err,
+//         }
+//     }
 
-    fn from_ok(_ok: ()) -> Self {
-        LibraryLinkStatus::NoError
-    }
-}
+//     fn from_ok(_ok: ()) -> Self {
+//         LibraryLinkStatus::NoError
+//     }
+// }
 
 //======================================
 // Utilities
