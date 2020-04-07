@@ -8,9 +8,9 @@ LibraryLink family of functions, specifically by
 
 Features:
 
-    * Call Rust functions from the Wolfram language.
-    * Pass general Wolfram language expressions to and from Rust code.
-    * Evaluating Wolfram expressions from Rust code.
+  * Call Rust functions from the Wolfram language.
+  * Pass general Wolfram language expressions to and from Rust code.
+  * Evaluating Wolfram expressions from Rust code.
 
 ## Usage
 
