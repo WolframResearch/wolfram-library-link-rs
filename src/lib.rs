@@ -2,9 +2,9 @@
 //!
 //! # Automatically generating LibraryLink wrappers around Rust functions.
 //!
-//! See the `generate_wrapper!()` macro.
+//! See the [`generate_wrapper!()`][macro@generate_wrapper] macro.
 //!
-//! ## Getting backtraces when a panic occurs
+//! ## Show backtrace when a panic occurs
 //!
 //! `generate_wrapper!()` will automatically catch any Rust panic's which occur in the
 //! wrapped code, and show an error in the FE with the panic message and source file/line
