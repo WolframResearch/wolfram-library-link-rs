@@ -4,7 +4,7 @@ This library offers bindings to Rust code from the Wolfram language.
 
 This library is used for writing Rust programs which can be loaded by the Wolfram language
 LibraryLink family of functions, specifically by
-[`LibraryFunctionLoad\[\]`][library-function-load].
+[`LibraryFunctionLoad[]`][library-function-load].
 
 Features:
 
