@@ -10,7 +10,8 @@ Features:
 
   * Call Rust functions from the Wolfram language.
   * Pass general Wolfram language expressions to and from Rust code.
-  * Evaluating Wolfram expressions from Rust code.
+  * Evaluate Wolfram expressions from Rust code.
+  * Check for and respond to Wolfram language aborts while in Rust code.
 
 ## Usage
 
