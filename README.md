@@ -44,14 +44,33 @@ wl-library-link    = { git = "ssh://github.com/ConnorGray/wl-library-link.git" }
 
 See [[ TODO ]] for a complete description of the Cargo.toml file.
 
-Ne
+Next
 
 ```rust
+### main.rs
+
 use wl_expr::Expr;
 use wl_library_link::generate_wrapper;
 
+generate_wrapper![GET_HEAD # get_head(e: Expr) -> Expr];
 
+// TODO: #[wl_library_link::wrap(wrapper_name = "GET_HEAD")]
+fn get_normal_head(expr: Expr) -> Expr {
+    match expr.kind() {
+        ExprKind::Normal(normal) => normal.head.clone(),
+        ExprKind::Symbol(_) | ExprKind::String(_) | ExprKind::Number(_) => wlexpr! {
+            Failure["HeadOfAtomic", <|
+                "Message" -> "Expected non-atomic expression"
+            |>]
+        }
+    }
+}
 ```
 
+Finally, build the library by executing the following commands in the terminal:
+
+```shell
+$ cargo build
+```
 
 [library-function-load]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
