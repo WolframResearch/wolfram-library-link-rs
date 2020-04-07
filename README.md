@@ -43,7 +43,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-wl-expr         = { git = "ssh://github.com/ConnorGray/wl-expr.git" }
+wl-expr = { git = "ssh://github.com/ConnorGray/wl-expr.git" }
 wl-library-link = { git = "ssh://github.com/ConnorGray/wl-library-link.git" }
 ```
 
