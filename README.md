@@ -50,7 +50,7 @@ wl-library-link = { git = "ssh://github.com/ConnorGray/wl-library-link.git" }
 See the [Cargo manifest documentation][cargo-manifest-docs] for a complete description of
 the Cargo TOML file.
 
-Next
+Next, import and use the `generate_wrapper!()` macro in your Rust code.
 
 ```rust
 // ### main.rs
@@ -58,7 +58,7 @@ Next
 use wl_expr::Expr;
 use wl_library_link::generate_wrapper;
 
-generate_wrapper![GET_HEAD # get_head(e: Expr) -> Expr];
+generate_wrapper![GET_HEAD # get_normal_head(e: Expr) -> Expr];
 
 // TODO: #[wl_library_link::wrap(wrapper_name = "GET_HEAD")]
 fn get_normal_head(expr: Expr) -> Expr {
