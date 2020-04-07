@@ -12,12 +12,13 @@ Features:
   * Pass general Wolfram language expressions to and from Rust code.
   * Evaluate Wolfram expressions from Rust code.
   * Check for and respond to Wolfram language aborts while in Rust code.
+  * TODO: WSTP bindings
 
 ## Usage
 
 First, ensure that `cargo` will build a dynamic library when this crate is compiled. This
-is done by setting `crate-type = ["cdylib"]` in Cargo.toml. This library can be loaded by
-[LibraryLink][library-link].
+is done by setting `crate-type = ["cdylib"]` in Cargo.toml. This library will be loadable
+by [LibraryLink][library-link].
 
 Next, add the `wl-expr` and `wl-library-link` crates to your dependencies in the
 `Cargo.toml` file. `wl-expr` provides the type `Expr`, which is a simple Rust
