@@ -16,13 +16,17 @@ Features:
 
 ## Usage
 
-First, ensure that `cargo` will build a dynamic library when this crate is compiled. This
-is done by setting `crate-type = ["cdylib"]` in Cargo.toml. This library will be loadable
-by [LibraryLink][library-link].
+First, ensure that your project's `Cargo.toml` is correctly configured. This means:
 
-Next, add the `wl-expr` and `wl-library-link` crates to your dependencies in the
-`Cargo.toml` file. `wl-expr` provides the type `Expr`, which is a simple Rust
-representation of a Wolfram expression.
+  * Setting `crate-type = ["cdylib"]`
+  * Add `wl-expr` and `wl-library-link` as dependencies
+
+By setting `crate-type` to `cdylib` we tell `cargo` to build a dynamic library, which
+will be loadable using Wolfram [LibraryLink][library-link].
+
+The `wl-expr` and `wl-library-link` dependencies provide, respectively, an `Expr` type,
+which is a simple Rust representation of a Wolfram expression, and an API for interacting
+with the Wolfram language from Rust.
 
 A correctly configured Cargo.toml looks like:
 
