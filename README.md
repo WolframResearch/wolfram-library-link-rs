@@ -25,7 +25,7 @@ representation of a Wolfram expression.
 A sample Cargo.toml is:
 
 ```toml
-# Cargo.toml
+### Cargo.toml
 
 [package]
 # This can be whatever you like, as long as it's a valid crate identifier.
