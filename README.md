@@ -16,7 +16,7 @@ Features:
 ## Usage
 
 First, ensure that `cargo` will build a dynamic library when this crate is compiled. This
-is done by setting the `crate-type` in Cargo.toml.
+is done by setting `crate-type = ["cdylib"]` in Cargo.toml.
 
 Next, add the `wl-expr` and `wl-library-link` crates to your dependencies in the
 `Cargo.toml` file. `wl-expr` provides the type `Expr`, which is a simple Rust
