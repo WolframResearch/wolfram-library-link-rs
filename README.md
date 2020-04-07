@@ -43,8 +43,8 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-wl-expr            = { git = "ssh://github.com/ConnorGray/wl-expr.git" }
-wl-library-link    = { git = "ssh://github.com/ConnorGray/wl-library-link.git" }
+wl-expr         = { git = "ssh://github.com/ConnorGray/wl-expr.git" }
+wl-library-link = { git = "ssh://github.com/ConnorGray/wl-library-link.git" }
 ```
 
 See the [Cargo manifest documentation][cargo-manifest-docs] for a complete description of
