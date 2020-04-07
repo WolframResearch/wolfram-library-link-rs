@@ -43,7 +43,8 @@ wl-expr            = { git = "ssh://github.com/ConnorGray/wl-expr.git" }
 wl-library-link    = { git = "ssh://github.com/ConnorGray/wl-library-link.git" }
 ```
 
-See [[ TODO ]] for a complete description of the Cargo.toml file.
+See the [Cargo manifest documentation][cargo-manifest-docs] for a complete description of
+the Cargo TOML file.
 
 Next
 
@@ -76,6 +77,7 @@ $ cargo build
 
 [library-link]: https://reference.wolfram.com/language/guide/LibraryLink.html
 [library-function-load]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
+[cargo-manifest-docs]: https://doc.rust-lang.org/cargo/reference/manifest.html
 
 ### Creating a library which is usable from Rust and Wolfram
 
