@@ -47,7 +47,7 @@ See [[ TODO ]] for a complete description of the Cargo.toml file.
 Next
 
 ```rust
-### main.rs
+// ### main.rs
 
 use wl_expr::Expr;
 use wl_library_link::generate_wrapper;
