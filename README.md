@@ -19,7 +19,7 @@ Features:
 First, ensure that your project's `Cargo.toml` is correctly configured. This means:
 
   * Setting `crate-type = ["cdylib"]`
-  * Add `wl-expr` and `wl-library-link` as dependencies
+  * Adding `wl-expr` and `wl-library-link` as dependencies
 
 By setting `crate-type` to `cdylib` we tell `cargo` to build a dynamic library, which
 will be loadable using Wolfram [LibraryLink][library-link].

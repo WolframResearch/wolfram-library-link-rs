@@ -1,4 +1,4 @@
-use wl_library_link::{Engine, generate_wrapper};
+use wl_library_link::{generate_wrapper, Engine};
 
 use wl_expr::Expr;
 
