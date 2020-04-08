@@ -118,7 +118,7 @@ pub extern "C" fn wstp_function(
 Then, in Wolfram:
 
 ```wolfram
-function = LibraryFunctionLoad["/path/to/library", "wstp_function", LinkObject, LinkObject]
+function = LibraryFunctionLoad["/path/to/library.dylib", "wstp_function", LinkObject, LinkObject]
 ```
 
 Finally, build the library by executing the following commands in the terminal:
