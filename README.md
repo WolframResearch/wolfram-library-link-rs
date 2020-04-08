@@ -127,6 +127,9 @@ Finally, build the library by executing the following commands in the terminal:
 $ cargo build
 ```
 
+The [cargo-paclet][cargo-paclet] command-line utility can be used to automate the process
+of building a Paclet from a Rust library.
+
 ### Creating a library which is usable from Rust and Wolfram
 
 `crate-type = ["rlib", "cdyib"]`
@@ -191,6 +194,7 @@ pub unsafe extern "C" fn demo_wstp_function(
 ```
 
 [wl-wstp]: https://stash.wolfram.com/users/connorg/repos/wl-wstp/browse
+[cargo-paclet]: https://stash.wolfram.com/users/connorg/repos/cargo-paclet/browse
 [library-link]: https://reference.wolfram.com/language/guide/LibraryLink.html
 [library-function-load]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
 [cargo-manifest-docs]: https://doc.rust-lang.org/cargo/reference/manifest.html
