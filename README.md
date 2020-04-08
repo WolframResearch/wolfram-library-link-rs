@@ -12,7 +12,7 @@ Features:
   * Pass general Wolfram language expressions to and from Rust code.
   * Evaluate Wolfram expressions from Rust code.
   * Check for and respond to Wolfram language aborts while in Rust code.
-  * TODO: WSTP bindings
+  * Safe API for the WSTP, using [wl-wstp][wl-wstp]
 
 ## Usage
 
