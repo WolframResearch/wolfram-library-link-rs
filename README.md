@@ -12,7 +12,7 @@ Features:
   * Pass general Wolfram language expressions to and from Rust code.
   * Evaluate Wolfram expressions from Rust code.
   * Check for and respond to Wolfram language aborts while in Rust code.
-  * Safe API for the WSTP, using [wl-wstp][wl-wstp]
+  * Safe API for the WSTP, using [`wl-wstp`][wl-wstp]
 
 ## Usage
 
@@ -77,7 +77,7 @@ fn get_normal_head(expr: Expr) -> Expr {
 
 ### Writing a LibraryLink ABI compatible function manually
 
-This example makes use of the [wl-wstp][wl-wstp] library to provide a safe wrapper around
+This example makes use of the [`wl-wstp`][wl-wstp] library to provide a safe wrapper around
 around the WSTP link object, which can be used to read the argument expression and write
 out the return expression.
 
