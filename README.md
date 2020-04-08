@@ -86,3 +86,62 @@ $ cargo build
 ### Creating a library which is usable from Rust and Wolfram
 
 `crate-type = ["rlib", "cdyib"]`
+
+## Using the raw LibraryLink API
+
+```rust
+use std::os::raw::{c_int, c_uint};
+
+use wl_library_link::{
+    mint, MArgument, WolframLibraryData, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
+};
+use wl_wstp_sys::{
+    WSGetInteger, WSNewPacket, WSPutInteger, WSTestHead, WSLINK,
+};
+
+#[no_mangle]
+pub unsafe extern "C" fn demo_function(
+    _lib_data: WolframLibraryData,
+    _arg_count: mint,
+    _args: MArgument,
+    res: MArgument,
+) -> c_uint {
+    *res.real = 42.42;
+    0
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn demo_wstp_function(
+    _lib: WolframLibraryData,
+    link: WSLINK,
+) -> c_uint {
+    let mut i1: c_int = 0;
+    let mut i2: c_int = 0;
+    let mut len: c_int = 0;
+
+    if WSTestHead(link, b"List\0".as_ptr() as *const i8, &mut len) == 0 {
+        return LIBRARY_FUNCTION_ERROR;
+    }
+    if len != 2 {
+        return LIBRARY_FUNCTION_ERROR;
+    }
+
+    if WSGetInteger(link, &mut i1) == 0 {
+        return LIBRARY_FUNCTION_ERROR;
+    }
+    if WSGetInteger(link, &mut i2) == 0 {
+        return LIBRARY_FUNCTION_ERROR;
+    }
+    if WSNewPacket(link) == 0 {
+        return LIBRARY_FUNCTION_ERROR;
+    }
+
+    let sum = i1 + i2;
+
+    if WSPutInteger(link, sum) == 0 {
+        return LIBRARY_FUNCTION_ERROR;
+    }
+
+    return LIBRARY_NO_ERROR;
+}
+```
