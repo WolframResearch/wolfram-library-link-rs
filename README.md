@@ -50,6 +50,8 @@ wl-library-link = { git = "ssh://github.com/ConnorGray/wl-library-link.git" }
 See the [Cargo manifest documentation][cargo-manifest-docs] for a complete description of
 the Cargo TOML file.
 
+### Using the `generate_wrapper!()` macro
+
 Next, import and use the `generate_wrapper!()` macro in your Rust code.
 
 ```rust
@@ -73,6 +75,52 @@ fn get_normal_head(expr: Expr) -> Expr {
 }
 ```
 
+### Writing a LibraryLink ABI compatible function manually
+
+This example makes use of the [wl-wstp][wl-wstp] library to provide a safe wrapper around
+around the WSTP link object, which can be used to read the argument expression and write
+out the return expression.
+
+```rust
+use wl_library_link::{WolframLibraryData, LIBRARY_NO_ERROR, LIBRARY_FUNCTION_ERROR};
+use wl_wstp::WSTPLink;
+use wl_wstp_sys::WSLINK;
+
+#[no_mangle]
+pub extern "C" fn wstp_function(
+    _lib: WolframLibraryData,
+    unsafe_link: WSLINK,
+) -> c_uint {
+    let link = unsafe {
+        WSTPLink::new(unsafe_link)
+    };
+
+    let expr = match link.get_expr() {
+        Ok(expr) => expr,
+        Err(err) => {
+            let err = wlexpr! { Failure["WSTP Error", <| "Message" -> 'err |>] };
+            match link.put_expr(&err) {
+                Ok(()) => return LIBRARY_NO_ERROR,
+                Err(_) => return LIBRARY_FUNCTION_ERROR,
+            }
+        },
+    };
+
+    let expr_string = format!("Input: {}", expr.to_string());
+
+    match link.put_expr(&Expr::string(expr_string)) {
+        Ok(()) => LIBRARY_NO_ERROR,
+        Err(_) => LIBRARY_FUNCTION_ERROR,
+    }
+}
+```
+
+Then, in Wolfram:
+
+```wolfram
+function = LibraryFunctionLoad["/path/to/library", "wstp_function", LinkObject, LinkObject]
+```
+
 Finally, build the library by executing the following commands in the terminal:
 
 ```shell
@@ -87,7 +135,7 @@ $ cargo build
 
 `crate-type = ["rlib", "cdyib"]`
 
-## Using the raw LibraryLink API
+## Using the raw LibraryLink and WSTP APIs
 
 ```rust
 use std::os::raw::{c_int, c_uint};
