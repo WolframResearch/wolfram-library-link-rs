@@ -14,7 +14,7 @@ wl-symbol-table     = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-symb
 wl-expr-macro       = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr-macro.git" }
 
 lazy_static = "^1"
-backtrace = "^0.3"
+backtrace = "^0.3.46"
 cfg-if = "0.1"
 
 [features]
