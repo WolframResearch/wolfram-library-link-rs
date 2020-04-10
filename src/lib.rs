@@ -54,52 +54,35 @@ pub use wolfram_library_function_macro::wolfram_library_function;
 const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 
 //======================================
-// Engine Interface
+// WolframEngine
 //======================================
-
-pub type Engine = Box<dyn EngineInterface>;
-pub type WolframEngine = Engine;
-
-pub trait EngineInterface {
-    /// Returns `true` if the user has requested that the current evaluation be aborted.
-    ///
-    /// Programs should finish what they are doing and return control of this thread to
-    /// to the kernel as quickly as possible. They should not exit the process or
-    /// otherwise terminate execution, simply return up the call stack.
-    fn aborted(&self) -> bool;
-
-    // TODO:
-    // /// Convenience wrapper around evaluate `Print`.
-    // fn print(&self, args: impl Into<PrintArgs>);
-
-    // TODO:
-    // /// Evaluate an expression in the current kernel.
-    // ///
-    // /// TODO: What does Stack[] give in this situation? What does Stack[] give inside any
-    // ///       builtin function?
-    // fn evaluate(&self, expr: Expr) -> EvaluationData;
-}
 
 /// This struct should be considered private.
 ///
 /// It is only public because it appears in the expansion of `generate_wrapper`.
-pub struct EngineCallbacks {
+pub struct WolframEngine {
     // TODO: Is this function thread safe? Can it be called from a thread other than the
     //       one the LibraryLink wrapper was originally invoked from?
     abortq: Option<unsafe extern "C" fn() -> mint>,
 }
 
-impl From<WolframLibraryData> for EngineCallbacks {
+impl From<WolframLibraryData> for WolframEngine {
     fn from(libdata: WolframLibraryData) -> Self {
-        EngineCallbacks {
+        // TODO(!): Use the library version to verify this is still correct?
+        WolframEngine {
             // TODO(!): Audit this
             abortq: unsafe { *libdata }.AbortQ,
         }
     }
 }
 
-impl EngineInterface for EngineCallbacks {
-    fn aborted(&self) -> bool {
+impl WolframEngine {
+    /// Returns `true` if the user has requested that the current evaluation be aborted.
+    ///
+    /// Programs should finish what they are doing and return control of this thread to
+    /// to the kernel as quickly as possible. They should not exit the process or
+    /// otherwise terminate execution, simply return up the call stack.
+    pub fn aborted(&self) -> bool {
         let func = match self.abortq {
             Some(func) => func,
             // If the callback is empty, assume no abort has been requested. That this is
@@ -112,6 +95,17 @@ impl EngineInterface for EngineCallbacks {
         let val: mint = unsafe { func() };
         val == 1
     }
+
+    // TODO:
+    // /// Convenience wrapper around evaluate `Print`.
+    // fn print(&self, args: impl Into<PrintArgs>);
+
+    // TODO:
+    // /// Evaluate an expression in the current kernel.
+    // ///
+    // /// TODO: What does Stack[] give in this situation? What does Stack[] give inside any
+    // ///       builtin function?
+    // fn evaluate(&self, expr: Expr) -> EvaluationData;
 }
 
 // #[library_link::wrap]
@@ -420,18 +414,21 @@ macro_rules! generate_wrapper {
 pub fn call_wolfram_library_function(
     libdata: WolframLibraryData,
     unsafe_link: wstp::sys::WSLINK,
-    function: fn(&WolframEngine, Vec<Expr>) -> Expr
+    function: fn(&WolframEngine, Vec<Expr>) -> Expr,
 ) -> std::os::raw::c_uint {
-    use wl_expr::ExprKind;
     use self::{
         catch_panic::{call_and_catch_panic, CaughtPanic},
-        wstp::{WSTPLink, sys::{WSPutString, WSEndPacket}},
+        wstp::{
+            sys::{WSEndPacket, WSPutString},
+            WSTPLink,
+        },
     };
+    use wl_expr::ExprKind;
 
     let result: Result<(), CaughtPanic> = unsafe {
         call_and_catch_panic(|| {
             // Contruct the engine
-            let engine: WolframEngine = Box::new(EngineCallbacks::from(libdata));
+            let engine = WolframEngine::from(libdata);
 
             let link = WSTPLink::new(unsafe_link);
 
@@ -454,8 +451,9 @@ pub fn call_wolfram_library_function(
 
             let result: Expr = function(&engine, arguments);
 
-            link.put_expr(&result)
-                .expect("LibraryFunction result expression could not be written to WSTP link");
+            link.put_expr(&result).expect(
+                "LibraryFunction result expression could not be written to WSTP link",
+            );
         })
     };
 
@@ -464,8 +462,8 @@ pub fn call_wolfram_library_function(
         Err(caught_panic) => unsafe {
             use wl_lang::forms::ToPrettyExpr;
             // FIXME: Fix unwraps + return this as a full expr
-            let cstring = CString::new(caught_panic.to_pretty_expr().to_string())
-                .unwrap();
+            let cstring =
+                CString::new(caught_panic.to_pretty_expr().to_string()).unwrap();
 
             WSPutString(unsafe_link, cstring.as_ptr());
 
