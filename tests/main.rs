@@ -1,4 +1,4 @@
-use wl_library_link::{generate_wrapper, Engine};
+use wl_library_link::{wolfram_library_function, WolframEngine};
 
 use wl_expr::Expr;
 
@@ -7,13 +7,7 @@ use wl_expr::Expr;
 //     // WRAPPED_ONE(5);
 // }
 
-generate_wrapper![WRAPPED_ONE # wrapped_one(a: Expr) -> Expr];
-generate_wrapper![WRAPPED_TWO # wrapped_two(engine: Engine, a: Expr) -> Expr];
-
-fn wrapped_one(a: Expr) -> Expr {
-    a
-}
-
-fn wrapped_two(engine: Engine, a: Expr) -> Expr {
-    a
+#[wolfram_library_function]
+pub fn wrapped_one(_: &WolframEngine, _: Vec<Expr>) -> Expr {
+    Expr::string("success")
 }
