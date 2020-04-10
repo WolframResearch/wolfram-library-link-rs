@@ -21,13 +21,12 @@
 
 pub mod catch_panic;
 
-use std::ffi::{CStr, CString};
+use std::ffi::CString;
 
-use wl_expr::{Expr, SymbolTable};
+use wl_expr::Expr;
 use wl_expr_macro::wlexpr;
 use wl_lang::forms::ToExpr;
 use wl_library_link_sys::{mint, WolframLibraryData, LIBRARY_NO_ERROR};
-use wl_parse;
 
 // Re-export `wl_library_link_sys` and `wl_wstp`.
 //
