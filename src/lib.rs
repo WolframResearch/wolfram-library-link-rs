@@ -26,6 +26,7 @@ use std::ffi::{CStr, CString};
 use wl_expr::{Expr, SymbolTable};
 use wl_expr_macro::wlexpr;
 use wl_lang::forms::ToExpr;
+use wl_library_link_sys::{mint, WolframLibraryData, LIBRARY_NO_ERROR};
 use wl_parse;
 
 // Re-export `wl_library_link_sys` and `wl_wstp`.
@@ -34,7 +35,7 @@ use wl_parse;
 //          needed? These should at least have module documentation saying that they
 //          shouldn't be used?
 
-//! Re-export of `wl_library_link_sys`
+/// Re-export of `wl_library_link_sys`
 pub use wl_library_link_sys as sys;
 pub use wl_wstp as wstp;
 
@@ -52,15 +53,18 @@ const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 pub struct WolframEngine {
     // TODO: Is this function thread safe? Can it be called from a thread other than the
     //       one the LibraryLink wrapper was originally invoked from?
-    abortq: Option<unsafe extern "C" fn() -> mint>,
+    abortq: unsafe extern "C" fn() -> mint,
 }
 
 impl From<WolframLibraryData> for WolframEngine {
     fn from(libdata: WolframLibraryData) -> Self {
         // TODO(!): Use the library version to verify this is still correct?
+        // NOTE: That these fields are even an Option is likely just bindgen being
+        //       conservative with function pointers possibly being null.
+        // TODO: Investigate making bindgen treat these as non-null fields?
         WolframEngine {
             // TODO(!): Audit this
-            abortq: unsafe { *libdata }.AbortQ,
+            abortq: unsafe { *libdata }.AbortQ.expect("AbortQ callback is NULL"),
         }
     }
 }
@@ -72,16 +76,7 @@ impl WolframEngine {
     /// to the kernel as quickly as possible. They should not exit the process or
     /// otherwise terminate execution, simply return up the call stack.
     pub fn aborted(&self) -> bool {
-        let func = match self.abortq {
-            Some(func) => func,
-            // If the callback is empty, assume no abort has been requested. That this is
-            // even an Option is likely just bindgen being conservative with function
-            // pointers possibly be null.
-            // TODO: Investigate making bindgen treat this as a non-null field?
-            None => return false,
-        };
-
-        let val: mint = unsafe { func() };
+        let val: mint = unsafe { (self.abortq)() };
         val == 1
     }
 
@@ -119,6 +114,8 @@ pub enum LibraryLinkStatus {
 
 impl From<LibraryLinkStatus> for u32 {
     fn from(status: LibraryLinkStatus) -> u32 {
+        use self::sys::{LIBRARY_FUNCTION_ERROR, LIBRARY_TYPE_ERROR};
+
         match status {
             LibraryLinkStatus::NoError => LIBRARY_NO_ERROR,
             LibraryLinkStatus::FunctionError => LIBRARY_FUNCTION_ERROR,
