@@ -134,9 +134,6 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
 ///
 /// NOTE: `func` should not set it's own panic hook, or unset the panic hook set upon
 ///       calling it. Doing so would likely interfere with the operation of this function.
-///
-/// NOTE: If `func` contains any `Expr` arguments it will not work (Expr cannot be sent
-///       between threads). Change to `ArcExpr` and it will work.
 pub unsafe fn call_and_catch_panic<T, F>(func: F) -> Result<T, CaughtPanic>
 where
     F: FnOnce() -> T + UnwindSafe,
@@ -246,7 +243,6 @@ fn custom_hook(info: &panic::PanicInfo) {
 cfg_if::cfg_if! {
     if #[cfg(feature = "nightly")] {
         fn get_panic_message(info: &panic::PanicInfo) -> Option<String> {
-
             let message = info.payload().downcast_ref::<&str>();
             if let Some(string) = message {
                 Some(string.to_string())
