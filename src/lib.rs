@@ -40,6 +40,17 @@ pub use wl_library_link_sys::{
     LIBRARY_TYPE_ERROR,
 };
 
+// Re-export `wl_library_link_sys` and `wl_wstp`.
+//
+// TODO(!): Only selectively re-export the parts of these API's which are actually
+//          needed? These should at least have module documentation saying that they
+//          shouldn't be used?
+
+pub use wl_library_link_sys as sys;
+pub use wl_wstp as wstp;
+
+pub use wolfram_library_function_macro::wolfram_library_function;
+
 const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 
 //======================================
@@ -47,6 +58,7 @@ const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 //======================================
 
 pub type Engine = Box<dyn EngineInterface>;
+pub type WolframEngine = Engine;
 
 pub trait EngineInterface {
     /// Returns `true` if the user has requested that the current evaluation be aborted.
@@ -394,4 +406,71 @@ macro_rules! generate_wrapper {
             LIBRARY_NO_ERROR
         }
     };
+}
+
+//======================================
+// #[wolfram_library_function] helpers
+//======================================
+
+/// Private.
+///
+/// Helper function used to implement the
+/// [`wolfram_library_function`][macro@wolfram_library_function] macro.
+pub fn call_wolfram_library_function(
+    libdata: WolframLibraryData,
+    unsafe_link: wstp::sys::WSLINK,
+    function: fn(&WolframEngine, Vec<Expr>) -> Expr
+) -> std::os::raw::c_uint {
+    use wl_expr::ExprKind;
+    use self::{
+        catch_panic::{call_and_catch_panic, CaughtPanic},
+        wstp::{WSTPLink, sys::{WSPutString, WSEndPacket}},
+    };
+
+    let result: Result<(), CaughtPanic> = unsafe {
+        call_and_catch_panic(|| {
+            // Contruct the engine
+            let engine: WolframEngine = Box::new(EngineCallbacks::from(libdata));
+
+            let link = WSTPLink::new(unsafe_link);
+
+            let arguments: Expr = match link.get_expr() {
+                Ok(args) => args,
+                Err(message) => {
+                    let _: Result<_, _> = link.put_expr(&wlexpr! {
+                        Failure["LibraryFunctionWSTPError", <|
+                            "Message" -> %[Expr::string(message)]
+                        |>]
+                    });
+                    return;
+                },
+            };
+
+            let arguments = match arguments.to_kind() {
+                ExprKind::Normal(normal) => normal.contents,
+                _ => panic!("WSTP argument expression was non-Normal"),
+            };
+
+            let result: Expr = function(&engine, arguments);
+
+            link.put_expr(&result)
+                .expect("LibraryFunction result expression could not be written to WSTP link");
+        })
+    };
+
+    match result {
+        Ok(()) => LIBRARY_NO_ERROR,
+        Err(caught_panic) => unsafe {
+            use wl_lang::forms::ToPrettyExpr;
+            // FIXME: Fix unwraps + return this as a full expr
+            let cstring = CString::new(caught_panic.to_pretty_expr().to_string())
+                .unwrap();
+
+            WSPutString(unsafe_link, cstring.as_ptr());
+
+            WSEndPacket(unsafe_link);
+
+            LIBRARY_NO_ERROR
+        },
+    }
 }
