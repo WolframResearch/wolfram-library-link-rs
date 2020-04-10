@@ -14,6 +14,14 @@ Features:
   * Check for and respond to Wolfram language aborts while in Rust code.
   * Safe API for the WSTP, using [`wl-wstp`][wl-wstp]
 
+Advantages over the LibraryLink/WSTP C API:
+
+  * The API is easier to use
+    - No need to worry about managing allocations
+    - No potential memory unsafety
+    - Easy and safe method call to evaluate an expression from Rust code
+  * Ability to use a safer, but still just as performant, modern programming language
+
 ## Usage
 
 First, ensure that your project's `Cargo.toml` is correctly configured. This means:
