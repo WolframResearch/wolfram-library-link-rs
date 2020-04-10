@@ -9,7 +9,7 @@ use backtrace::Backtrace;
 use lazy_static::lazy_static;
 
 use wl_expr::Expr;
-use wl_expr_macro::wlexpr;
+use wl_expr_macro::Expr;
 use wl_lang::forms::{ToExpr, ToPrettyExpr};
 use wl_symbol_table as sym;
 
@@ -48,7 +48,7 @@ impl ToPrettyExpr for CaughtPanic {
 
         let head = Expr::symbol(wl_parse::parse_symbol("LibraryLink`Panic").unwrap());
 
-        wlexpr! {
+        Expr! {
             Failure['head[Panel[Column[{
                 Row[{Style["Message", Bold], ": ", 'message}],
                 Row[{Style["SourceLocation", Bold], ": ", 'location}],
@@ -65,7 +65,7 @@ fn should_show_backtrace() -> bool {
 fn display_backtrace(bt: Option<Backtrace>) -> Expr {
     if !should_show_backtrace() {
         // This Sequence[] will not show up in the FE.
-        return wlexpr! { Sequence[] };
+        return Expr! { Sequence[] };
     }
 
     let bt: Expr = if let Some(mut bt) = bt {
@@ -102,7 +102,7 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
                 _ => "".into(),
             };
 
-            frames.push(wlexpr! {
+            frames.push(Expr! {
                 Row[{
                     %[index.to_string()],
                     ": ",
@@ -115,12 +115,12 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
         let frames = Expr::normal(&*sym::List, frames);
         // Set ImageSize so that the lines don't wordwrap for very long function names,
         // which makes the backtrace hard to read.
-        wlexpr! { Column['frames, ImageSize -> {1200, Automatic}] }
+        Expr! { Column['frames, ImageSize -> {1200, Automatic}] }
     } else {
         Expr::string("<unable to capture backtrace>")
     };
 
-    wlexpr! {
+    Expr! {
         Row[{
             Style["Backtrace", Bold],
             ": ",

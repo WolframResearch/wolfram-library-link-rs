@@ -24,7 +24,7 @@ pub mod catch_panic;
 use std::ffi::CString;
 
 use wl_expr::{Expr, ExprKind};
-use wl_expr_macro::wlexpr;
+use wl_expr_macro::Expr;
 use wl_lang::forms::ToExpr;
 use wl_library_link_sys::{mint, WolframLibraryData, LIBRARY_NO_ERROR, MLINK};
 use wl_symbol_table as sym;
@@ -101,7 +101,7 @@ impl WolframEngine {
 
             // Send an EvaluatePacket['expr].
             let _: () = link
-                .put_expr(&wlexpr! { EvaluatePacket['expr] })
+                .put_expr(&Expr! { EvaluatePacket['expr] })
                 .expect("WolframEngine::evaluate: failed to send EvaluatePacket");
 
             // Process the packet on the link.
@@ -230,7 +230,7 @@ pub fn call_wolfram_library_function(
             let arguments: Expr = match link.get_expr() {
                 Ok(args) => args,
                 Err(message) => {
-                    let _: Result<_, _> = link.put_expr(&wlexpr! {
+                    let _: Result<_, _> = link.put_expr(&Expr! {
                         Failure["LibraryFunctionWSTPError", <|
                             "Message" -> %[Expr::string(message)]
                         |>]

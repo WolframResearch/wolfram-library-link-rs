@@ -74,7 +74,7 @@ generate_wrapper![GET_HEAD # get_normal_head(e: Expr) -> Expr];
 fn get_normal_head(expr: Expr) -> Expr {
     match expr.kind() {
         ExprKind::Normal(normal) => normal.head.clone(),
-        ExprKind::Symbol(_) | ExprKind::String(_) | ExprKind::Number(_) => wlexpr! {
+        ExprKind::Symbol(_) | ExprKind::String(_) | ExprKind::Number(_) => Expr! {
             Failure["HeadOfAtomic", <|
                 "Message" -> "Expected non-atomic expression"
             |>]
@@ -106,7 +106,7 @@ pub extern "C" fn wstp_function(
     let expr = match link.get_expr() {
         Ok(expr) => expr,
         Err(err) => {
-            let err = wlexpr! { Failure["WSTP Error", <| "Message" -> 'err |>] };
+            let err = Expr! { Failure["WSTP Error", <| "Message" -> 'err |>] };
             match link.put_expr(&err) {
                 Ok(()) => return LIBRARY_NO_ERROR,
                 Err(_) => return LIBRARY_FUNCTION_ERROR,
