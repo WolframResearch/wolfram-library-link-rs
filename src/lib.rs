@@ -256,6 +256,7 @@ pub fn marg_str_expr(string: &str) -> Result<Expr, Expr> {
 //            generate_wrapper!() invokation.
 // TODO: Allow any type which implements FromExpr in wrapper parameter lists?
 #[macro_export]
+#[deprecated(note = "Use the #[wolfram_library_function] procedural macro instead")]
 macro_rules! generate_wrapper {
     ($wrapper:ident # $func:ident ( $($arg:ident : Expr),* ) -> Expr) => {
         #[no_mangle]
