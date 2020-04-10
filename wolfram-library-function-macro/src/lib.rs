@@ -67,7 +67,7 @@ fn wolfram_library_function_impl(
 
         #[no_mangle]
         pub extern "C" fn #wrapper_function_name(
-            libdata: ::wl_library_link::WolframLibraryData,
+            libdata: ::wl_library_link::sys::WolframLibraryData,
             unsafe_link: ::wl_library_link::wstp::sys::WSLINK,
         ) -> std::os::raw::c_uint {
             ::wl_library_link::call_wolfram_library_function(
