@@ -49,10 +49,11 @@ const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 /// This struct should be considered private.
 ///
 /// It is only public because it appears in the expansion of `generate_wrapper`.
+#[allow(non_snake_case)]
 pub struct WolframEngine {
     // TODO: Is this function thread safe? Can it be called from a thread other than the
     //       one the LibraryLink wrapper was originally invoked from?
-    abortq: unsafe extern "C" fn() -> mint,
+    AbortQ: unsafe extern "C" fn() -> mint,
 }
 
 impl From<WolframLibraryData> for WolframEngine {
@@ -63,7 +64,7 @@ impl From<WolframLibraryData> for WolframEngine {
         // TODO: Investigate making bindgen treat these as non-null fields?
         WolframEngine {
             // TODO(!): Audit this
-            abortq: unsafe { *libdata }.AbortQ.expect("AbortQ callback is NULL"),
+            AbortQ: unsafe { *libdata }.AbortQ.expect("AbortQ callback is NULL"),
         }
     }
 }
@@ -75,7 +76,7 @@ impl WolframEngine {
     /// to the kernel as quickly as possible. They should not exit the process or
     /// otherwise terminate execution, simply return up the call stack.
     pub fn aborted(&self) -> bool {
-        let val: mint = unsafe { (self.abortq)() };
+        let val: mint = unsafe { (self.AbortQ)() };
         val == 1
     }
 
