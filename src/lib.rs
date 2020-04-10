@@ -28,24 +28,13 @@ use wl_expr_macro::wlexpr;
 use wl_lang::forms::ToExpr;
 use wl_parse;
 
-// TODO: Maybe don't reexport mint? Standardize on using u32/u64/isize? Type aliases
-//       aren't always helpful.
-pub use wl_library_link_sys::{
-    mint,
-    MArgument,
-    WolframLibraryData,
-    LIBRARY_FUNCTION_ERROR,
-    // Errors
-    LIBRARY_NO_ERROR,
-    LIBRARY_TYPE_ERROR,
-};
-
 // Re-export `wl_library_link_sys` and `wl_wstp`.
 //
 // TODO(!): Only selectively re-export the parts of these API's which are actually
 //          needed? These should at least have module documentation saying that they
 //          shouldn't be used?
 
+//! Re-export of `wl_library_link_sys`
 pub use wl_library_link_sys as sys;
 pub use wl_wstp as wstp;
 
