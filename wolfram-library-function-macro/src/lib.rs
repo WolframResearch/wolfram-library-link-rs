@@ -1,10 +1,8 @@
 extern crate proc_macro;
 
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 
-use quote::quote_spanned;
-// use quote::ToTokens;
-use syn::{punctuated::Punctuated, spanned::Spanned, Item};
+use syn::{punctuated::Punctuated, spanned::Spanned, Item, Error, Result};
 
 /*
 TODO:
@@ -23,38 +21,17 @@ pub fn wolfram_library_function(
 
     let output: TokenStream = match wolfram_library_function_impl(attr, item) {
         Ok(stream) => stream,
-        Err(ErrorSpan { span, message }) => {
-            quote_spanned! {
-                span => compile_error!(#message);
-            }
-        },
+        Err(err) => err.to_compile_error(),
     };
 
     proc_macro::TokenStream::from(output)
 }
 
-struct ErrorSpan {
-    span: Span,
-    message: String,
-}
-
-impl ErrorSpan {
-    fn new(span: Span, message: impl Into<String>) -> Self {
-        Self {
-            span,
-            message: message.into(),
-        }
-    }
-}
-
 fn wolfram_library_function_impl(
     attr: TokenStream,
     item: TokenStream,
-) -> Result<TokenStream, ErrorSpan> {
-    let fnitem = syn::parse2(item.clone()).map_err(|err| ErrorSpan {
-        span: attr.span(),
-        message: err.to_string(),
-    })?;
+) -> Result<TokenStream> {
+    let fnitem = syn::parse2(item.clone())?;
 
     let function_name = validate_function(&fnitem)?;
     let wrapper_function_name = syn::Ident::new(
@@ -81,11 +58,11 @@ fn wolfram_library_function_impl(
     Ok(tokens)
 }
 
-fn validate_function(item: &Item) -> Result<syn::Ident, ErrorSpan> {
+fn validate_function(item: &Item) -> Result<syn::Ident> {
     let fnitem = match item {
         Item::Fn(fnitem) => fnitem,
         _ => {
-            return Err(ErrorSpan::new(
+            return Err(Error::new(
                 item.span(),
                 "`wolfram_library_function` attribute can only be used on functions",
             ))
@@ -104,13 +81,13 @@ fn validate_function(item: &Item) -> Result<syn::Ident, ErrorSpan> {
 
     // Ensure that the function is not marked with `const` or `async`
     if let Some(const_) = sig.constness {
-        return Err(ErrorSpan::new(
+        return Err(Error::new(
             const_.span,
             "Wolfram library function must not be `const`",
         ));
     }
     if let Some(async_) = sig.asyncness {
-        return Err(ErrorSpan::new(
+        return Err(Error::new(
             async_.span,
             "Wolfram library function must not be `async`",
         ));
@@ -119,7 +96,7 @@ fn validate_function(item: &Item) -> Result<syn::Ident, ErrorSpan> {
     // Ensure that the function is using the native Rust ABI (and *not* e.g.
     // `extern "C"`).
     if let Some(abi) = &sig.abi {
-        return Err(ErrorSpan::new(
+        return Err(Error::new(
             abi.span(),
             "Wolfram library function must use the native Rust ABI",
         ));
@@ -127,7 +104,7 @@ fn validate_function(item: &Item) -> Result<syn::Ident, ErrorSpan> {
 
     // Ensure that the function is not generic
     if sig.generics.params.len() > 0 {
-        return Err(ErrorSpan::new(
+        return Err(Error::new(
             sig.generics.params.span(),
             "Wolfram library function must not be generic",
         ));
@@ -135,7 +112,7 @@ fn validate_function(item: &Item) -> Result<syn::Ident, ErrorSpan> {
 
     // Ensure that the function does not have variadic arguments, e.g. `args: ..i32`
     if let Some(variadic) = &sig.variadic {
-        return Err(ErrorSpan::new(
+        return Err(Error::new(
             variadic.span(),
             "Wolfram library function must not be variadic",
         ));
@@ -150,20 +127,20 @@ fn validate_function(item: &Item) -> Result<syn::Ident, ErrorSpan> {
 fn check_visibility(
     vis: &syn::Visibility,
     sig: &syn::Signature,
-) -> Result<(), ErrorSpan> {
+) -> Result<()> {
     match vis {
         // `pub fn name()`
         syn::Visibility::Public(_) => Ok(()),
         // `pub(crate) fn name()`
         syn::Visibility::Restricted(restriction) => {
-            return Err(ErrorSpan::new(
+            return Err(Error::new(
                 restriction.paren_token.span,
                 "Wolfram library function must be marked `pub`, with no restrictions",
             ))
         },
         // `crate fn name()`
         syn::Visibility::Crate(_) => {
-            return Err(ErrorSpan::new(
+            return Err(Error::new(
                 vis.span(),
                 "Wolfram library function must be marked `pub`",
             ))
@@ -171,7 +148,7 @@ fn check_visibility(
         // `fn name()`
         // Same as the ::Crate case, but the error span is the `fn` token
         syn::Visibility::Inherited => {
-            return Err(ErrorSpan::new(
+            return Err(Error::new(
                 sig.fn_token.span(),
                 "Wolfram library function must be marked `pub`",
             ))
@@ -182,9 +159,9 @@ fn check_visibility(
 fn check_parameters(
     inputs: &Punctuated<syn::FnArg, syn::token::Comma>,
     parens: syn::token::Paren,
-) -> Result<(), ErrorSpan> {
+) -> Result<()> {
     if inputs.len() != 2 {
-        return Err(ErrorSpan::new(
+        return Err(Error::new(
             parens.span,
             "Wolfram library function must have 2 parameters",
         ));
@@ -197,7 +174,7 @@ fn check_parameters(
     let first_param =
         match &inputs[0] {
             // `self` OR `&self`
-            syn::FnArg::Receiver(receiver) => return Err(ErrorSpan::new(
+            syn::FnArg::Receiver(receiver) => return Err(Error::new(
                 receiver.span(),
                 "First parameter of Wolfram library function must be `&WolframEngine`",
             )),
@@ -205,7 +182,7 @@ fn check_parameters(
         };
 
     if !first_param.attrs.is_empty() {
-        return Err(ErrorSpan::new(
+        return Err(Error::new(
             first_param.attrs[0].span(),
             "Unknown Wolfram library function attribute",
         ));
@@ -226,7 +203,7 @@ fn check_parameters(
             // let path = match &**elem {
             //     syn::Type::Path(path) => path,
             //     _ => {
-            //         return Err(ErrorSpan::new(
+            //         return Err(Error::new(
             //             first_param.ty.span(),
             //             "Expected type `&WolframEngine`",
             //         ))
@@ -234,25 +211,25 @@ fn check_parameters(
             // };
             // let path_str = quote::quote!(#path).to_string();
             // if !(path_str == "WolframEngine" || path_str == "wl_library_link :: WolframEngine") {
-            //     return Err(ErrorSpan::new(first_param.ty.span(), "Expected type `&WolframEngine`"))
+            //     return Err(Error::new(first_param.ty.span(), "Expected type `&WolframEngine`"))
             // }
 
             if let Some(lifetime) = lifetime {
-                return Err(ErrorSpan::new(
+                return Err(Error::new(
                     lifetime.span(),
                     "Explicit lifetime is not allowed within a Wolfram library function",
                 ));
             }
 
             if let Some(mut_) = mutability {
-                return Err(ErrorSpan::new(
+                return Err(Error::new(
                     mut_.span(),
                     "Wolfram library function engine parameter must be taken by immutable `&` reference",
                 ));
             }
         },
         _ => {
-            return Err(ErrorSpan::new(
+            return Err(Error::new(
                 first_param.ty.span(),
                 "First parameter of Wolfram library function must be `&WolframEngine`",
             ))
