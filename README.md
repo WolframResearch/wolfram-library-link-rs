@@ -24,7 +24,14 @@ Advantages over the LibraryLink/WSTP C API:
 
 ## Quick Start Guide
 
-First, ensure that your project's `Cargo.toml` is correctly configured. This means:
+Create a new Rust library by running:
+
+```shell
+$ cargo new --lib my-package
+```
+
+Next, ensure that your project's `Cargo.toml` is correctly configured to be used as a
+Wolfram LibraryLink library. This means:
 
   * Setting `crate-type = ["cdylib"]`
   * Adding `wl-expr` and `wl-library-link` as dependencies
