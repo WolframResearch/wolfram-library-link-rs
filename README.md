@@ -22,7 +22,7 @@ Advantages over the LibraryLink/WSTP C API:
     - Easy and safe method call to evaluate an expression from Rust code
   * Ability to use a safer, but still just as performant, modern programming language
 
-## Usage
+## Quick Start Guide
 
 First, ensure that your project's `Cargo.toml` is correctly configured. This means:
 
@@ -53,33 +53,61 @@ crate-type = ["cdylib"]
 [dependencies]
 wl-expr = { git = "ssh://github.com/ConnorGray/wl-expr.git" }
 wl-library-link = { git = "ssh://github.com/ConnorGray/wl-library-link.git" }
+
+# Support libraries
+wl-lang = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-lang.git" }
+wl-expr-macro = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr-macro.git" }
+wl-from-expr-macro = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-from-expr-macro.git" }
+wl-pattern-match = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-pattern-match.git" }
 ```
 
 See the [Cargo manifest documentation][cargo-manifest-docs] for a complete description of
 the Cargo TOML file.
 
-### Using the `generate_wrapper!()` macro
+### Using `#[wolfram_library_function]` to generate a wrapper automatically
 
-Next, import and use the `generate_wrapper!()` macro in your Rust code.
+Next, import and use the `#[wolfram_library_function]` macro into your Rust code.
 
 ```rust
-// ### main.rs
+// ### lib.rs
 
-use wl_expr::Expr;
-use wl_library_link::generate_wrapper;
+use wl_expr::{Expr, Number};
+use wl_expr_macro::Expr;
+use wl_from_expr_macro::FromExpr;
+use wl_library_link::WolframEngine;
+use wl_lang::forms::{FromExpr, ToExpr, List, from_expr::FormError};
 
-generate_wrapper![GET_HEAD # get_normal_head(e: Expr) -> Expr];
+#[derive(FromExpr)]
+#[pattern(Pattern[numbers, {___}])]
+struct Numbers {
+    numbers: List<Number>,
+}
 
-// TODO: #[wl_library_link::wrap(wrapper_name = "GET_HEAD")]
-fn get_normal_head(expr: Expr) -> Expr {
-    match expr.kind() {
-        ExprKind::Normal(normal) => normal.head.clone(),
-        ExprKind::Symbol(_) | ExprKind::String(_) | ExprKind::Number(_) => Expr! {
-            Failure["HeadOfAtomic", <|
-                "Message" -> "Expected non-atomic expression"
+#[wl_library_link::wolfram_library_function]
+pub fn sum_of_numbers(engine: &WolframEngine, arguments: Vec<Expr>) -> Expr {
+    let Numbers { numbers } = match Numbers::from_expr(&arguments[0]) {
+        Ok(numbers) => numbers,
+        Err(err) => return Expr! {
+            Failure["ArgumentShape", <|
+                "Message" -> %[format!("{}", FormError::from(err))]
             |>]
+        },
+    };
+
+    let List(numbers) = numbers;
+
+    let mut sum: f64 = 0.0;
+
+    for number in numbers {
+        engine.evaluate(&Expr! { Echo['number] });
+
+        match number {
+            Number::Integer(int) => sum += int as f64,
+            Number::Real(real) => sum += *real,
         }
     }
+
+    Expr::number(Number::Real(wl_expr::F64::new(sum).expect("got NaN")))
 }
 ```
 
