@@ -12,6 +12,8 @@ Features:
   * Pass general Wolfram language expressions to and from Rust code.
   * Evaluate Wolfram expressions from Rust code.
   * Check for and respond to Wolfram language aborts while in Rust code.
+  * Seamlessly construct native Rust datastructures from expressions using the pattern
+    language via `derive(FromExpr)`.
   * Safe API for the WSTP, using [`wl-wstp`][wl-wstp]
 
 Advantages over the LibraryLink/WSTP C API:
