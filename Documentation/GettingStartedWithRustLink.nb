@@ -1,0 +1,1001 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     37280,        993]
+NotebookOptionsPosition[     29325,        818]
+NotebookOutlinePosition[     29992,        839]
+CellTagsIndexPosition[     29949,        836]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[TextData[{
+ "New in: ",
+ Cell["??", "HistoryData",
+  CellTags->"New",ExpressionUUID->"80a77814-9d45-45fa-95e2-e43e90996dbb"],
+ " | Modified in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Modified",ExpressionUUID->"528e6d75-8f07-4466-b2c8-9cf44f88c0ec"],
+ " | Obsolete in: ",
+ Cell["12.1", "HistoryData",
+  CellTags->"Obsolete",ExpressionUUID->"166585e4-febb-4949-bdd6-968d05bba226"],
+ " | Excised in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Excised",ExpressionUUID->"8371b238-c5e8-4d3a-ad24-7dfab7014655"]
+}], "History",
+ Editable->True,
+ CellID->1247902091,ExpressionUUID->"4ea0ee36-8878-4d1c-a918-c2c21df7d4d5"],
+
+Cell["Created by: connorgray on 04-16-2020 09:46:50", "AuthorDate",
+ CellID->500972764,ExpressionUUID->"78bb6475-a16d-428e-87c8-5192b6f07bb1"],
+
+Cell[CellGroupData[{
+
+Cell["Categorization", "CategorizationSection",
+ CellID->1122911449,ExpressionUUID->"b9eed37b-bbfd-4286-98ed-9461093b4437"],
+
+Cell["Tutorial", "Categorization",
+ CellLabel->"Entity Type",
+ CellID->686433507,ExpressionUUID->"067102bd-c02a-4d18-9f00-979e96c38118"],
+
+Cell["", "Categorization",
+ CellLabel->"Paclet Name",
+ CellID->605800465,ExpressionUUID->"aed595f9-5e2e-4520-8562-0ada568e1466"],
+
+Cell["", "Categorization",
+ CellLabel->"Context",
+ CellID->468444828,ExpressionUUID->"1d16fbf4-8b8f-4aa5-b1c4-74f26f694f18"],
+
+Cell["XXXX", "Categorization",
+ CellLabel->"URI",ExpressionUUID->"e5d47a1a-0d55-46cf-8641-d6d5efb46aad"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Synonyms", "SynonymsSection",
+ CellID->1427418553,ExpressionUUID->"e448e686-77a9-4635-817d-6425547fc03e"],
+
+Cell["XXXX", "Synonyms",
+ CellID->1251652828,ExpressionUUID->"bd6698a0-73b3-4401-85e7-a9ec27e6e8f6"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Keywords", "KeywordsSection",
+ CellID->1427428552,ExpressionUUID->"93cf42b8-a3b9-4f62-8975-05e6348ff15e"],
+
+Cell["XXXX", "Keywords",
+ CellID->1251852827,ExpressionUUID->"0217d95d-d229-4cee-ae76-b2743c106ce7"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Details", "DetailsSection",
+ CellID->307771771,ExpressionUUID->"cf5a9d40-eb51-46e6-9652-70ea5858223e"],
+
+Cell["XXXX", "Details",
+ CellLabel->"Lead",
+ CellID->115134701,ExpressionUUID->"0cf02267-f394-4787-8cf1-70e31a7c5732"],
+
+Cell["XXXX", "Details",
+ CellLabel->"Developers",
+ CellID->350963985,ExpressionUUID->"9d104c92-6c18-4978-95ef-4848d0cc5ae9"],
+
+Cell["XXXX", "Details",
+ CellLabel->"Authors",
+ CellID->787641479,ExpressionUUID->"3edb205b-77b6-4dd4-8e10-251f60d327d8"],
+
+Cell["XXXX", "Details",
+ CellLabel->"Feature Name",
+ CellID->489188983,ExpressionUUID->"05a0be07-2644-4773-92e9-b9d038d145e8"],
+
+Cell["XXXX", "Details",
+ CellLabel->"QA",
+ CellID->267986155,ExpressionUUID->"b5dd73e3-317c-4871-aabc-be00e56e174f"],
+
+Cell["XXXX", "Details",
+ CellLabel->"DA",
+ CellID->55052072,ExpressionUUID->"57f29181-624d-42e8-b441-65e3d98901a1"],
+
+Cell["XXXX", "Details",
+ CellLabel->"Docs",
+ CellID->125741376,ExpressionUUID->"1a1ff11d-b5e0-4eef-aa6e-1c098da985d8"],
+
+Cell["XXXX", "Details",
+ CellLabel->"Features Page Notes",
+ CellID->31040295,ExpressionUUID->"051d2581-e963-4240-8265-335ccac2c5fd"],
+
+Cell["XXXX", "Details",
+ CellLabel->"Comments",
+ CellID->240026365,ExpressionUUID->"cb516ef7-be70-4473-91de-f1ea3d9bc8a7"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Getting Started with RustLink", "Title",
+ CellChangeTimes->{{3.796037212903202*^9, 3.796037217150374*^9}},
+ CellID->509267359,ExpressionUUID->"f00c7563-254d-4af0-84ba-063862cefb5a"],
+
+Cell["\<\
+RustLink provides a convenient and powerful way use the Wolfram Language from \
+within a Rust library, and to use Rust from within a Wolfram Language program.\
+\>", "Text",
+ CellChangeTimes->{{3.796038571308449*^9, 3.796038635227665*^9}, {
+  3.7960386974048243`*^9, 3.796038699492564*^9}},
+ CellID->2057916504,ExpressionUUID->"82ec3859-cf76-42de-83d2-9945fba19ce4"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ StyleBox["Installing Rust and ", "Subsection"],
+ StyleBox["cargo", "InlineCode"]
+}], "Section",
+ CellChangeTimes->{{3.7960385221794662`*^9, 3.796038549145376*^9}},
+ CellID->304722785,ExpressionUUID->"37569c0b-cdf7-4b38-89e5-9d6bfc6df07c"],
+
+Cell[TextData[{
+ "To build you first RustLink program, you'll need to install Rust, and it's \
+package manager, ",
+ StyleBox["cargo", "InlineCode"],
+ ". This can be done by following the official instructions found at:"
+}], "Text",
+ CellChangeTimes->{{3.79604260865201*^9, 3.796042644908196*^9}, {
+  3.7960426811195707`*^9, 3.796042712851618*^9}},
+ CellID->1919957400,ExpressionUUID->"f764c741-dca6-4634-899d-82a98c6e9eee"],
+
+Cell[TextData[StyleBox["https://www.rust-lang.org/tools/install",
+ FontWeight->"Bold"]], "MathCaption",
+ CellChangeTimes->{{3.796042728423128*^9, 3.796042732459741*^9}},
+ CellID->1738855251,ExpressionUUID->"28781e2a-0566-413c-9805-84496b90a239"],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Verify the installation succeeded by running the following command-line code:\
+\
+\>", "Text",
+ CellChangeTimes->{{3.79604260865201*^9, 3.796042644908196*^9}, {
+  3.7960426811195707`*^9, 3.796042712851618*^9}, {3.79604290988332*^9, 
+  3.796042934505045*^9}, {3.7960429923435698`*^9, 3.79604303745155*^9}, {
+  3.796043169098048*^9, 3.796043196890534*^9}},
+ CellID->642730918,ExpressionUUID->"c3c0b299-48b0-4f24-bbf8-1c58c1717637"],
+
+Cell["\<\
+$ cargo --version
+cargo 1.42.0 (86334295e 2020-01-31)\
+\>", "Program",
+ CellChangeTimes->{{3.796043059314624*^9, 3.796043072800617*^9}, {
+  3.7960431084647217`*^9, 3.796043112625018*^9}},
+ CellID->1395952705,ExpressionUUID->"912073f7-6a5c-4421-8945-b24efe8fab03"]
+}, Open  ]],
+
+Cell[TextData[{
+ "Note that your ",
+ StyleBox["cargo", "InlineCode"],
+ " version may differ from the output above."
+}], "Text",
+ CellChangeTimes->{{3.796043121520755*^9, 3.7960431448258944`*^9}, {
+  3.796043203475522*^9, 3.796043225441815*^9}, {3.796043268615007*^9, 
+  3.7960432821818323`*^9}},
+ CellID->593204575,ExpressionUUID->"02b6ab8d-82e6-4353-9c1a-8ca34776cda2"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Your first RustLink program", "Section",
+ CellChangeTimes->{{3.796038490961854*^9, 3.7960384988099947`*^9}},
+ CellID->693837892,ExpressionUUID->"3bbe83be-ee87-4e1e-bd63-591f84ec5bc7"],
+
+Cell[CellGroupData[{
+
+Cell["Development lifecycle of a RustLink library", "Subsection",
+ CellChangeTimes->{{3.796043324135098*^9, 3.796043333254524*^9}},
+ CellID->1136826467,ExpressionUUID->"b60a50c9-1620-4019-968c-8ba3a0c0bd8c"],
+
+Cell[CellGroupData[{
+
+Cell["A RustLink library consists of two components.", "Text",
+ CellChangeTimes->{{3.796043285959551*^9, 3.7960433106075487`*^9}},
+ CellID->1088647092,ExpressionUUID->"1737f285-1583-4b60-8061-3c2d98b942c3"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"SyntaxHighlight", "[", 
+  RowBox[{
+  "\"\<\\\nuse wl_expr::Expr;\nuse wl_library_link::{WolframEngine, \
+wolfram_library_function};\n\n#[wolfram_library_function]\nfn \
+say_hello(engine: &WolframEngine, args: Vec<Expr>) -> Expr {\n\tExpr::string(\
+\\\"Hello, World!\\\")\n}\>\"", ",", "\"\<Rust\>\""}], "]"}]], "Input",
+ CellChangeTimes->{{3.7960378259429207`*^9, 3.796037927971735*^9}},
+ CellLabel->"In[26]:=",
+ CellID->109300776,ExpressionUUID->"a9d61164-75a7-40e0-b1ac-4773236917b8"],
+
+Cell[BoxData[
+ TagBox[GridBox[{
+    {
+     TemplateBox[{
+       StyleBox["\"use\"", 
+        RGBColor[
+        0.6549019607843137, 0.11372549019607843`, 0.36470588235294116`, 1.], 
+        StripOnInput -> False], 
+       StyleBox["\" \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"wl_expr\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"::\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"Expr\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\";\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False]},
+      "RowDefault"]},
+    {
+     TemplateBox[{
+       StyleBox["\"use\"", 
+        RGBColor[
+        0.6549019607843137, 0.11372549019607843`, 0.36470588235294116`, 1.], 
+        StripOnInput -> False], 
+       StyleBox["\" \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"wl_library_link\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"::\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"{\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"WolframEngine\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\",\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\" wolfram_library_function\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"}\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\";\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False]},
+      "RowDefault"]},
+    {
+     TemplateBox[{
+       StyleBox["\"\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False]},
+      "RowDefault"]},
+    {
+     TemplateBox[{
+       StyleBox["\"#\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"[\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"wolfram_library_function\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"]\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False]},
+      "RowDefault"]},
+    {
+     TemplateBox[{
+       StyleBox["\"fn\"", 
+        RGBColor[
+        0.6549019607843137, 0.11372549019607843`, 0.36470588235294116`, 1.], 
+        StripOnInput -> False], 
+       StyleBox["\" \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"say_hello\"", 
+        RGBColor[
+        0.4745098039215686, 0.36470588235294116`, 0.6392156862745098, 1.], 
+        StripOnInput -> False], 
+       StyleBox["\"(\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"engine\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\":\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\" \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"&\"", 
+        RGBColor[
+        0.6549019607843137, 0.11372549019607843`, 0.36470588235294116`, 1.], 
+        StripOnInput -> False], 
+       StyleBox["\"WolframEngine, \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"args\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\":\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\" \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"Vec\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"<\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"Expr\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\">\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\")\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\" \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"->\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\" Expr\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\" \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"{\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False]},
+      "RowDefault"]},
+    {
+     TemplateBox[{
+       StyleBox["\"\\t\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"Expr\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"::\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"string\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"(\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"\\\"\"", 
+        RGBColor[
+        0.09411764705882353, 0.21176470588235294`, 0.5686274509803921, 1.], 
+        StripOnInput -> False], 
+       StyleBox["\"Hello, World!\"", 
+        RGBColor[
+        0.09411764705882353, 0.21176470588235294`, 0.5686274509803921, 1.], 
+        StripOnInput -> False], 
+       StyleBox["\"\\\"\"", 
+        RGBColor[
+        0.09411764705882353, 0.21176470588235294`, 0.5686274509803921, 1.], 
+        StripOnInput -> False], 
+       StyleBox["\")\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False]},
+      "RowDefault"]},
+    {
+     TemplateBox[{
+       StyleBox["\"}\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False]},
+      "RowDefault"]}
+   },
+   DefaultBaseStyle->"Column",
+   GridBoxAlignment->{"Columns" -> {{Left}}},
+   GridBoxBackground->{"Columns" -> {{
+        RGBColor[1., 1., 1., 1.]}}},
+   GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+   GridBoxSpacings->{"Columns" -> {{Automatic}}, "Rows" -> {{0.5}}}],
+  "Column"]], "Output",
+ CellChangeTimes->{{3.79603792508012*^9, 3.796037929022769*^9}},
+ CellLabel->"Out[26]=",
+ CellID->1417490879,ExpressionUUID->"27d63f19-da06-44e4-bb6a-67319f2b501b"]
+}, {2}]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["XXXX", "MathCaption",
+ CellID->836781195,ExpressionUUID->"a0b7eaca-91a0-4421-9337-9d741a236fda"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["XXXX"], "Input",
+ CellLabel->"In[1]:=",
+ CellID->2058623809,ExpressionUUID->"ac1f07ff-97e9-480c-9eb6-6551496671c7"],
+
+Cell[BoxData["XXXX"], "Output",
+ CellLabel->"Out[1]=",
+ CellID->1181321046,ExpressionUUID->"c6ad65a7-a0b2-49db-b4a4-9cd115a7f127"]
+}, Open  ]]
+}, Open  ]]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ StyleBox["Constructing Expressions: The ", "Subsection"],
+ StyleBox["Expr![]", "InlineCode"],
+ StyleBox[" macro", "Subsection"]
+}], "Subsection",
+ CellChangeTimes->{{3.796038189574031*^9, 3.796038213716839*^9}},
+ CellID->1741422371,ExpressionUUID->"d9e5a366-0b20-4a9e-8b69-928f5571e554"],
+
+Cell["TODO TODO TODO", "Text",
+ CellChangeTimes->{{3.796043378432222*^9, 3.796043381460126*^9}},
+ CellID->1120891822,ExpressionUUID->"e4c0e5ef-a0bb-42e8-bd60-cb5fa9bb11b1"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Working with structured expressions: ",
+ StyleBox["derive(FromExpr)", "InlineCode"]
+}], "Subsection",
+ CellChangeTimes->{{3.796038230948111*^9, 3.796038250746358*^9}},
+ CellID->976548054,ExpressionUUID->"6b096047-fe75-4943-b785-9a5ddf26db95"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "The ",
+ StyleBox["derive(FromExpr)", "InlineCode"],
+ " attribute invokes what's known as a Rust \"procedural macro\". This \
+inserts new code, based on the structure which the macro is used to annotate. \
+FromExpr is a "
+}], "Text",
+ CellChangeTimes->{{3.7960397291523848`*^9, 3.796039811084894*^9}, {
+  3.796039856901967*^9, 3.796039895982244*^9}, {3.796040061314286*^9, 
+  3.796040063818615*^9}},
+ CellID->1994375645,ExpressionUUID->"acc5ebd7-fb10-4083-8f1c-cc744b17218b"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"SyntaxHighlight", "[", 
+  RowBox[{
+  "\"\<\\\n#[derive(FromExpr)]\n#[pattern({x_, y_})\nstruct Point {\n    x: \
+i64,\n    y: i64,\n}\n\>\"", ",", "\"\<Rust\>\""}], "]"}]], "Input",
+ CellChangeTimes->{{3.796039906328341*^9, 3.7960400261445017`*^9}},
+ CellLabel->"In[30]:=",
+ CellID->154491268,ExpressionUUID->"fab44655-e1a4-43e7-9d7a-b4ce66b08e4d"],
+
+Cell[BoxData[
+ TagBox[GridBox[{
+    {
+     TemplateBox[{
+       StyleBox["\"#\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"[\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"derive\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"(\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"FromExpr\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\")\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"]\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False]},
+      "RowDefault"]},
+    {
+     TemplateBox[{
+       StyleBox["\"#\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"[\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"pattern\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"(\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"{x_\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\",\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\" y_}\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\")\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False]},
+      "RowDefault"]},
+    {
+     TemplateBox[{
+       StyleBox["\"struct\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\" \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"Point\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\" {\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False]},
+      "RowDefault"]},
+    {
+     TemplateBox[{
+       StyleBox["\"    \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"x\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\": \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"i64\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\",\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False]},
+      "RowDefault"]},
+    {
+     TemplateBox[{
+       StyleBox["\"    \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"y\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\": \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\"i64\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
+       StyleBox["\",\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False]},
+      "RowDefault"]},
+    {
+     TemplateBox[{
+       StyleBox["\"}\"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False]},
+      "RowDefault"]}
+   },
+   DefaultBaseStyle->"Column",
+   GridBoxAlignment->{"Columns" -> {{Left}}},
+   GridBoxBackground->{"Columns" -> {{
+        RGBColor[1., 1., 1., 1.]}}},
+   GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+   GridBoxSpacings->{"Columns" -> {{Automatic}}, "Rows" -> {{0.5}}}],
+  "Column"]], "Output",
+ CellChangeTimes->{{3.796039974787704*^9, 3.796040027040785*^9}},
+ CellLabel->"Out[30]=",
+ CellID->1841630686,ExpressionUUID->"6b1d7217-85af-4055-8d48-c79d9c4525e4"]
+}, {2}]]
+}, Open  ]],
+
+Cell["", "Text",
+ CellChangeTimes->{{3.796040043792014*^9, 3.796040051621992*^9}},
+ CellID->323911381,ExpressionUUID->"d07e4ad6-f22c-4c84-b978-cdbc8750a324"],
+
+Cell[TextData[{
+ "Their are two levels of validation done when using ",
+ StyleBox["derive(FromExpr)", "InlineCode"],
+ ". The first is checking whether the pattern matches against"
+}], "Text",
+ CellChangeTimes->{{3.796039642251837*^9, 3.7960397227039957`*^9}},
+ CellID->1774963159,ExpressionUUID->"79a264b2-2d5b-4990-8792-5aba3c4cb37e"],
+
+Cell[TextData[{
+ "The [[ ",
+ StyleBox["LINK: ",
+  FontWeight->"Bold"],
+ StyleBox["wl-lang ]]", "InlineCode"],
+ " library contains many existing structures for common Wolfram Language \
+forms."
+}], "Text",
+ CellChangeTimes->{{3.796038876684465*^9, 3.796038877874261*^9}, {
+  3.796038979138242*^9, 3.796039016840444*^9}, {3.796039261530583*^9, 
+  3.7960392658205433`*^9}, {3.796039305238388*^9, 3.796039311230947*^9}},
+ CellID->1192390612,ExpressionUUID->"05114311-5e0a-4562-8a2e-98f23ea99b30"],
+
+Cell[CellGroupData[{
+
+Cell["", "Text",
+ CellChangeTimes->{{3.796038876684465*^9, 3.796038877874261*^9}, {
+  3.796038979138242*^9, 3.796039016840444*^9}, {3.796039261530583*^9, 
+  3.796039262273127*^9}},
+ CellID->286675678,ExpressionUUID->"2fccd39b-6f20-4fb9-8bef-1bdf5295f751"],
+
+Cell[BoxData[GridBox[{
+   {"      ", "List", "Association", "Rule"},
+   {"      ", "Pattern", "IteratorSpec", "SingleOrList"},
+   {"      ", "XXXX", "XXXX", "XXXX"}
+  }]], "3ColumnTableMod",
+ CellChangeTimes->{{3.796039162132287*^9, 3.796039171476212*^9}, {
+  3.796039212827046*^9, 3.796039252433928*^9}, {3.7960393229830627`*^9, 
+  3.796039355605036*^9}, {3.7960394637217417`*^9, 3.796039482566526*^9}},
+ CellID->182070495,ExpressionUUID->"01395d1d-7ad5-4637-afd7-4401ff075eaf"],
+
+Cell[BoxData[
+ RowBox[{"SyntaxHighlight", "[", 
+  RowBox[{
+  "\"\<\\\nuse wl_lang::List;\n\n#[derive(FromExpr)]\n\>\"", ",", 
+   "\"\<Rust\>\""}], "]"}]], "Input",
+ CellChangeTimes->{{3.796039439184691*^9, 3.796039455318667*^9}, {
+  3.796039630355442*^9, 3.796039638802053*^9}},
+ CellID->1458780447,ExpressionUUID->"b62613c3-3932-4413-a959-24e5e61de9ec"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Implementing ",
+ StyleBox["ToExpr", "InlineCode"]
+}], "Subsection",
+ CellChangeTimes->{{3.796038263369843*^9, 3.7960382678578*^9}},
+ CellID->255735726,ExpressionUUID->"94ebba03-7d99-40e2-a0b8-e456619a9506"],
+
+Cell["TODO TODO TODO", "Text",
+ CellChangeTimes->{{3.796043388191663*^9, 3.796043390262795*^9}},
+ CellID->2096539476,ExpressionUUID->"c3172601-a6e7-421f-96cf-9befd2183369"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["More About", "TutorialMoreAboutSection",
+ CellID->23220180,ExpressionUUID->"9a73f2a5-cd35-4e11-9064-471a2d1e7195"],
+
+Cell["XXXX", "TutorialMoreAbout",
+ CellID->1567025153,ExpressionUUID->"9ddd1fb1-f559-4260-aa95-2e471f064240"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Related Tutorials", "RelatedTutorialsSection",
+ CellID->415694126,ExpressionUUID->"f8c56921-1aaf-491d-9ba7-952f38bc4577"],
+
+Cell["XXXX", "RelatedTutorials",
+ CellID->806871991,ExpressionUUID->"79948333-5eae-4ac7-8229-396f23e87335"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Related Wolfram Training Courses", "TutorialRelatedLinksSection",
+ CellChangeTimes->{{3.545139239709342*^9, 3.545139240396411*^9}},
+ CellID->415694148,ExpressionUUID->"80e7cb49-3597-45fd-adc5-ce9cf2d3fb63"],
+
+Cell["XXXX", "TutorialRelatedLinks",
+ CellID->415694149,ExpressionUUID->"e62ed730-a65e-4d68-941f-0050aa707da1"]
+}, Open  ]]
+}, Open  ]]
+},
+ScreenStyleEnvironment->"FutureObject",
+WindowSize->{700, 770},
+WindowMargins->{{Automatic, 374}, {185, Automatic}},
+TaggingRules->{
+ "Author" -> "connorgray", "CreationDate" -> "04-16-2020 09:46:50", 
+  "SaveDialogDataSavesBlog" -> False, "AnnotationsDeleted" -> False},
+FrontEndVersion->"12.1 for Mac OS X x86 (64-bit) (March 18, 2020)",
+StyleDefinitions->FrontEnd`FileName[{"Wolfram"}, "TutorialPageStyles.nb", 
+  CharacterEncoding -> "UTF-8"],
+ExpressionUUID->"9ad59372-1afe-4da8-a18a-82cd94fd5423"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 619, 15, 19, "History",ExpressionUUID->"4ea0ee36-8878-4d1c-a918-c2c21df7d4d5",
+ CellID->1247902091],
+Cell[1180, 37, 142, 1, 18, "AuthorDate",ExpressionUUID->"78bb6475-a16d-428e-87c8-5192b6f07bb1",
+ CellID->500972764],
+Cell[CellGroupData[{
+Cell[1347, 42, 123, 1, 24, "CategorizationSection",ExpressionUUID->"b9eed37b-bbfd-4286-98ed-9461093b4437",
+ CellID->1122911449],
+Cell[1473, 45, 136, 2, 70, "Categorization",ExpressionUUID->"067102bd-c02a-4d18-9f00-979e96c38118",
+ CellID->686433507],
+Cell[1612, 49, 128, 2, 70, "Categorization",ExpressionUUID->"aed595f9-5e2e-4520-8562-0ada568e1466",
+ CellID->605800465],
+Cell[1743, 53, 124, 2, 70, "Categorization",ExpressionUUID->"1d16fbf4-8b8f-4aa5-b1c4-74f26f694f18",
+ CellID->468444828],
+Cell[1870, 57, 104, 1, 70, "Categorization",ExpressionUUID->"e5d47a1a-0d55-46cf-8641-d6d5efb46aad"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[2011, 63, 111, 1, 16, "SynonymsSection",ExpressionUUID->"e448e686-77a9-4635-817d-6425547fc03e",
+ CellID->1427418553],
+Cell[2125, 66, 100, 1, 70, "Synonyms",ExpressionUUID->"bd6698a0-73b3-4401-85e7-a9ec27e6e8f6",
+ CellID->1251652828]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[2262, 72, 111, 1, 16, "KeywordsSection",ExpressionUUID->"93cf42b8-a3b9-4f62-8975-05e6348ff15e",
+ CellID->1427428552],
+Cell[2376, 75, 100, 1, 70, "Keywords",ExpressionUUID->"0217d95d-d229-4cee-ae76-b2743c106ce7",
+ CellID->1251852827]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[2513, 81, 108, 1, 16, "DetailsSection",ExpressionUUID->"cf5a9d40-eb51-46e6-9652-70ea5858223e",
+ CellID->307771771],
+Cell[2624, 84, 118, 2, 70, "Details",ExpressionUUID->"0cf02267-f394-4787-8cf1-70e31a7c5732",
+ CellID->115134701],
+Cell[2745, 88, 124, 2, 70, "Details",ExpressionUUID->"9d104c92-6c18-4978-95ef-4848d0cc5ae9",
+ CellID->350963985],
+Cell[2872, 92, 121, 2, 70, "Details",ExpressionUUID->"3edb205b-77b6-4dd4-8e10-251f60d327d8",
+ CellID->787641479],
+Cell[2996, 96, 126, 2, 70, "Details",ExpressionUUID->"05a0be07-2644-4773-92e9-b9d038d145e8",
+ CellID->489188983],
+Cell[3125, 100, 116, 2, 70, "Details",ExpressionUUID->"b5dd73e3-317c-4871-aabc-be00e56e174f",
+ CellID->267986155],
+Cell[3244, 104, 115, 2, 70, "Details",ExpressionUUID->"57f29181-624d-42e8-b441-65e3d98901a1",
+ CellID->55052072],
+Cell[3362, 108, 118, 2, 70, "Details",ExpressionUUID->"1a1ff11d-b5e0-4eef-aa6e-1c098da985d8",
+ CellID->125741376],
+Cell[3483, 112, 132, 2, 70, "Details",ExpressionUUID->"051d2581-e963-4240-8265-335ccac2c5fd",
+ CellID->31040295],
+Cell[3618, 116, 122, 2, 70, "Details",ExpressionUUID->"cb516ef7-be70-4473-91de-f1ea3d9bc8a7",
+ CellID->240026365]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[3777, 123, 187, 2, 87, "Title",ExpressionUUID->"f00c7563-254d-4af0-84ba-063862cefb5a",
+ CellID->509267359],
+Cell[3967, 127, 375, 6, 32, "Text",ExpressionUUID->"82ec3859-cf76-42de-83d2-9945fba19ce4",
+ CellID->2057916504],
+Cell[CellGroupData[{
+Cell[4367, 137, 255, 5, 33, "Section",ExpressionUUID->"37569c0b-cdf7-4b38-89e5-9d6bfc6df07c",
+ CellID->304722785],
+Cell[4625, 144, 423, 8, 33, "Text",ExpressionUUID->"f764c741-dca6-4634-899d-82a98c6e9eee",
+ CellID->1919957400],
+Cell[5051, 154, 245, 3, 33, "MathCaption",ExpressionUUID->"28781e2a-0566-413c-9805-84496b90a239",
+ CellID->1738855251],
+Cell[CellGroupData[{
+Cell[5321, 161, 438, 8, 18, "Text",ExpressionUUID->"c3c0b299-48b0-4f24-bbf8-1c58c1717637",
+ CellID->642730918],
+Cell[5762, 171, 273, 6, 50, "Program",ExpressionUUID->"912073f7-6a5c-4421-8945-b24efe8fab03",
+ CellID->1395952705]
+}, Open  ]],
+Cell[6050, 180, 370, 8, 19, "Text",ExpressionUUID->"02b6ab8d-82e6-4353-9c1a-8ca34776cda2",
+ CellID->593204575]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6457, 193, 189, 2, 35, "Section",ExpressionUUID->"3bbe83be-ee87-4e1e-bd63-591f84ec5bc7",
+ CellID->693837892],
+Cell[CellGroupData[{
+Cell[6671, 199, 207, 2, 32, "Subsection",ExpressionUUID->"b60a50c9-1620-4019-968c-8ba3a0c0bd8c",
+ CellID->1136826467],
+Cell[CellGroupData[{
+Cell[6903, 205, 206, 2, 18, "Text",ExpressionUUID->"1737f285-1583-4b60-8061-3c2d98b942c3",
+ CellID->1088647092],
+Cell[CellGroupData[{
+Cell[7134, 211, 510, 9, 138, "Input",ExpressionUUID->"a9d61164-75a7-40e0-b1ac-4773236917b8",
+ CellID->109300776],
+Cell[7647, 222, 10089, 265, 114, "Output",ExpressionUUID->"27d63f19-da06-44e4-bb6a-67319f2b501b",
+ CellID->1417490879]
+}, {2}]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[17782, 493, 102, 1, 33, "MathCaption",ExpressionUUID->"a0b7eaca-91a0-4421-9337-9d741a236fda",
+ CellID->836781195],
+Cell[CellGroupData[{
+Cell[17909, 498, 129, 2, 23, "Input",ExpressionUUID->"ac1f07ff-97e9-480c-9eb6-6551496671c7",
+ CellID->2058623809],
+Cell[18041, 502, 130, 2, 23, "Output",ExpressionUUID->"c6ad65a7-a0b2-49db-b4a4-9cd115a7f127",
+ CellID->1181321046]
+}, Open  ]]
+}, Open  ]]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[18232, 511, 304, 6, 32, "Subsection",ExpressionUUID->"d9e5a366-0b20-4a9e-8b69-928f5571e554",
+ CellID->1741422371],
+Cell[18539, 519, 172, 2, 18, "Text",ExpressionUUID->"e4c0e5ef-a0bb-42e8-bd60-cb5fa9bb11b1",
+ CellID->1120891822]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[18748, 526, 260, 5, 32, "Subsection",ExpressionUUID->"6b096047-fe75-4943-b785-9a5ddf26db95",
+ CellID->976548054],
+Cell[CellGroupData[{
+Cell[19033, 535, 492, 10, 33, "Text",ExpressionUUID->"acc5ebd7-fb10-4083-8f1c-cc744b17218b",
+ CellID->1994375645],
+Cell[CellGroupData[{
+Cell[19550, 549, 372, 7, 138, "Input",ExpressionUUID->"fab44655-e1a4-43e7-9d7a-b4ce66b08e4d",
+ CellID->154491268],
+Cell[19925, 558, 5873, 158, 96, "Output",ExpressionUUID->"6b1d7217-85af-4055-8d48-c79d9c4525e4",
+ CellID->1841630686]
+}, {2}]]
+}, Open  ]],
+Cell[25822, 720, 157, 2, 18, "Text",ExpressionUUID->"d07e4ad6-f22c-4c84-b978-cdbc8750a324",
+ CellID->323911381],
+Cell[25982, 724, 335, 6, 33, "Text",ExpressionUUID->"79a264b2-2d5b-4990-8792-5aba3c4cb37e",
+ CellID->1774963159],
+Cell[26320, 732, 492, 11, 19, "Text",ExpressionUUID->"05114311-5e0a-4562-8a2e-98f23ea99b30",
+ CellID->1192390612],
+Cell[CellGroupData[{
+Cell[26837, 747, 255, 4, 18, "Text",ExpressionUUID->"2fccd39b-6f20-4fb9-8bef-1bdf5295f751",
+ CellID->286675678],
+Cell[27095, 753, 479, 8, 43, "3ColumnTableMod",ExpressionUUID->"01395d1d-7ad5-4637-afd7-4401ff075eaf",
+ CellID->182070495],
+Cell[27577, 763, 354, 7, 90, "Input",ExpressionUUID->"b62613c3-3932-4413-a959-24e5e61de9ec",
+ CellID->1458780447]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[27980, 776, 224, 5, 32, "Subsection",ExpressionUUID->"94ebba03-7d99-40e2-a0b8-e456619a9506",
+ CellID->255735726],
+Cell[28207, 783, 172, 2, 18, "Text",ExpressionUUID->"c3172601-a6e7-421f-96cf-9befd2183369",
+ CellID->2096539476]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[28428, 791, 120, 1, 59, "TutorialMoreAboutSection",ExpressionUUID->"9a73f2a5-cd35-4e11-9064-471a2d1e7195",
+ CellID->23220180],
+Cell[28551, 794, 109, 1, 18, "TutorialMoreAbout",ExpressionUUID->"9ddd1fb1-f559-4260-aa95-2e471f064240",
+ CellID->1567025153]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[28697, 800, 127, 1, 59, "RelatedTutorialsSection",ExpressionUUID->"f8c56921-1aaf-491d-9ba7-952f38bc4577",
+ CellID->415694126],
+Cell[28827, 803, 107, 1, 18, "RelatedTutorials",ExpressionUUID->"79948333-5eae-4ac7-8229-396f23e87335",
+ CellID->806871991]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[28971, 809, 212, 2, 59, "TutorialRelatedLinksSection",ExpressionUUID->"80e7cb49-3597-45fd-adc5-ce9cf2d3fb63",
+ CellID->415694148],
+Cell[29186, 813, 111, 1, 18, "TutorialRelatedLinks",ExpressionUUID->"e62ed730-a65e-4d68-941f-0050aa707da1",
+ CellID->415694149]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
