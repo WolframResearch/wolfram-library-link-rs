@@ -82,9 +82,8 @@ Next, import and use the `#[wolfram_library_function]` macro into your Rust code
 
 use wl_expr::{Expr, Number};
 use wl_expr_macro::Expr;
-use wl_from_expr_macro::FromExpr;
 use wl_library_link::WolframEngine;
-use wl_lang::forms::{FromExpr, ToExpr, List, from_expr::FormError};
+use wl_lang::{FromExpr, forms::{FromExpr, ToExpr, List, from_expr::FormError}};
 
 #[derive(FromExpr)]
 #[pattern(Pattern[numbers, {___}])]
