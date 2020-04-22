@@ -66,7 +66,6 @@ wl-library-link = { git = "ssh://github.com/ConnorGray/wl-library-link.git" }
 # Support libraries
 wl-lang = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-lang.git" }
 wl-expr-macro = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr-macro.git" }
-wl-from-expr-macro = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-from-expr-macro.git" }
 wl-pattern-match = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-pattern-match.git" }
 ```
 
