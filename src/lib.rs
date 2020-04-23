@@ -100,7 +100,9 @@ impl WolframEngine {
         }
     }
 
-    fn try_evaluate(&self, expr: &Expr) -> Result<Expr, String> {
+    /// Attempt to evaluate `expr`, returning an error if a WSTP transport error occurred
+    /// or evaluation failed.
+    pub fn try_evaluate(&self, expr: &Expr) -> Result<Expr, String> {
         let link = self.get_wstp_link();
 
         // Send an EvaluatePacket['expr].
