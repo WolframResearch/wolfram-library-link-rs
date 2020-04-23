@@ -1,12 +1,21 @@
 //! This example demonstrates using the raw Rust wrappers around the LibraryLink C API to
-//! write a function which looks much like a classic C function using LibraryLink would.
+//! write a function which looks much like a classic C function using LibraryLink and
+//! WSTP would.
+//!
+//! This also includes an example of mixing the low-level LibraryLink bindings with the
+//! higher-level bindings provided by the `wl-wstp` crate.
 
 use std::os::raw::{c_int, c_uint};
 
+use wl_expr::Expr;
+use wl_expr_macro::Expr;
 use wl_library_link::sys::{
     WolframLibraryData, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
 };
-use wl_wstp::sys::{WSGetInteger, WSNewPacket, WSPutInteger, WSTestHead, WSLINK};
+use wl_wstp::{
+    sys::{WSGetInteger, WSNewPacket, WSPutInteger, WSTestHead, WSLINK},
+    WSTPLink,
+};
 
 /// This function is loaded by evaluating:
 ///
