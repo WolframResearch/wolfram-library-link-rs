@@ -27,3 +27,7 @@ nightly = []
 [[example]]
 name = "raw_wstp_function"
 crate-type = ["cdylib"]
+
+[[example]]
+name = "raw_librarylink_function"
+crate-type = ["cdylib"]
