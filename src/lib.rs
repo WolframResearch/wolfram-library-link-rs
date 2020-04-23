@@ -148,10 +148,10 @@ impl WolframEngine {
                 debug_assert!(normal.contents.len() == 1);
                 normal.contents[0].clone()
             },
-            _ => panic!(
-                "WolframEngine::evaluate: returned expression was not ReturnPacket: {}",
+            _ => return Err(format!(
+                "WolframEngine::try_evaluate: returned expression was not ReturnPacket: {}",
                 return_packet
-            ),
+            )),
         };
 
         Ok(returned_expr)
