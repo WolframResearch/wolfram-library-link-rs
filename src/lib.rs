@@ -62,27 +62,23 @@ pub struct WolframEngine {
     processWSLINK: unsafe extern "C" fn(MLINK) -> i32,
 }
 
-impl From<WolframLibraryData> for WolframEngine {
-    fn from(libdata: WolframLibraryData) -> Self {
+impl WolframEngine {
+    pub unsafe fn from_library_data(libdata: WolframLibraryData) -> Self {
         // TODO(!): Use the library version to verify this is still correct?
         // TODO(!): Audit this
         // NOTE: That these fields are even an Option is likely just bindgen being
         //       conservative with function pointers possibly being null.
         // TODO: Investigate making bindgen treat these as non-null fields?
-        unsafe {
-            let lib = *libdata;
-            WolframEngine {
-                wl_lib: libdata,
+        let lib = *libdata;
+        WolframEngine {
+            wl_lib: libdata,
 
-                AbortQ: lib.AbortQ.expect("AbortQ callback is NULL"),
-                getWSLINK: lib.getWSLINK.expect("getWSLINK callback is NULL"),
-                processWSLINK: lib.processWSLINK.expect("processWSLINK callback is NULL"),
-            }
+            AbortQ: lib.AbortQ.expect("AbortQ callback is NULL"),
+            getWSLINK: lib.getWSLINK.expect("getWSLINK callback is NULL"),
+            processWSLINK: lib.processWSLINK.expect("processWSLINK callback is NULL"),
         }
     }
-}
 
-impl WolframEngine {
     /// Returns `true` if the user has requested that the current evaluation be aborted.
     ///
     /// Programs should finish what they are doing and return control of this thread to
@@ -279,7 +275,7 @@ pub fn call_wolfram_library_function(
     let result: Result<(), CaughtPanic> = unsafe {
         call_and_catch_panic(|| {
             // Contruct the engine
-            let engine = WolframEngine::from(libdata);
+            let engine = WolframEngine::from_library_data(libdata);
 
             let link = WSTPLink::new(unsafe_link);
 
