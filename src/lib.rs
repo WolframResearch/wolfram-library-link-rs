@@ -94,41 +94,13 @@ impl WolframEngine {
     }
 
     pub fn evaluate(&self, expr: &Expr) -> Expr {
-        unsafe {
-            let unsafe_link = (self.getWSLINK)(self.wl_lib);
-            // Go from *mut MLINK -> *mut WSLINK
-            let link = WSTPLink::new(unsafe_link as *mut _);
-
-            // Send an EvaluatePacket['expr].
-            let _: () = link
-                .put_expr(&Expr! { EvaluatePacket['expr] })
-                .expect("WolframEngine::evaluate: failed to send EvaluatePacket");
-
-            // Process the packet on the link.
-            let code: i32 = (self.processWSLINK)(unsafe_link);
-
-            if code == 0 {
-                // TODO: Use WSErrorMessage() here and print the error.
-                panic!("WolframEngine::evaluate: processWSLINKK returned error",);
-            }
-
-            let return_packet: Expr = link.get_expr().expect(
-                "WolframEngine::evaluate: failed to read return packet from WSTP link",
-            );
-
-            let returned_expr = match return_packet.kind() {
-                ExprKind::Normal(normal) => {
-                    debug_assert!(normal.has_head(&*sym::ReturnPacket));
-                    debug_assert!(normal.contents.len() == 1);
-                    normal.contents[0].clone()
-                },
-                _ => panic!(
-                    "WolframEngine::evaluate: returned expression was not ReturnPacket: {}",
-                    return_packet
-                ),
-            };
-
-            returned_expr
+        match self.try_evaluate(expr) {
+            Ok(returned) => returned,
+            Err(msg) => panic!(
+                "WolframEngine::evaluate: evaluation of expression failed: \
+                {}\n\texpression: {}",
+                msg, expr
+            ),
         }
     }
 
