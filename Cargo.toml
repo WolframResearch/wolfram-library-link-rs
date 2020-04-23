@@ -23,3 +23,7 @@ cfg-if = "0.1"
 [features]
 default = []
 nightly = []
+
+[[example]]
+name = "raw_wstp_function"
+crate-type = ["cdylib"]
