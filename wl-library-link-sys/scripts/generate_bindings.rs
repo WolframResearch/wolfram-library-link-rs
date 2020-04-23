@@ -2,11 +2,10 @@
 //! [dependencies]
 //! # Use an exact, known-good version, since we really don't want small bugs in bindgen to a
 //! # be a problem when running `cargo build` for the first time.
-//! bindgen = "=0.32"
+//! bindgen = "=0.53.2"
 //! # lazy_static = "^1.1"
 //! ```
 
-use std::env;
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
