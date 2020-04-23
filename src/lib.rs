@@ -23,7 +23,7 @@ pub mod catch_panic;
 
 use std::ffi::CString;
 
-use wl_expr::{Expr, ExprKind, Symbol};
+use wl_expr::{Expr, ExprKind};
 use wl_expr_macro::Expr;
 use wl_lang::forms::ToExpr;
 use wl_library_link_sys::{mint, WolframLibraryData, LIBRARY_NO_ERROR, MLINK};
