@@ -127,8 +127,7 @@ impl WolframEngine {
         Ok(returned_expr)
     }
 
-    // PRE-COMMIT: SHould be private?
-    pub fn get_wstp_link(&self) -> WSTPLink {
+    fn get_wstp_link(&self) -> WSTPLink {
         unsafe {
             let unsafe_link = (self.getWSLINK)(self.wl_lib);
             // Go from *mut MLINK -> *mut WSLINK
