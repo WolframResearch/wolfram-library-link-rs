@@ -7,6 +7,16 @@ use wl_library_link::sys::{
     mint, MArgument, WolframLibraryData, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
 };
 
+/// This function is loaded by evaluating:
+///
+/// ```wolfram
+/// LibraryFunctionLoad[
+///     "/path/to/libraw_librarylink_function.dylib",
+///     "demo_function",
+///     {Integer, Integer},
+///     Integer
+/// ]
+/// ```
 #[no_mangle]
 pub unsafe extern "C" fn demo_function(
     _lib_data: WolframLibraryData,
