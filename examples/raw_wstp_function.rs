@@ -1,3 +1,6 @@
+//! This example demonstrates using the raw Rust wrappers around the LibraryLink C API to
+//! write a function which looks much like a classic C function using LibraryLink would.
+
 use std::os::raw::{c_int, c_uint};
 
 use wl_library_link::sys::{
