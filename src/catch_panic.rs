@@ -63,6 +63,9 @@ fn should_show_backtrace() -> bool {
 }
 
 fn display_backtrace(bt: Option<Backtrace>) -> Expr {
+    // Avoid showing the backtrace if it hasn't been explicitly requested by the user.
+    // This avoids calling `.resolve()` below, which can sometimes be very slow (100s of
+    // millisends).
     if !should_show_backtrace() {
         // This Sequence[] will not show up in the FE.
         return Expr! { Sequence[] };
