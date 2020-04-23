@@ -138,7 +138,7 @@ impl WolframEngine {
         // Send an EvaluatePacket['expr].
         let _: () = link.put_expr(&Expr! { EvaluatePacket['expr] })?;
 
-        self.process_wstp_link(&link);
+        let _: () = self.process_wstp_link(&link)?;
 
         let return_packet: Expr = link.get_expr()?;
 
@@ -166,16 +166,21 @@ impl WolframEngine {
         }
     }
 
-    fn process_wstp_link(&self, link: &WSTPLink) {
-        let link = unsafe { link.raw_link() };
+    fn process_wstp_link(&self, link: &WSTPLink) -> Result<(), String> {
+        let raw_link = unsafe { link.raw_link() };
 
         // Process the packet on the link.
-        let code: i32 = unsafe { (self.processWSLINK)(link as *mut _) };
+        let code: i32 = unsafe { (self.processWSLINK)(raw_link as *mut _) };
 
         if code == 0 {
-            // TODO: Use WSErrorMessage() here and print the error.
-            panic!("WolframEngine::process_wstp_link: processWSLINKK returned error",);
+            let error_message = link
+                .error_message()
+                .unwrap_or_else(|| "unknown error occurred on WSTPLink".into());
+
+            return Err(error_message);
         }
+
+        Ok(())
     }
 
     // TODO?: Add a try_evaluate() -> Result<Expr, String> method, to more gracefully
