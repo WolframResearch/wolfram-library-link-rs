@@ -27,6 +27,10 @@ wl-pattern-match = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-pattern
 default = []
 nightly = []
 
+############
+# Examples #
+############
+
 [[example]]
 name = "raw_wstp_function"
 crate-type = ["cdylib"]
