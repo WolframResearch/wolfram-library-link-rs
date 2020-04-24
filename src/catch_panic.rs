@@ -8,9 +8,7 @@ use std::time::Instant;
 use backtrace::Backtrace;
 use lazy_static::lazy_static;
 
-use wl_expr::Expr;
-use wl_expr_macro::Expr;
-use wl_lang::forms::{ToExpr, ToPrettyExpr};
+use wl_expr::{forms::ToPrettyExpr, Expr};
 use wl_symbol_table as sym;
 
 lazy_static! {

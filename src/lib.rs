@@ -23,9 +23,7 @@ pub mod catch_panic;
 
 use std::ffi::CString;
 
-use wl_expr::{Expr, ExprKind};
-use wl_expr_macro::Expr;
-use wl_lang::forms::ToExpr;
+use wl_expr::{forms::ToPrettyExpr, Expr, ExprKind};
 use wl_library_link_sys::{mint, WolframLibraryData, LIBRARY_NO_ERROR, MLINK};
 use wl_symbol_table as sym;
 use wl_wstp::WSTPLink;
@@ -275,7 +273,6 @@ pub fn call_wolfram_library_function(
     match result {
         Ok(()) => LIBRARY_NO_ERROR,
         Err(caught_panic) => unsafe {
-            use wl_lang::forms::ToPrettyExpr;
             // FIXME: Fix unwraps + return this as a full expr
             let cstring =
                 CString::new(caught_panic.to_pretty_expr().to_string()).unwrap();
