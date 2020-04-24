@@ -20,6 +20,9 @@ lazy_static = "^1"
 backtrace = "^0.3.46"
 cfg-if = "0.1"
 
+[dev-dependencies]
+wl-pattern-match = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-pattern-match.git" }
+
 [features]
 default = []
 nightly = []
@@ -30,4 +33,12 @@ crate-type = ["cdylib"]
 
 [[example]]
 name = "raw_librarylink_function"
+crate-type = ["cdylib"]
+
+[[example]]
+name = "basic_expressions"
+crate-type = ["cdylib"]
+
+[[example]]
+name = "structured_expressions"
 crate-type = ["cdylib"]
