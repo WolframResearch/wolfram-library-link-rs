@@ -2,7 +2,10 @@ extern crate proc_macro;
 
 use proc_macro2::TokenStream;
 
-use syn::{punctuated::Punctuated, spanned::Spanned, Item, Error, Result};
+use syn::{
+    punctuated::Punctuated, spanned::Spanned, AttributeArgs, Error, Ident, Item, Lit,
+    Meta, MetaNameValue, Result,
+};
 
 /*
 TODO:
@@ -13,13 +16,13 @@ TODO:
 
 #[proc_macro_attribute]
 pub fn wolfram_library_function(
-    attr: proc_macro::TokenStream,
+    attr_args: proc_macro::TokenStream,
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
-    let attr = TokenStream::from(attr);
+    let attr_args = syn::parse_macro_input!(attr_args as AttributeArgs);
     let item = TokenStream::from(item);
 
-    let output: TokenStream = match wolfram_library_function_impl(attr, item) {
+    let output: TokenStream = match wolfram_library_function_impl(attr_args, item) {
         Ok(stream) => stream,
         Err(err) => err.to_compile_error(),
     };
@@ -27,17 +30,27 @@ pub fn wolfram_library_function(
     proc_macro::TokenStream::from(output)
 }
 
+struct Options {
+    /// The name to give the generated wrapper function. This is the name used as the
+    /// 2nd argument of `LoadLibraryFunction`.
+    name: Option<Ident>,
+}
+
 fn wolfram_library_function_impl(
-    attr: TokenStream,
+    attr_args: AttributeArgs,
     item: TokenStream,
 ) -> Result<TokenStream> {
+    let options = parse_attributes(attr_args)?;
     let fnitem = syn::parse2(item.clone())?;
 
     let function_name = validate_function(&fnitem)?;
-    let wrapper_function_name = syn::Ident::new(
-        &format!("{}_wrapper", function_name),
-        proc_macro2::Span::call_site(),
-    );
+    let wrapper_function_name = match options.name {
+        Some(name) => name,
+        None => Ident::new(
+            &format!("{}_wrapper", function_name),
+            proc_macro2::Span::call_site(),
+        ),
+    };
 
     let tokens = quote::quote! {
         #fnitem
@@ -56,6 +69,66 @@ fn wolfram_library_function_impl(
     };
 
     Ok(tokens)
+}
+
+fn parse_attributes(attr_args: AttributeArgs) -> Result<Options> {
+    use syn::NestedMeta;
+
+    let mut name_option: Option<Ident> = None;
+
+    for attr in attr_args {
+        let MetaNameValue {
+            path,
+            eq_token: _,
+            lit,
+        } = match attr {
+            NestedMeta::Meta(Meta::NameValue(nv)) => nv,
+            _ => {
+                return Err(Error::new(
+                    attr.span(),
+                    "expected `name = \"..\" attribute`",
+                ))
+            },
+        };
+
+        if !path.is_ident("name") {
+            return Err(Error::new(
+                path.span(),
+                "expected `name = \"..\"` attribute",
+            ));
+        }
+
+        // PRE-COMMIT: Test error
+        // Verify that we have not already parsed a value for the `name` option. E.g,
+        // prevent `#[wolfram_library_function(name = "name1", name = "name2")]`.
+        if name_option.is_some() {
+            return Err(Error::new(path.span(), "attribute appears more than once"));
+        }
+
+        debug_assert!(name_option == None);
+        name_option = Some(parse_name_option_value(lit)?);
+    }
+
+    Ok(Options { name: name_option })
+}
+
+fn parse_name_option_value(lit: syn::Lit) -> Result<Ident> {
+    let litstr = match lit {
+        Lit::Str(string) => string,
+        _ => return Err(Error::new(lit.span(), "expected string literal")),
+    };
+
+    let name_ident: Ident = match syn::parse_str::<Ident>(&litstr.value()) {
+        Ok(ident) => ident,
+        Err(err) => {
+            return Err(Error::new(
+                litstr.span(),
+                format!("string is not a valid identifier: {}", err),
+            ))
+        },
+    };
+
+    Ok(name_ident)
 }
 
 fn validate_function(item: &Item) -> Result<syn::Ident> {
@@ -124,10 +197,7 @@ fn validate_function(item: &Item) -> Result<syn::Ident> {
 }
 
 /// Ensure that the function is marked `pub`.
-fn check_visibility(
-    vis: &syn::Visibility,
-    sig: &syn::Signature,
-) -> Result<()> {
+fn check_visibility(vis: &syn::Visibility, sig: &syn::Signature) -> Result<()> {
     match vis {
         // `pub fn name()`
         syn::Visibility::Public(_) => Ok(()),
