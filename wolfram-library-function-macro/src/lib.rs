@@ -98,7 +98,6 @@ fn parse_attributes(attr_args: AttributeArgs) -> Result<Options> {
             ));
         }
 
-        // PRE-COMMIT: Test error
         // Verify that we have not already parsed a value for the `name` option. E.g,
         // prevent `#[wolfram_library_function(name = "name1", name = "name2")]`.
         if name_option.is_some() {
