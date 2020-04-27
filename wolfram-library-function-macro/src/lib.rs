@@ -52,6 +52,13 @@ fn wolfram_library_function_impl(
         ),
     };
 
+    if wrapper_function_name == function_name {
+        return Err(Error::new(
+            function_name.span(),
+            "this name must be different from the value of the `name` attribute",
+        ));
+    }
+
     let tokens = quote::quote! {
         #fnitem
 
