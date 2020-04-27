@@ -8,7 +8,6 @@
 use std::os::raw::{c_int, c_uint};
 
 use wl_expr::Expr;
-use wl_expr_macro::Expr;
 use wl_library_link::sys::{
     WolframLibraryData, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
 };

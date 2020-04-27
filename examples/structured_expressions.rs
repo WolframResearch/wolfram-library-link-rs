@@ -1,10 +1,8 @@
 //! TODO: This example isn't the greatest -- come up with another example and use it.
 
-use wl_expr::{Expr, Number};
-use wl_expr_macro::Expr;
-use wl_lang::{
-    forms::{FormError, FromExpr, List, ToExpr},
-    FromExpr,
+use wl_expr::{
+    forms::{FormError, FromExpr, List},
+    Expr, FromExpr, Number,
 };
 use wl_library_link::{wolfram_library_function, WolframEngine};
 
