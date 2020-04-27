@@ -64,8 +64,6 @@ wl-expr = { git = "ssh://github.com/ConnorGray/wl-expr.git" }
 wl-library-link = { git = "ssh://github.com/ConnorGray/wl-library-link.git" }
 
 # Support libraries
-wl-lang = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-lang.git" }
-wl-expr-macro = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr-macro.git" }
 wl-pattern-match = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-pattern-match.git" }
 ```
 
@@ -79,10 +77,8 @@ Next, import and use the `#[wolfram_library_function]` macro into your Rust code
 ```rust
 // ### lib.rs
 
-use wl_expr::{Expr, Number};
-use wl_expr_macro::Expr;
+use wl_expr::{Expr, Number, FromExpr, forms::{FromExpr, ToExpr, List, from_expr::FormError}};
 use wl_library_link::WolframEngine;
-use wl_lang::{FromExpr, forms::{FromExpr, ToExpr, List, from_expr::FormError}};
 
 #[derive(FromExpr)]
 #[pattern(Pattern[numbers, {___}])]
