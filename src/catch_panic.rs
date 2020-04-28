@@ -16,6 +16,9 @@ lazy_static! {
         Mutex::new(HashMap::new());
 }
 
+/// Information from a caught panic.
+///
+/// Returned by [`call_and_catch_panic()`].
 #[derive(Clone)]
 pub struct CaughtPanic {
     /// Note: In certain circumstances, this message will NOT match the message used

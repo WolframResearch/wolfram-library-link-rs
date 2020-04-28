@@ -43,7 +43,14 @@
 //! [cargo-features]: https://doc.rust-lang.org/cargo/reference/features.html
 
 #![cfg_attr(feature = "nightly", feature(panic_info_message))]
+#![deny(missing_docs)]
 
+/// This module is *semver exempt*. This is not intended to be part of the public API of
+/// wl-library-link.
+///
+/// Utility for catching panics, capturing a backtrace, and extracting the panic
+/// message.
+#[doc(hidden)]
 pub mod catch_panic;
 
 use std::ffi::CString;
@@ -156,7 +163,9 @@ pub struct WolframEngine {
 }
 
 impl WolframEngine {
-    pub unsafe fn from_library_data(libdata: WolframLibraryData) -> Self {
+    /// Initialize a `WolframEngine` from the callbacks in a [`WolframLibraryData`]
+    /// object.
+    unsafe fn from_library_data(libdata: WolframLibraryData) -> Self {
         // TODO(!): Use the library version to verify this is still correct?
         // TODO(!): Audit this
         // NOTE: That these fields are even an Option is likely just bindgen being
