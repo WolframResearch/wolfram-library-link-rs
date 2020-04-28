@@ -8,7 +8,7 @@ use wl_library_link::{wolfram_library_function, WolframEngine};
 
 
 #[derive(FromExpr)]
-#[pattern(Pattern[numbers, {___}])]
+#[pattern(numbers:{___})]
 struct Numbers {
     numbers: List<Number>,
 }

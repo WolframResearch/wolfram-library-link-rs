@@ -81,7 +81,7 @@ use wl_expr::{Expr, Number, FromExpr, forms::{FromExpr, ToExpr, List, from_expr:
 use wl_library_link::WolframEngine;
 
 #[derive(FromExpr)]
-#[pattern(Pattern[numbers, {___}])]
+#[pattern(numbers:{___})]
 struct Numbers {
     numbers: List<Number>,
 }
