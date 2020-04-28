@@ -177,11 +177,23 @@ impl WolframEngine {
     /// Programs should finish what they are doing and return control of this thread to
     /// to the kernel as quickly as possible. They should not exit the process or
     /// otherwise terminate execution, simply return up the call stack.
+    ///
+    /// Within Rust code reached through a `#[wolfram_library_function]` wrapper,
+    /// `panic!()` can be used to quickly unwind the call stack to the appropriate place.
+    /// Note that this will not work if the current library is built with
+    /// `panic = "abort"`. See the [`panic`][panic-option] profile configuration option
+    /// for more information.
+    ///
+    /// [panic-option]: https://doc.rust-lang.org/cargo/reference/profiles.html#panic
     pub fn aborted(&self) -> bool {
         let val: mint = unsafe { (self.AbortQ)() };
         val == 1
     }
 
+    /// Evaluate `expr` by calling back into the Wolfram Kernel.
+    ///
+    /// TODO: Specify and document what happens if the evaluation of `expr` triggers a
+    ///       kernel abort (such as a `Throw[]` in the code).
     pub fn evaluate(&self, expr: &Expr) -> Expr {
         match self.try_evaluate(expr) {
             Ok(returned) => returned,
