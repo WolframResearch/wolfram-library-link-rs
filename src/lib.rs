@@ -264,55 +264,6 @@ impl WolframEngine {
 //     pub message: Vec<forms::Message>,
 // }
 
-//======================================
-// LibraryLinkStatus
-//======================================
-
-#[derive(Copy, Clone, Debug)]
-pub enum LibraryLinkStatus {
-    NoError,
-    FunctionError,
-    TypeError,
-}
-
-impl From<LibraryLinkStatus> for u32 {
-    fn from(status: LibraryLinkStatus) -> u32 {
-        use self::sys::{LIBRARY_FUNCTION_ERROR, LIBRARY_TYPE_ERROR};
-
-        match status {
-            LibraryLinkStatus::NoError => LIBRARY_NO_ERROR,
-            LibraryLinkStatus::FunctionError => LIBRARY_FUNCTION_ERROR,
-            LibraryLinkStatus::TypeError => LIBRARY_TYPE_ERROR,
-        }
-    }
-}
-
-// impl Try for LibraryLinkStatus {
-//     type Ok = ();
-//     type Error = Self;
-
-//     fn into_result(self) -> Result<Self::Ok, Self::Error> {
-//         match self {
-//             LibraryLinkStatus::NoError => Ok(()),
-//             s @ LibraryLinkStatus::FunctionError => Err(s),
-//             s @ LibraryLinkStatus::TypeError => Err(s),
-//         }
-//     }
-
-//     fn from_error(err: Self) -> Self {
-//         match err {
-//             LibraryLinkStatus::NoError => {
-//                 panic!("Try::from_error for LibraryLinkStatus: got NoError")
-//             },
-//             LibraryLinkStatus::FunctionError | LibraryLinkStatus::TypeError => err,
-//         }
-//     }
-
-//     fn from_ok(_ok: ()) -> Self {
-//         LibraryLinkStatus::NoError
-//     }
-// }
-
 // TODO: Allow any type which implements FromExpr in wrapper parameter lists?
 
 //======================================
