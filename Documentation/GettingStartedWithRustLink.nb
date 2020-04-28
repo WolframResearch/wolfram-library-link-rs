@@ -1,22 +1,3 @@
-(* Content-type: application/vnd.wolfram.mathematica *)
-
-(*** Wolfram Notebook File ***)
-(* http://www.wolfram.com/nb *)
-
-(* CreatedBy='Mathematica 12.1' *)
-
-(*CacheID: 234*)
-(* Internal cache information:
-NotebookFileLineBreakTest
-NotebookFileLineBreakTest
-NotebookDataPosition[       158,          7]
-NotebookDataLength[     40193,       1061]
-NotebookOptionsPosition[     31411,        867]
-NotebookOutlinePosition[     32111,        889]
-CellTagsIndexPosition[     32068,        886]
-WindowFrame->Normal*)
-
-(* Beginning of Notebook Content *)
 Notebook[{
 Cell[TextData[{
  "New in: ",
@@ -122,15 +103,13 @@ Cell["XXXX", "Details",
 Cell[CellGroupData[{
 
 Cell["Getting Started with RustLink", "Title",
- CellChangeTimes->{{3.796037212903202*^9, 3.796037217150374*^9}},
  CellID->509267359,ExpressionUUID->"f00c7563-254d-4af0-84ba-063862cefb5a"],
 
 Cell["\<\
-RustLink provides a convenient and powerful way use the Wolfram Language from \
-within a Rust library, and to use Rust from within a Wolfram Language program.\
+RustLink provides a convenient and powerful way to extend the Wolfram \
+Language via Rust libraries, and to call back into the Wolfram Language from \
+Rust code.\
 \>", "Text",
- CellChangeTimes->{{3.796038571308449*^9, 3.796038635227665*^9}, {
-  3.7960386974048243`*^9, 3.796038699492564*^9}},
  CellID->2057916504,ExpressionUUID->"82ec3859-cf76-42de-83d2-9945fba19ce4"],
 
 Cell[CellGroupData[{
@@ -139,7 +118,6 @@ Cell[TextData[{
  StyleBox["Installing Rust and ", "Subsection"],
  StyleBox["cargo", "InlineCode"]
 }], "Section",
- CellChangeTimes->{{3.7960385221794662`*^9, 3.796038549145376*^9}},
  CellID->304722785,ExpressionUUID->"37569c0b-cdf7-4b38-89e5-9d6bfc6df07c"],
 
 Cell[TextData[{
@@ -148,13 +126,10 @@ package manager, ",
  StyleBox["cargo", "InlineCode"],
  ". This can be done by following the official instructions found at:"
 }], "Text",
- CellChangeTimes->{{3.79604260865201*^9, 3.796042644908196*^9}, {
-  3.7960426811195707`*^9, 3.796042712851618*^9}},
  CellID->1919957400,ExpressionUUID->"f764c741-dca6-4634-899d-82a98c6e9eee"],
 
 Cell[TextData[StyleBox["https://www.rust-lang.org/tools/install",
  FontWeight->"Bold"]], "MathCaption",
- CellChangeTimes->{{3.796042728423128*^9, 3.796042732459741*^9}},
  CellID->1738855251,ExpressionUUID->"28781e2a-0566-413c-9805-84496b90a239"],
 
 Cell[CellGroupData[{
@@ -163,18 +138,12 @@ Cell["\<\
 Verify the installation succeeded by running the following command-line code:\
 \
 \>", "Text",
- CellChangeTimes->{{3.79604260865201*^9, 3.796042644908196*^9}, {
-  3.7960426811195707`*^9, 3.796042712851618*^9}, {3.79604290988332*^9, 
-  3.796042934505045*^9}, {3.7960429923435698`*^9, 3.79604303745155*^9}, {
-  3.796043169098048*^9, 3.796043196890534*^9}},
  CellID->642730918,ExpressionUUID->"c3c0b299-48b0-4f24-bbf8-1c58c1717637"],
 
 Cell["\<\
 $ cargo --version
 cargo 1.42.0 (86334295e 2020-01-31)\
 \>", "Program",
- CellChangeTimes->{{3.796043059314624*^9, 3.796043072800617*^9}, {
-  3.7960431084647217`*^9, 3.796043112625018*^9}},
  CellID->1395952705,ExpressionUUID->"912073f7-6a5c-4421-8945-b24efe8fab03"]
 }, Open  ]],
 
@@ -183,27 +152,20 @@ Cell[TextData[{
  StyleBox["cargo", "InlineCode"],
  " version may differ from the output above."
 }], "Text",
- CellChangeTimes->{{3.796043121520755*^9, 3.7960431448258944`*^9}, {
-  3.796043203475522*^9, 3.796043225441815*^9}, {3.796043268615007*^9, 
-  3.7960432821818323`*^9}, {3.7961349081794357`*^9, 3.796134909131056*^9}},
  CellID->593204575,ExpressionUUID->"02b6ab8d-82e6-4353-9c1a-8ca34776cda2"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["Your first RustLink program", "Section",
- CellChangeTimes->{{3.796038490961854*^9, 3.7960384988099947`*^9}},
  CellID->693837892,ExpressionUUID->"3bbe83be-ee87-4e1e-bd63-591f84ec5bc7"],
 
 Cell[CellGroupData[{
 
 Cell["Create a new Rust library by running:", "Text",
- CellChangeTimes->{{3.796134998111104*^9, 3.796135009500682*^9}, {
-  3.796135136638476*^9, 3.796135136813534*^9}},
  CellID->1584557758,ExpressionUUID->"d7c10bf8-423f-476b-ad2c-f33382787dde"],
 
 Cell["$ cargo new --lib my-library", "Program",
- CellChangeTimes->{{3.7961350137423067`*^9, 3.796135029627638*^9}},
  CellID->1033370596,ExpressionUUID->"96363b02-605a-4b15-b193-a7912fef6a85"]
 }, Open  ]],
 
@@ -212,19 +174,16 @@ Cell[TextData[{
  StyleBox["my-library", "InlineCode"],
  " and automatically populate it with the standard Rust project layout."
 }], "Text",
- CellChangeTimes->{{3.7961352598081913`*^9, 3.796135260626672*^9}},
  CellID->1315785579,ExpressionUUID->"70e3c231-0099-4c6a-9f32-8ad0c761f84a"],
 
 Cell[CellGroupData[{
 
 Cell["Development lifecycle of a RustLink library", "Subsection",
- CellChangeTimes->{{3.796043324135098*^9, 3.796043333254524*^9}},
  CellID->1136826467,ExpressionUUID->"b60a50c9-1620-4019-968c-8ba3a0c0bd8c"],
 
 Cell[CellGroupData[{
 
 Cell["A RustLink library consists of two components.", "Text",
- CellChangeTimes->{{3.796043285959551*^9, 3.7960433106075487`*^9}},
  CellID->1088647092,ExpressionUUID->"1737f285-1583-4b60-8061-3c2d98b942c3"],
 
 Cell[CellGroupData[{
@@ -236,7 +195,6 @@ Cell[BoxData[
 wolfram_library_function};\n\n#[wolfram_library_function]\nfn \
 say_hello(engine: &WolframEngine, args: Vec<Expr>) -> Expr {\n\tExpr::string(\
 \\\"Hello, World!\\\")\n}\>\"", ",", "\"\<Rust\>\""}], "]"}]], "Input",
- CellChangeTimes->{{3.7960378259429207`*^9, 3.796037927971735*^9}},
  CellLabel->"In[26]:=",
  CellID->109300776,ExpressionUUID->"a9d61164-75a7-40e0-b1ac-4773236917b8"],
 
@@ -503,7 +461,6 @@ Cell[BoxData[
    GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
    GridBoxSpacings->{"Columns" -> {{Automatic}}, "Rows" -> {{0.5}}}],
   "Column"]], "Output",
- CellChangeTimes->{{3.79603792508012*^9, 3.796037929022769*^9}},
  CellLabel->"Out[26]=",
  CellID->1417490879,ExpressionUUID->"27d63f19-da06-44e4-bb6a-67319f2b501b"]
 }, {2}]]
@@ -525,17 +482,15 @@ Cell[BoxData["XXXX"], "Output",
  CellID->1181321046,ExpressionUUID->"c6ad65a7-a0b2-49db-b4a4-9cd115a7f127"]
 }, Open  ]]
 }, Open  ]]
-}, Closed]],
+}, Open  ]],
 
 Cell["Directory layout", "Subsection",
- CellChangeTimes->{{3.797075794194168*^9, 3.797075797757766*^9}},
  CellID->727726823,ExpressionUUID->"e2c4e334-f378-4ce0-9c4d-9ca9c62ebf21"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["Expressions and Structured Data", "Section",
- CellChangeTimes->{{3.79613543487402*^9, 3.7961354677996693`*^9}},
  CellID->1989752601,ExpressionUUID->"1bf47c8e-5ce1-412e-9485-763bcaf33d52"],
 
 Cell[CellGroupData[{
@@ -545,17 +500,14 @@ Cell[TextData[{
  StyleBox["Expr![]", "InlineCode"],
  StyleBox[" macro", "Subsection"]
 }], "Subsection",
- CellChangeTimes->{{3.796038189574031*^9, 3.796038213716839*^9}},
  CellID->1741422371,ExpressionUUID->"d9e5a366-0b20-4a9e-8b69-928f5571e554"],
 
 Cell["TODO TODO TODO", "Text",
- CellChangeTimes->{{3.796043378432222*^9, 3.796043381460126*^9}},
  CellID->1120891822,ExpressionUUID->"e4c0e5ef-a0bb-42e8-bd60-cb5fa9bb11b1"],
 
 Cell["\<\
 This is equivalent to the building the expression manually using the Expr API:\
 \>", "Text",
- CellChangeTimes->{{3.7961356686190443`*^9, 3.796135686492523*^9}},
  CellID->209823254,ExpressionUUID->"3fd74544-5fd8-47b2-8ead-ec83ed92aa91"]
 }, Open  ]],
 
@@ -565,7 +517,6 @@ Cell[TextData[{
  "Working with structured expressions: ",
  StyleBox["derive(FromExpr)", "InlineCode"]
 }], "Subsection",
- CellChangeTimes->{{3.796038230948111*^9, 3.796038250746358*^9}},
  CellID->976548054,ExpressionUUID->"6b096047-fe75-4943-b785-9a5ddf26db95"],
 
 Cell[CellGroupData[{
@@ -577,9 +528,6 @@ Cell[TextData[{
 inserts new code, based on the structure which the macro is used to annotate. \
 FromExpr is a "
 }], "Text",
- CellChangeTimes->{{3.7960397291523848`*^9, 3.796039811084894*^9}, {
-  3.796039856901967*^9, 3.796039895982244*^9}, {3.796040061314286*^9, 
-  3.796040063818615*^9}},
  CellID->1994375645,ExpressionUUID->"acc5ebd7-fb10-4083-8f1c-cc744b17218b"],
 
 Cell[CellGroupData[{
@@ -589,7 +537,6 @@ Cell[BoxData[
   RowBox[{
   "\"\<\\\n#[derive(FromExpr)]\n#[pattern({x_, y_})\nstruct Point {\n    x: \
 i64,\n    y: i64,\n}\n\>\"", ",", "\"\<Rust\>\""}], "]"}]], "Input",
- CellChangeTimes->{{3.796039906328341*^9, 3.7960400261445017`*^9}},
  CellLabel->"In[30]:=",
  CellID->154491268,ExpressionUUID->"fab44655-e1a4-43e7-9d7a-b4ce66b08e4d"],
 
@@ -749,7 +696,6 @@ Cell[BoxData[
    GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
    GridBoxSpacings->{"Columns" -> {{Automatic}}, "Rows" -> {{0.5}}}],
   "Column"]], "Output",
- CellChangeTimes->{{3.796039974787704*^9, 3.796040027040785*^9}},
  CellLabel->"Out[30]=",
  CellID->1841630686,ExpressionUUID->"6b1d7217-85af-4055-8d48-c79d9c4525e4"]
 }, {2}]]
@@ -764,8 +710,6 @@ Cell[TextData[{
 The second is calling `FromExpr::from_expr` on the values of the named \
 bindings returned from a successful match."
 }], "Text",
- CellChangeTimes->{{3.7961334926600447`*^9, 3.7961334983868856`*^9}, {
-   3.796134071263874*^9, 3.796134108741095*^9}, 3.796134201580553*^9},
  CellID->284889278,ExpressionUUID->"85989b4c-dcda-41e7-95ff-85d2a98aefe4"],
 
 Cell[BoxData[
@@ -774,9 +718,6 @@ Cell[BoxData[
   "\"\<\\\nuse wl_lang::forms::List;\n\n#[derive(FromExpr)]\n\
 #[pattern(Pattern[points, {___}])\nstruct Line {\n    points: List<Point>,\n}\
 \n\>\"", ",", "\"\<Rust\>\""}], "]"}]], "Input",
- CellChangeTimes->{{3.796039906328341*^9, 3.7960400261445017`*^9}, {
-  3.796133527273489*^9, 3.7961335363674793`*^9}, {3.796133578946499*^9, 
-  3.796133591264286*^9}, {3.796134259877554*^9, 3.796134284652069*^9}},
  CellLabel->"In[30]:=",
  CellID->1306545109,ExpressionUUID->"748da9f0-66c6-460b-bd44-2ddcf61a1a63"]
 }, Open  ]],
@@ -789,17 +730,11 @@ Cell[TextData[{
  " library contains many existing structures for common Wolfram Language \
 forms."
 }], "Text",
- CellChangeTimes->{{3.796038876684465*^9, 3.796038877874261*^9}, {
-  3.796038979138242*^9, 3.796039016840444*^9}, {3.796039261530583*^9, 
-  3.7960392658205433`*^9}, {3.796039305238388*^9, 3.796039311230947*^9}},
  CellID->1192390612,ExpressionUUID->"05114311-5e0a-4562-8a2e-98f23ea99b30"],
 
 Cell[CellGroupData[{
 
 Cell["", "Text",
- CellChangeTimes->{{3.796038876684465*^9, 3.796038877874261*^9}, {
-  3.796038979138242*^9, 3.796039016840444*^9}, {3.796039261530583*^9, 
-  3.796039262273127*^9}},
  CellID->286675678,ExpressionUUID->"2fccd39b-6f20-4fb9-8bef-1bdf5295f751"],
 
 Cell[BoxData[GridBox[{
@@ -807,9 +742,6 @@ Cell[BoxData[GridBox[{
    {"      ", "Pattern", "IteratorSpec", "SingleOrList"},
    {"      ", "XXXX", "XXXX", "XXXX"}
   }]], "3ColumnTableMod",
- CellChangeTimes->{{3.796039162132287*^9, 3.796039171476212*^9}, {
-  3.796039212827046*^9, 3.796039252433928*^9}, {3.7960393229830627`*^9, 
-  3.796039355605036*^9}, {3.7960394637217417`*^9, 3.796039482566526*^9}},
  CellID->182070495,ExpressionUUID->"01395d1d-7ad5-4637-afd7-4401ff075eaf"]
 }, Open  ]],
 
@@ -817,7 +749,6 @@ Cell["\<\
 With the structures defined above, we can now easily write a RustLink program \
 to calculate the length of a line:\
 \>", "Text",
- CellChangeTimes->{{3.7961336236081057`*^9, 3.796133649942765*^9}},
  CellID->1504777704,ExpressionUUID->"50807c88-46f3-4870-8e83-a80bdc82978e"]
 }, Open  ]],
 
@@ -827,11 +758,9 @@ Cell[TextData[{
  "Implementing ",
  StyleBox["ToExpr", "InlineCode"]
 }], "Subsection",
- CellChangeTimes->{{3.796038263369843*^9, 3.7960382678578*^9}},
  CellID->255735726,ExpressionUUID->"94ebba03-7d99-40e2-a0b8-e456619a9506"],
 
 Cell["TODO TODO TODO", "Text",
- CellChangeTimes->{{3.796043388191663*^9, 3.796043390262795*^9}},
  CellID->2096539476,ExpressionUUID->"c3172601-a6e7-421f-96cf-9befd2183369"]
 }, Open  ]]
 }, Open  ]],
@@ -857,7 +786,6 @@ Cell["XXXX", "RelatedTutorials",
 Cell[CellGroupData[{
 
 Cell["Related Wolfram Training Courses", "TutorialRelatedLinksSection",
- CellChangeTimes->{{3.545139239709342*^9, 3.545139240396411*^9}},
  CellID->415694148,ExpressionUUID->"80e7cb49-3597-45fd-adc5-ce9cf2d3fb63"],
 
 Cell["XXXX", "TutorialRelatedLinks",
@@ -867,203 +795,15 @@ Cell["XXXX", "TutorialRelatedLinks",
 },
 ScreenStyleEnvironment->"FutureObject",
 WindowSize->{853, 1174},
-WindowMargins->{{1143, Automatic}, {290, Automatic}},
+WindowMargins->{{1083, Automatic}, {Automatic, 195}},
+PrivateNotebookOptions->{"FileOutlineCache"->False},
 TaggingRules->{
  "Author" -> "connorgray", "CreationDate" -> "04-16-2020 09:46:50", 
   "SaveDialogDataSavesBlog" -> False, "AnnotationsDeleted" -> False},
+TrackCellChangeTimes->False,
 Magnification:>1.25 Inherited,
 FrontEndVersion->"12.1 for Mac OS X x86 (64-bit) (March 18, 2020)",
 StyleDefinitions->FrontEnd`FileName[{"Wolfram"}, "TutorialPageStyles.nb", 
   CharacterEncoding -> "UTF-8"],
 ExpressionUUID->"9ad59372-1afe-4da8-a18a-82cd94fd5423"
 ]
-(* End of Notebook Content *)
-
-(* Internal cache information *)
-(*CellTagsOutline
-CellTagsIndex->{}
-*)
-(*CellTagsIndex
-CellTagsIndex->{}
-*)
-(*NotebookFileOutline
-Notebook[{
-Cell[558, 20, 619, 15, 30, "History",ExpressionUUID->"4ea0ee36-8878-4d1c-a918-c2c21df7d4d5",
- CellID->1247902091],
-Cell[1180, 37, 142, 1, 25, "AuthorDate",ExpressionUUID->"78bb6475-a16d-428e-87c8-5192b6f07bb1",
- CellID->500972764],
-Cell[CellGroupData[{
-Cell[1347, 42, 123, 1, 35, "CategorizationSection",ExpressionUUID->"b9eed37b-bbfd-4286-98ed-9461093b4437",
- CellID->1122911449],
-Cell[1473, 45, 136, 2, 87, "Categorization",ExpressionUUID->"067102bd-c02a-4d18-9f00-979e96c38118",
- CellID->686433507],
-Cell[1612, 49, 128, 2, 87, "Categorization",ExpressionUUID->"aed595f9-5e2e-4520-8562-0ada568e1466",
- CellID->605800465],
-Cell[1743, 53, 124, 2, 87, "Categorization",ExpressionUUID->"1d16fbf4-8b8f-4aa5-b1c4-74f26f694f18",
- CellID->468444828],
-Cell[1870, 57, 104, 1, 87, "Categorization",ExpressionUUID->"e5d47a1a-0d55-46cf-8641-d6d5efb46aad"]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[2011, 63, 111, 1, 22, "SynonymsSection",ExpressionUUID->"e448e686-77a9-4635-817d-6425547fc03e",
- CellID->1427418553],
-Cell[2125, 66, 100, 1, 87, "Synonyms",ExpressionUUID->"bd6698a0-73b3-4401-85e7-a9ec27e6e8f6",
- CellID->1251652828]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[2262, 72, 111, 1, 22, "KeywordsSection",ExpressionUUID->"93cf42b8-a3b9-4f62-8975-05e6348ff15e",
- CellID->1427428552],
-Cell[2376, 75, 100, 1, 87, "Keywords",ExpressionUUID->"0217d95d-d229-4cee-ae76-b2743c106ce7",
- CellID->1251852827]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[2513, 81, 108, 1, 22, "DetailsSection",ExpressionUUID->"cf5a9d40-eb51-46e6-9652-70ea5858223e",
- CellID->307771771],
-Cell[2624, 84, 118, 2, 87, "Details",ExpressionUUID->"0cf02267-f394-4787-8cf1-70e31a7c5732",
- CellID->115134701],
-Cell[2745, 88, 124, 2, 87, "Details",ExpressionUUID->"9d104c92-6c18-4978-95ef-4848d0cc5ae9",
- CellID->350963985],
-Cell[2872, 92, 121, 2, 87, "Details",ExpressionUUID->"3edb205b-77b6-4dd4-8e10-251f60d327d8",
- CellID->787641479],
-Cell[2996, 96, 126, 2, 87, "Details",ExpressionUUID->"05a0be07-2644-4773-92e9-b9d038d145e8",
- CellID->489188983],
-Cell[3125, 100, 116, 2, 87, "Details",ExpressionUUID->"b5dd73e3-317c-4871-aabc-be00e56e174f",
- CellID->267986155],
-Cell[3244, 104, 115, 2, 87, "Details",ExpressionUUID->"57f29181-624d-42e8-b441-65e3d98901a1",
- CellID->55052072],
-Cell[3362, 108, 118, 2, 87, "Details",ExpressionUUID->"1a1ff11d-b5e0-4eef-aa6e-1c098da985d8",
- CellID->125741376],
-Cell[3483, 112, 132, 2, 87, "Details",ExpressionUUID->"051d2581-e963-4240-8265-335ccac2c5fd",
- CellID->31040295],
-Cell[3618, 116, 122, 2, 87, "Details",ExpressionUUID->"cb516ef7-be70-4473-91de-f1ea3d9bc8a7",
- CellID->240026365]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[3777, 123, 187, 2, 114, "Title",ExpressionUUID->"f00c7563-254d-4af0-84ba-063862cefb5a",
- CellID->509267359],
-Cell[3967, 127, 375, 6, 47, "Text",ExpressionUUID->"82ec3859-cf76-42de-83d2-9945fba19ce4",
- CellID->2057916504],
-Cell[CellGroupData[{
-Cell[4367, 137, 255, 5, 51, "Section",ExpressionUUID->"37569c0b-cdf7-4b38-89e5-9d6bfc6df07c",
- CellID->304722785],
-Cell[4625, 144, 423, 8, 48, "Text",ExpressionUUID->"f764c741-dca6-4634-899d-82a98c6e9eee",
- CellID->1919957400],
-Cell[5051, 154, 245, 3, 44, "MathCaption",ExpressionUUID->"28781e2a-0566-413c-9805-84496b90a239",
- CellID->1738855251],
-Cell[CellGroupData[{
-Cell[5321, 161, 438, 8, 27, "Text",ExpressionUUID->"c3c0b299-48b0-4f24-bbf8-1c58c1717637",
- CellID->642730918],
-Cell[5762, 171, 273, 6, 72, "Program",ExpressionUUID->"912073f7-6a5c-4421-8945-b24efe8fab03",
- CellID->1395952705]
-}, Open  ]],
-Cell[6050, 180, 424, 8, 28, "Text",ExpressionUUID->"02b6ab8d-82e6-4353-9c1a-8ca34776cda2",
- CellID->593204575]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[6511, 193, 189, 2, 54, "Section",ExpressionUUID->"3bbe83be-ee87-4e1e-bd63-591f84ec5bc7",
- CellID->693837892],
-Cell[CellGroupData[{
-Cell[6725, 199, 244, 3, 27, "Text",ExpressionUUID->"d7c10bf8-423f-476b-ad2c-f33382787dde",
- CellID->1584557758],
-Cell[6972, 204, 191, 2, 51, "Program",ExpressionUUID->"96363b02-605a-4b15-b193-a7912fef6a85",
- CellID->1033370596]
-}, Open  ]],
-Cell[7178, 209, 319, 6, 48, "Text",ExpressionUUID->"70e3c231-0099-4c6a-9f32-8ad0c761f84a",
- CellID->1315785579],
-Cell[CellGroupData[{
-Cell[7522, 219, 207, 2, 49, "Subsection",ExpressionUUID->"b60a50c9-1620-4019-968c-8ba3a0c0bd8c",
- CellID->1136826467],
-Cell[CellGroupData[{
-Cell[7754, 225, 206, 2, 22, "Text",ExpressionUUID->"1737f285-1583-4b60-8061-3c2d98b942c3",
- CellID->1088647092],
-Cell[CellGroupData[{
-Cell[7985, 231, 510, 9, 172, "Input",ExpressionUUID->"a9d61164-75a7-40e0-b1ac-4773236917b8",
- CellID->109300776],
-Cell[8498, 242, 10089, 265, 142, "Output",ExpressionUUID->"27d63f19-da06-44e4-bb6a-67319f2b501b",
- CellID->1417490879]
-}, {2}]]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[18633, 513, 102, 1, 41, "MathCaption",ExpressionUUID->"a0b7eaca-91a0-4421-9337-9d741a236fda",
- CellID->836781195],
-Cell[CellGroupData[{
-Cell[18760, 518, 129, 2, 28, "Input",ExpressionUUID->"ac1f07ff-97e9-480c-9eb6-6551496671c7",
- CellID->2058623809],
-Cell[18892, 522, 130, 2, 28, "Output",ExpressionUUID->"c6ad65a7-a0b2-49db-b4a4-9cd115a7f127",
- CellID->1181321046]
-}, Open  ]]
-}, Open  ]]
-}, Closed]],
-Cell[19061, 529, 179, 2, 49, "Subsection",ExpressionUUID->"e2c4e334-f378-4ce0-9c4d-9ca9c62ebf21",
- CellID->727726823]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[19277, 536, 193, 2, 54, "Section",ExpressionUUID->"1bf47c8e-5ce1-412e-9485-763bcaf33d52",
- CellID->1989752601],
-Cell[CellGroupData[{
-Cell[19495, 542, 304, 6, 50, "Subsection",ExpressionUUID->"d9e5a366-0b20-4a9e-8b69-928f5571e554",
- CellID->1741422371],
-Cell[19802, 550, 172, 2, 27, "Text",ExpressionUUID->"e4c0e5ef-a0bb-42e8-bd60-cb5fa9bb11b1",
- CellID->1120891822],
-Cell[19977, 554, 245, 4, 27, "Text",ExpressionUUID->"3fd74544-5fd8-47b2-8ead-ec83ed92aa91",
- CellID->209823254]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[20259, 563, 260, 5, 50, "Subsection",ExpressionUUID->"6b096047-fe75-4943-b785-9a5ddf26db95",
- CellID->976548054],
-Cell[CellGroupData[{
-Cell[20544, 572, 492, 10, 48, "Text",ExpressionUUID->"acc5ebd7-fb10-4083-8f1c-cc744b17218b",
- CellID->1994375645],
-Cell[CellGroupData[{
-Cell[21061, 586, 372, 7, 172, "Input",ExpressionUUID->"fab44655-e1a4-43e7-9d7a-b4ce66b08e4d",
- CellID->154491268],
-Cell[21436, 595, 5873, 158, 144, "Output",ExpressionUUID->"6b1d7217-85af-4055-8d48-c79d9c4525e4",
- CellID->1841630686]
-}, {2}]]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[27355, 759, 542, 9, 67, "Text",ExpressionUUID->"85989b4c-dcda-41e7-95ff-85d2a98aefe4",
- CellID->284889278],
-Cell[27900, 770, 563, 10, 226, "Input",ExpressionUUID->"748da9f0-66c6-460b-bd44-2ddcf61a1a63",
- CellID->1306545109]
-}, Open  ]],
-Cell[28478, 783, 492, 11, 28, "Text",ExpressionUUID->"05114311-5e0a-4562-8a2e-98f23ea99b30",
- CellID->1192390612],
-Cell[CellGroupData[{
-Cell[28995, 798, 255, 4, 27, "Text",ExpressionUUID->"2fccd39b-6f20-4fb9-8bef-1bdf5295f751",
- CellID->286675678],
-Cell[29253, 804, 479, 8, 61, "3ColumnTableMod",ExpressionUUID->"01395d1d-7ad5-4637-afd7-4401ff075eaf",
- CellID->182070495]
-}, Open  ]],
-Cell[29747, 815, 282, 5, 47, "Text",ExpressionUUID->"50807c88-46f3-4870-8e83-a80bdc82978e",
- CellID->1504777704]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[30066, 825, 224, 5, 50, "Subsection",ExpressionUUID->"94ebba03-7d99-40e2-a0b8-e456619a9506",
- CellID->255735726],
-Cell[30293, 832, 172, 2, 27, "Text",ExpressionUUID->"c3172601-a6e7-421f-96cf-9befd2183369",
- CellID->2096539476]
-}, Open  ]]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[30514, 840, 120, 1, 90, "TutorialMoreAboutSection",ExpressionUUID->"9a73f2a5-cd35-4e11-9064-471a2d1e7195",
- CellID->23220180],
-Cell[30637, 843, 109, 1, 26, "TutorialMoreAbout",ExpressionUUID->"9ddd1fb1-f559-4260-aa95-2e471f064240",
- CellID->1567025153]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[30783, 849, 127, 1, 90, "RelatedTutorialsSection",ExpressionUUID->"f8c56921-1aaf-491d-9ba7-952f38bc4577",
- CellID->415694126],
-Cell[30913, 852, 107, 1, 27, "RelatedTutorials",ExpressionUUID->"79948333-5eae-4ac7-8229-396f23e87335",
- CellID->806871991]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[31057, 858, 212, 2, 90, "TutorialRelatedLinksSection",ExpressionUUID->"80e7cb49-3597-45fd-adc5-ce9cf2d3fb63",
- CellID->415694148],
-Cell[31272, 862, 111, 1, 27, "TutorialRelatedLinks",ExpressionUUID->"e62ed730-a65e-4d68-941f-0050aa707da1",
- CellID->415694149]
-}, Open  ]]
-}, Open  ]]
-}
-]
-*)
-
