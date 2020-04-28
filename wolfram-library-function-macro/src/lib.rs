@@ -9,7 +9,6 @@ use syn::{
 
 /*
 TODO:
-  * needs to check that the function is marked `pub`
   * Document that functions generated using this wrapper must us LinkObject as their
     argument / return value method.
 */
