@@ -109,8 +109,8 @@ pub use wl_wstp as wstp;
 /// #### Generated wrapper name
 ///
 /// By default, the generated wrapper function will be the name of the function the
-/// attribute it applied to with the fragment `_wrapper` appended. E.g., the function
-/// `say_hello` has a wrapper named `say_hello_wrapper`.
+/// attribute it applied to with the fragment `_wrapper` appended. For example, the
+/// function `say_hello` has a wrapper named `say_hello_wrapper`.
 ///
 /// This can be controlled via the `name` option of `wolfram_library_function`, which sets
 /// the name of generated Wolfram library function:
