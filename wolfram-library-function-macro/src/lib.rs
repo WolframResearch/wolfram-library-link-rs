@@ -35,46 +35,143 @@ struct Options {
     name: Option<Ident>,
 }
 
+enum ArgumentsMode {
+    ExprList,
+    /// This contains a the pattern tokens from the `#[pattern(..)]` attribute
+    PatternMatches {
+        pattern: TokenStream,
+        pattern_parameters: Vec<(Ident, syn::Type)>,
+    },
+}
+
+struct Function {
+    item: syn::ItemFn,
+
+    name: Ident,
+
+    arguments_mode: ArgumentsMode,
+}
+
 fn wolfram_library_function_impl(
     attr_args: AttributeArgs,
     item: TokenStream,
 ) -> Result<TokenStream> {
     let options = parse_attributes(attr_args)?;
-    let fnitem = syn::parse2(item.clone())?;
+    let function = Function::from_item(syn::parse2(item.clone())?)?;
 
-    let function_name = validate_function(&fnitem)?;
     let wrapper_function_name = match options.name {
         Some(name) => name,
         None => Ident::new(
-            &format!("{}_wrapper", function_name),
+            &format!("{}_wrapper", function.name),
             proc_macro2::Span::call_site(),
         ),
     };
 
-    if wrapper_function_name == function_name {
+    if wrapper_function_name == function.name {
         return Err(Error::new(
-            function_name.span(),
+            function.name.span(),
             "this name must be different from the value of the `name` attribute",
         ));
     }
 
-    let tokens = quote::quote! {
-        #fnitem
+    let tokens = match function.arguments_mode {
+        ArgumentsMode::ExprList => {
+            gen_arg_mode_expr_list(&function.item, function.name, wrapper_function_name)
+        },
+        ArgumentsMode::PatternMatches {
+            ref pattern,
+            ref pattern_parameters,
+        } => gen_arg_mode_pattern(
+            &function,
+            wrapper_function_name,
+            &pattern,
+            &pattern_parameters,
+        ),
+    };
+
+    Ok(tokens)
+}
+
+fn gen_arg_mode_expr_list(
+    fn_item: &syn::ItemFn,
+    function_name: Ident,
+    wrapper_function_name: Ident,
+) -> TokenStream {
+    quote::quote! {
+        #fn_item
 
         #[no_mangle]
         pub extern "C" fn #wrapper_function_name(
             libdata: ::wl_library_link::sys::WolframLibraryData,
             unsafe_link: ::wl_library_link::wstp::sys::WSLINK,
         ) -> std::os::raw::c_uint {
-            ::wl_library_link::call_wolfram_library_function(
+            ::wl_library_link::call_wolfram_library_function_expr_list(
                 libdata,
                 unsafe_link,
                 #function_name
             )
         }
-    };
+    }
+}
 
-    Ok(tokens)
+fn gen_arg_mode_pattern(
+    function: &Function,
+    wrapper_function_name: Ident,
+    pattern: &TokenStream,
+    pattern_parameters: &Vec<(Ident, syn::Type)>,
+) -> TokenStream {
+    let fn_item = &function.item;
+    let function_name = &function.name;
+
+    let struct_name = quote::format_ident!("ArgumentsFor_{}", function_name);
+
+    let parameter_names = pattern_parameters
+        .iter()
+        .map(|(name, _)| name.clone())
+        .collect::<Vec<_>>();
+    let parameter_pairs = pattern_parameters
+        .iter()
+        .map(|(name, ty)| quote::quote! { #name: #ty, })
+        .collect::<Vec<_>>();
+
+    quote::quote! {
+        #fn_item
+
+        #[derive(wl_expr::FromExpr)]
+        #[pattern({ #pattern })]
+        #[allow(non_camel_case_types)]
+        struct #struct_name {
+            #(#parameter_pairs)*
+        }
+
+        #[no_mangle]
+        pub extern "C" fn #wrapper_function_name(
+            libdata: ::wl_library_link::sys::WolframLibraryData,
+            unsafe_link: ::wl_library_link::wstp::sys::WSLINK,
+        ) -> std::os::raw::c_uint {
+            use ::wl_expr::{Expr, forms::{FromExpr, FormError}};
+            use ::wl_library_link::WolframEngine;
+
+            ::wl_library_link::call_wolfram_library_function(
+                libdata,
+                unsafe_link,
+                |engine: &WolframEngine, argument_expr: Expr| -> Expr {
+                    // `argument_expr` should have the head `List`, due to how LibraryFunction[]
+                    // is implemented.
+                    let args = match <#struct_name as FromExpr>::from_expr(&argument_expr) {
+                        Ok(args) => args,
+                        Err(err) => return Expr! {
+                            Failure["ArgumentShape", <|
+                                "Message" -> %[format!("{}", FormError::from(err))]
+                            |>]
+                        },
+                    };
+
+                    #function_name(engine, #( args.#parameter_names ),*)
+                }
+            )
+        }
+    }
 }
 
 fn parse_attributes(attr_args: AttributeArgs) -> Result<Options> {
@@ -136,17 +233,122 @@ fn parse_name_option_value(lit: syn::Lit) -> Result<Ident> {
     Ok(name_ident)
 }
 
-fn validate_function(item: &Item) -> Result<syn::Ident> {
-    let fnitem = match item {
-        Item::Fn(fnitem) => fnitem,
-        _ => {
-            return Err(Error::new(
-                item.span(),
-                "`wolfram_library_function` attribute can only be used on functions",
-            ))
-        },
-    };
+impl Function {
+    fn from_item(item: Item) -> Result<Self> {
+        let mut fn_item =
+            match item {
+                Item::Fn(fnitem) => fnitem,
+                _ => return Err(Error::new(
+                    item.span(),
+                    "`wolfram_library_function` attribute can only be used on functions",
+                )),
+            };
 
+        let arguments_mode = determine_arguments_mode(&mut fn_item.attrs, &fn_item.sig)?;
+
+        let _: () = validate_function(&fn_item, &arguments_mode)?;
+
+        Ok(Function {
+            name: fn_item.sig.ident.clone(),
+            item: fn_item,
+            arguments_mode,
+        })
+    }
+}
+
+fn parse_pattern_parameters(sig: &syn::Signature) -> Result<Vec<(Ident, syn::Type)>> {
+    let parameters = sig
+        .inputs
+        .iter()
+        // Skip the &WolframEngine parameter
+        .skip(1)
+        .map(|arg| {
+            let typed = match arg {
+                // `&self`
+                syn::FnArg::Receiver(_) => {
+                    return Err(Error::new(arg.span(), "expected non-self parameter"))
+                },
+                syn::FnArg::Typed(typed) => typed,
+            };
+
+            let name = match &*typed.pat {
+                // TODO: Check if this `pat_ident` has any attributes, like the planned
+                //       #[list] and #[sequence] attributes.
+                syn::Pat::Ident(pat_ident)
+                    if pat_ident.subpat.is_none() && pat_ident.by_ref.is_none() =>
+                {
+                    pat_ident.ident.clone()
+                },
+                _ => return Err(Error::new(
+                    typed.pat.span(),
+                    "Wolfram library function expects parameters to be plain identifiers",
+                )),
+            };
+
+            Ok((name, (*typed.ty).clone()))
+        })
+        .collect::<Result<Vec<_>>>()?;
+
+    Ok(parameters)
+}
+
+fn determine_arguments_mode(
+    attrs: &mut Vec<syn::Attribute>,
+    sig: &syn::Signature,
+) -> Result<ArgumentsMode> {
+    let mut pattern: Option<(usize, syn::Attribute)> = None;
+    for (index, attr) in attrs.iter().enumerate() {
+        if !attr.path.is_ident("pattern") {
+            continue;
+        }
+
+        if pattern.is_some() {
+            return Err(Error::new(attr.span(), "attribute appears more than once"));
+        }
+
+        pattern = Some((index, attr.clone()));
+    }
+
+    match pattern {
+        Some((index, attr)) => {
+            use proc_macro2::{Delimiter, TokenTree};
+
+            // Remove the `#[pattern(..)]` attribute from the function item.
+            attrs.remove(index);
+
+            // Get get tokens inside the parenthesis in `#[pattern(...)]`.
+            let attr_span = attr.span();
+            let tokens: Vec<TokenTree> = attr.tokens.into_iter().collect();
+
+            let inner_tokens = match tokens.as_slice() {
+                &[TokenTree::Group(ref group)]
+                    if group.delimiter() == Delimiter::Parenthesis =>
+                {
+                    group.stream()
+                },
+                // E.g. `#[pattern = "..."]`
+                _ => {
+                    return Err(Error::new(
+                        attr_span,
+                        "expected attribute with format `#[pattern(..)]`",
+                    ))
+                },
+            };
+
+            let pattern_parameters = parse_pattern_parameters(sig)?
+                .into_iter()
+                .collect::<Vec<_>>();
+
+            Ok(ArgumentsMode::PatternMatches {
+                pattern: inner_tokens,
+                pattern_parameters,
+            })
+        },
+        None => Ok(ArgumentsMode::ExprList),
+    }
+}
+
+fn validate_function(fnitem: &syn::ItemFn, args_mode: &ArgumentsMode) -> Result<()> {
     let syn::ItemFn {
         attrs: _,
         vis,
@@ -155,7 +357,7 @@ fn validate_function(item: &Item) -> Result<syn::Ident> {
     } = fnitem;
 
     // Ensure that the function is marked `pub`.
-    let _: () = check_visibility(vis, sig)?;
+    let _: () = validate_visibility(vis, sig)?;
 
     // Ensure that the function is not marked with `const` or `async`
     if let Some(const_) = sig.constness {
@@ -196,13 +398,13 @@ fn validate_function(item: &Item) -> Result<syn::Ident> {
         ));
     }
 
-    let _: () = check_parameters(&sig.inputs, sig.paren_token)?;
+    let _: () = validate_parameters(&sig.inputs, sig.paren_token, &args_mode)?;
 
-    Ok(sig.ident.clone())
+    Ok(())
 }
 
 /// Ensure that the function is marked `pub`.
-fn check_visibility(vis: &syn::Visibility, sig: &syn::Signature) -> Result<()> {
+fn validate_visibility(vis: &syn::Visibility, sig: &syn::Signature) -> Result<()> {
     match vis {
         // `pub fn name()`
         syn::Visibility::Public(_) => Ok(()),
@@ -231,14 +433,15 @@ fn check_visibility(vis: &syn::Visibility, sig: &syn::Signature) -> Result<()> {
     }
 }
 
-fn check_parameters(
+fn validate_parameters(
     inputs: &Punctuated<syn::FnArg, syn::token::Comma>,
     parens: syn::token::Paren,
+    args_mode: &ArgumentsMode,
 ) -> Result<()> {
-    if inputs.len() != 2 {
+    if inputs.is_empty() {
         return Err(Error::new(
             parens.span,
-            "Wolfram library function must have 2 parameters",
+            "Wolfram library function must have at least 1 parameter for `&WolframEngine`",
         ));
     }
 
@@ -255,6 +458,22 @@ fn check_parameters(
             )),
             syn::FnArg::Typed(pat_type) => pat_type,
         };
+
+    match args_mode {
+        ArgumentsMode::ExprList => (),
+        ArgumentsMode::PatternMatches { .. } => return Ok(()),
+    }
+
+    //
+    // Check that there are 2 parameters, and that the 2nd one is `Vec<Expr>`.
+    //
+
+    if inputs.len() != 2 {
+        return Err(Error::new(
+            parens.span,
+            "Wolfram library function must have 2 parameters",
+        ));
+    }
 
     if !first_param.attrs.is_empty() {
         return Err(Error::new(
@@ -314,7 +533,6 @@ fn check_parameters(
     //
     // TODO?: Check that the second parameter is `Vec<Expr>`
     //
-
 
     Ok(())
 }

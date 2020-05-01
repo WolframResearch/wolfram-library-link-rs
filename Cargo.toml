@@ -44,3 +44,7 @@ crate-type = ["cdylib"]
 [[example]]
 name = "structured_expressions"
 crate-type = ["cdylib"]
+
+[[example]]
+name = "downvalue"
+crate-type = ["cdylib"]
