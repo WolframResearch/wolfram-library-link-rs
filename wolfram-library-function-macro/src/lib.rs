@@ -102,7 +102,7 @@ fn parse_attributes(attr_args: AttributeArgs) -> Result<Options> {
             _ => {
                 return Err(Error::new(
                     attr.span(),
-                    "expected `name = \"..\" attribute`",
+                    "expected `<name> = \"..\"` attribute`",
                 ))
             },
         };
