@@ -56,7 +56,7 @@ pub mod catch_panic;
 use std::ffi::CString;
 
 use wl_expr::{forms::ToPrettyExpr, Expr, ExprKind};
-use wl_library_link_sys::{mint, WolframLibraryData, LIBRARY_NO_ERROR, MLINK};
+use wl_library_link_sys::{mint, WolframLibraryData, LIBRARY_NO_ERROR, WSLINK};
 use wl_symbol_table as sym;
 use wl_wstp::WSTPLink;
 
@@ -158,8 +158,8 @@ pub struct WolframEngine {
     // TODO: Is this function thread safe? Can it be called from a thread other than the
     //       one the LibraryLink wrapper was originally invoked from?
     AbortQ: unsafe extern "C" fn() -> mint,
-    getWSLINK: unsafe extern "C" fn(WolframLibraryData) -> MLINK,
-    processWSLINK: unsafe extern "C" fn(MLINK) -> i32,
+    getWSLINK: unsafe extern "C" fn(WolframLibraryData) -> WSLINK,
+    processWSLINK: unsafe extern "C" fn(WSLINK) -> i32,
 }
 
 impl WolframEngine {
