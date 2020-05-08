@@ -56,7 +56,7 @@ pub unsafe extern "C" fn demo_function(
 pub unsafe extern "C" fn demo_byte_array(
     lib_data: WolframLibraryData,
     arg_count: mint,
-    args: *mut MArgument,
+    _args: *mut MArgument,
     res: MArgument,
 ) -> c_uint {
     const LENGTH: usize = 10;
