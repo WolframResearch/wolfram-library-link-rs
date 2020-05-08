@@ -276,12 +276,12 @@ impl WolframEngine {
 /// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
 ///
 /// [wlf]: attr.wolfram_library_function.html
-pub fn call_wolfram_library_function_expr_list(
+pub fn call_wstp_wolfram_library_function_expr_list(
     libdata: WolframLibraryData,
     unsafe_link: wstp::sys::WSLINK,
     function: fn(&WolframEngine, Vec<Expr>) -> Expr,
 ) -> std::os::raw::c_uint {
-    call_wolfram_library_function(
+    call_wstp_wolfram_library_function(
         libdata,
         unsafe_link,
         |engine: &WolframEngine, argument_expr: Expr| -> Expr {
@@ -298,7 +298,7 @@ pub fn call_wolfram_library_function_expr_list(
 /// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
 ///
 /// [wlf]: attr.wolfram_library_function.html
-pub fn call_wolfram_library_function<
+pub fn call_wstp_wolfram_library_function<
     F: FnOnce(&WolframEngine, Expr) -> Expr + std::panic::UnwindSafe,
 >(
     libdata: WolframLibraryData,

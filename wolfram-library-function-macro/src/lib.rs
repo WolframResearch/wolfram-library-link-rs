@@ -105,7 +105,7 @@ fn gen_arg_mode_expr_list(
             libdata: ::wl_library_link::sys::WolframLibraryData,
             unsafe_link: ::wl_library_link::wstp::sys::WSLINK,
         ) -> std::os::raw::c_uint {
-            ::wl_library_link::call_wolfram_library_function_expr_list(
+            ::wl_library_link::call_wstp_wolfram_library_function_expr_list(
                 libdata,
                 unsafe_link,
                 #function_name
@@ -152,7 +152,7 @@ fn gen_arg_mode_pattern(
             use ::wl_expr::{Expr, forms::{FromExpr, FormError}};
             use ::wl_library_link::WolframEngine;
 
-            ::wl_library_link::call_wolfram_library_function(
+            ::wl_library_link::call_wstp_wolfram_library_function(
                 libdata,
                 unsafe_link,
                 |engine: &WolframEngine, argument_expr: Expr| -> Expr {
