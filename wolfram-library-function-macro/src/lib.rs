@@ -1,5 +1,3 @@
-extern crate proc_macro;
-
 mod function;
 mod gen_wstp;
 
