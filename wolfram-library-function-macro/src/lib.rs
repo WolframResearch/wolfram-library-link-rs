@@ -15,22 +15,6 @@ TODO:
     argument / return value method.
 */
 
-#[proc_macro_attribute]
-pub fn wolfram_library_function(
-    attr_args: proc_macro::TokenStream,
-    item: proc_macro::TokenStream,
-) -> proc_macro::TokenStream {
-    let attr_args = syn::parse_macro_input!(attr_args as AttributeArgs);
-    let item = TokenStream::from(item);
-
-    let output: TokenStream = match wolfram_library_function_impl(attr_args, item) {
-        Ok(stream) => stream,
-        Err(err) => err.to_compile_error(),
-    };
-
-    proc_macro::TokenStream::from(output)
-}
-
 struct Options {
     /// The name to give the generated wrapper function. This is the name used as the
     /// 2nd argument of `LoadLibraryFunction`.
@@ -52,6 +36,22 @@ struct Function {
     name: Ident,
 
     arguments_mode: ArgumentsMode,
+}
+
+#[proc_macro_attribute]
+pub fn wolfram_library_function(
+    attr_args: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    let attr_args = syn::parse_macro_input!(attr_args as AttributeArgs);
+    let item = TokenStream::from(item);
+
+    let output: TokenStream = match wolfram_library_function_impl(attr_args, item) {
+        Ok(stream) => stream,
+        Err(err) => err.to_compile_error(),
+    };
+
+    proc_macro::TokenStream::from(output)
 }
 
 fn wolfram_library_function_impl(
