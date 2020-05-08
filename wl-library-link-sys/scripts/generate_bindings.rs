@@ -62,6 +62,7 @@ fn generate_bindings(c_includes: PathBuf) {
     let bindings = bindgen::builder()
         .header(c_includes.join("WolframLibrary.h").display().to_string())
         .header(c_includes.join("WolframNumericArrayLibrary.h").display().to_string())
+        .header(c_includes.join("WolframCompileLibrary.h").display().to_string())
         .generate_comments(true)
         // NOTE: At time of writing this will silently fail to work if you are using a
         //       nightly version of Rust, making the generated bindings almost impossible

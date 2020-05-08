@@ -196,6 +196,7 @@ pub const False: u32 = 0;
 pub const MType_Integer: u32 = 2;
 pub const MType_Real: u32 = 3;
 pub const MType_Complex: u32 = 4;
+pub const WolframCompileLibraryVersion: u32 = 1;
 pub type jmp_buf = [::std::os::raw::c_int; 37usize];
 pub type sigjmp_buf = [::std::os::raw::c_int; 38usize];
 extern "C" {
@@ -859,11 +860,6 @@ fn bindgen_test_layout_mcomplex() {
             stringify!(ri)
         )
     );
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct st_MNumericArray {
-    _unused: [u8; 0],
 }
 pub type MTensor = *mut st_MNumericArray;
 pub type MRawArray = *mut st_MNumericArray;
@@ -2216,6 +2212,797 @@ fn bindgen_test_layout_st_WolframNumericArrayLibrary_Functions() {
 }
 pub type WolframNumericArrayLibrary_Functions =
     *mut st_WolframNumericArrayLibrary_Functions;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct st_MNumericArray {
+    pub prec: mreal,
+    pub dims: *mut mint,
+    pub rank: mint,
+    pub tensor_property_type: type_t,
+    pub flags: UBIT32,
+    pub data_type: type_t,
+    pub nelems: mint,
+    pub data: *mut ::std::os::raw::c_void,
+    pub refcount: umint,
+}
+#[test]
+fn bindgen_test_layout_st_MNumericArray() {
+    assert_eq!(
+        ::std::mem::size_of::<st_MNumericArray>(),
+        64usize,
+        concat!("Size of: ", stringify!(st_MNumericArray))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<st_MNumericArray>(),
+        8usize,
+        concat!("Alignment of ", stringify!(st_MNumericArray))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<st_MNumericArray>())).prec as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_MNumericArray),
+            "::",
+            stringify!(prec)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<st_MNumericArray>())).dims as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_MNumericArray),
+            "::",
+            stringify!(dims)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<st_MNumericArray>())).rank as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_MNumericArray),
+            "::",
+            stringify!(rank)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_MNumericArray>())).tensor_property_type as *const _
+                as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_MNumericArray),
+            "::",
+            stringify!(tensor_property_type)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_MNumericArray>())).flags as *const _ as usize
+        },
+        28usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_MNumericArray),
+            "::",
+            stringify!(flags)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_MNumericArray>())).data_type as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_MNumericArray),
+            "::",
+            stringify!(data_type)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_MNumericArray>())).nelems as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_MNumericArray),
+            "::",
+            stringify!(nelems)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<st_MNumericArray>())).data as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_MNumericArray),
+            "::",
+            stringify!(data)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_MNumericArray>())).refcount as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_MNumericArray),
+            "::",
+            stringify!(refcount)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct M_TENSOR_INITIALIZATION_DATA_STRUCT {
+    pub tensors: *mut MTensor,
+    pub n: mint,
+    pub in_use: ::std::os::raw::c_int,
+}
+#[test]
+fn bindgen_test_layout_M_TENSOR_INITIALIZATION_DATA_STRUCT() {
+    assert_eq!(
+        ::std::mem::size_of::<M_TENSOR_INITIALIZATION_DATA_STRUCT>(),
+        24usize,
+        concat!("Size of: ", stringify!(M_TENSOR_INITIALIZATION_DATA_STRUCT))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<M_TENSOR_INITIALIZATION_DATA_STRUCT>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(M_TENSOR_INITIALIZATION_DATA_STRUCT)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<M_TENSOR_INITIALIZATION_DATA_STRUCT>())).tensors
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(M_TENSOR_INITIALIZATION_DATA_STRUCT),
+            "::",
+            stringify!(tensors)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<M_TENSOR_INITIALIZATION_DATA_STRUCT>())).n as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(M_TENSOR_INITIALIZATION_DATA_STRUCT),
+            "::",
+            stringify!(n)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<M_TENSOR_INITIALIZATION_DATA_STRUCT>())).in_use
+                as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(M_TENSOR_INITIALIZATION_DATA_STRUCT),
+            "::",
+            stringify!(in_use)
+        )
+    );
+}
+pub type MTensorInitializationData = *mut M_TENSOR_INITIALIZATION_DATA_STRUCT;
+pub type WolframRuntimeData = *mut st_WolframRuntimeData;
+pub type LibraryFunctionPointer = ::std::option::Option<
+    unsafe extern "C" fn(
+        arg1: WolframLibraryData,
+        arg2: mint,
+        arg3: *mut MArgument,
+        arg4: MArgument,
+    ) -> ::std::os::raw::c_int,
+>;
+pub type UnaryMathFunctionPointer = ::std::option::Option<
+    unsafe extern "C" fn(
+        arg1: *mut ::std::os::raw::c_void,
+        arg2: *const ::std::os::raw::c_void,
+        arg3: mint,
+        arg4: *const mint,
+        arg5: ::std::os::raw::c_uint,
+    ) -> mint,
+>;
+pub type BinaryMathFunctionPointer = ::std::option::Option<
+    unsafe extern "C" fn(
+        arg1: *mut ::std::os::raw::c_void,
+        arg2: *const ::std::os::raw::c_void,
+        arg3: *const ::std::os::raw::c_void,
+        arg4: mint,
+        arg5: *const mint,
+        arg6: ::std::os::raw::c_uint,
+    ) -> mint,
+>;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct st_WolframCompileLibrary_Functions {
+    pub VersionNumber: mint,
+    pub GetInitializedMTensors: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut st_WolframLibraryData,
+            arg2: mint,
+        ) -> MTensorInitializationData,
+    >,
+    pub ReleaseInitializedMTensors:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MTensorInitializationData)>,
+    pub WolframLibraryData_cleanUp: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut st_WolframLibraryData,
+            arg2: ::std::os::raw::c_int,
+        ),
+    >,
+    pub MTensor_init: ::std::option::Option<unsafe extern "C" fn() -> MTensor>,
+    pub MTensor_allocate: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut MTensor,
+            arg2: ::std::os::raw::c_int,
+            arg3: mint,
+            arg4: *mut mint,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub MTensor_copy: ::std::option::Option<
+        unsafe extern "C" fn(arg1: *mut MTensor, arg2: MTensor) -> ::std::os::raw::c_int,
+    >,
+    pub MTensor_copyUnique: ::std::option::Option<
+        unsafe extern "C" fn(arg1: *mut MTensor, arg2: MTensor) -> ::std::os::raw::c_int,
+    >,
+    pub MTensor_insertMTensor: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MTensor,
+            arg2: MTensor,
+            arg3: *mut mint,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub MTensor_getMTensorInitialized: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut MTensor,
+            arg2: MTensor,
+            arg3: *mut mint,
+            arg4: mint,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub MTensor_getPart: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut MTensor,
+            arg2: MTensor,
+            arg3: mint,
+            arg4: *mut ::std::os::raw::c_int,
+            arg5: *mut *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub MTensor_setPart: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut MTensor,
+            arg2: MTensor,
+            arg3: mint,
+            arg4: *mut ::std::os::raw::c_int,
+            arg5: *mut *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub getUnaryMathFunction: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ::std::os::raw::c_int,
+            arg2: ::std::os::raw::c_int,
+        ) -> UnaryMathFunctionPointer,
+    >,
+    pub Math_T_T: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ::std::os::raw::c_int,
+            arg2: ::std::os::raw::c_uint,
+            arg3: MTensor,
+            arg4: ::std::os::raw::c_int,
+            arg5: *mut MTensor,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub Math_V_V: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ::std::os::raw::c_int,
+            arg2: ::std::os::raw::c_uint,
+            arg3: ::std::os::raw::c_int,
+            arg4: *mut ::std::os::raw::c_void,
+            arg5: ::std::os::raw::c_int,
+            arg6: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub getBinaryMathFunction: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ::std::os::raw::c_int,
+            arg2: ::std::os::raw::c_int,
+            arg3: ::std::os::raw::c_int,
+        ) -> BinaryMathFunctionPointer,
+    >,
+    pub Math_TT_T: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ::std::os::raw::c_int,
+            arg2: ::std::os::raw::c_uint,
+            arg3: MTensor,
+            arg4: MTensor,
+            arg5: ::std::os::raw::c_int,
+            arg6: *mut MTensor,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub Math_VV_V: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ::std::os::raw::c_int,
+            arg2: ::std::os::raw::c_uint,
+            arg3: ::std::os::raw::c_int,
+            arg4: *mut ::std::os::raw::c_void,
+            arg5: ::std::os::raw::c_int,
+            arg6: *mut ::std::os::raw::c_void,
+            arg7: ::std::os::raw::c_int,
+            arg8: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub Compare_R: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ::std::os::raw::c_int,
+            arg2: mreal,
+            arg3: mint,
+            arg4: *mut mreal,
+        ) -> mbool,
+    >,
+    pub Compare_C: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ::std::os::raw::c_int,
+            arg2: mreal,
+            arg3: mint,
+            arg4: *mut mcomplex,
+            arg5: *mut mbool,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub getExpressionFunctionPointer: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut st_WolframLibraryData,
+            arg2: *const ::std::os::raw::c_char,
+        ) -> *mut ::std::os::raw::c_void,
+    >,
+    pub evaluateFunctionExpression: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut st_WolframLibraryData,
+            arg2: *mut ::std::os::raw::c_void,
+            arg3: mint,
+            arg4: mint,
+            arg5: mint,
+            arg6: *mut ::std::os::raw::c_int,
+            arg7: *mut *mut ::std::os::raw::c_void,
+            arg8: ::std::os::raw::c_int,
+            arg9: mint,
+            arg10: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub getArgumentSpace: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut st_WolframLibraryData,
+            arg2: mint,
+        ) -> *mut *mut ::std::os::raw::c_void,
+    >,
+    pub getLibraryFunctionPointer: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut ::std::os::raw::c_char,
+            arg2: *mut ::std::os::raw::c_char,
+        ) -> LibraryFunctionPointer,
+    >,
+    pub getFunctionCallPointer: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *const ::std::os::raw::c_char,
+        ) -> LibraryFunctionPointer,
+    >,
+    pub checkFloatingPointException: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut ::std::os::raw::c_void,
+            arg2: ::std::os::raw::c_int,
+            arg3: ::std::os::raw::c_uint,
+        ) -> mbool,
+    >,
+    pub getRankZeroMTensor: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut ::std::os::raw::c_void,
+            arg2: ::std::os::raw::c_int,
+            arg3: mint,
+        ) -> MTensor,
+    >,
+    pub MTensor_fillFromMTensor: ::std::option::Option<
+        unsafe extern "C" fn(arg1: MTensor, arg2: *mut MTensor) -> ::std::os::raw::c_int,
+    >,
+}
+#[test]
+fn bindgen_test_layout_st_WolframCompileLibrary_Functions() {
+    assert_eq!(
+        ::std::mem::size_of::<st_WolframCompileLibrary_Functions>(),
+        224usize,
+        concat!("Size of: ", stringify!(st_WolframCompileLibrary_Functions))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<st_WolframCompileLibrary_Functions>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(st_WolframCompileLibrary_Functions)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>())).VersionNumber
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(VersionNumber)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .GetInitializedMTensors as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(GetInitializedMTensors)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .ReleaseInitializedMTensors as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(ReleaseInitializedMTensors)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .WolframLibraryData_cleanUp as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(WolframLibraryData_cleanUp)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>())).MTensor_init
+                as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(MTensor_init)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .MTensor_allocate as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(MTensor_allocate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>())).MTensor_copy
+                as *const _ as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(MTensor_copy)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .MTensor_copyUnique as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(MTensor_copyUnique)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .MTensor_insertMTensor as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(MTensor_insertMTensor)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .MTensor_getMTensorInitialized as *const _ as usize
+        },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(MTensor_getMTensorInitialized)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>())).MTensor_getPart
+                as *const _ as usize
+        },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(MTensor_getPart)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>())).MTensor_setPart
+                as *const _ as usize
+        },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(MTensor_setPart)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .getUnaryMathFunction as *const _ as usize
+        },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(getUnaryMathFunction)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>())).Math_T_T
+                as *const _ as usize
+        },
+        104usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(Math_T_T)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>())).Math_V_V
+                as *const _ as usize
+        },
+        112usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(Math_V_V)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .getBinaryMathFunction as *const _ as usize
+        },
+        120usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(getBinaryMathFunction)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>())).Math_TT_T
+                as *const _ as usize
+        },
+        128usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(Math_TT_T)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>())).Math_VV_V
+                as *const _ as usize
+        },
+        136usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(Math_VV_V)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>())).Compare_R
+                as *const _ as usize
+        },
+        144usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(Compare_R)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>())).Compare_C
+                as *const _ as usize
+        },
+        152usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(Compare_C)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .getExpressionFunctionPointer as *const _ as usize
+        },
+        160usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(getExpressionFunctionPointer)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .evaluateFunctionExpression as *const _ as usize
+        },
+        168usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(evaluateFunctionExpression)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .getArgumentSpace as *const _ as usize
+        },
+        176usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(getArgumentSpace)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .getLibraryFunctionPointer as *const _ as usize
+        },
+        184usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(getLibraryFunctionPointer)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .getFunctionCallPointer as *const _ as usize
+        },
+        192usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(getFunctionCallPointer)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .checkFloatingPointException as *const _ as usize
+        },
+        200usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(checkFloatingPointException)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .getRankZeroMTensor as *const _ as usize
+        },
+        208usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(getRankZeroMTensor)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframCompileLibrary_Functions>()))
+                .MTensor_fillFromMTensor as *const _ as usize
+        },
+        216usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframCompileLibrary_Functions),
+            "::",
+            stringify!(MTensor_fillFromMTensor)
+        )
+    );
+}
+pub type WolframCompileLibrary_Functions = *mut st_WolframCompileLibrary_Functions;
 pub type __builtin_va_list = [__va_list_tag; 1usize];
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2290,11 +3077,6 @@ fn bindgen_test_layout___va_list_tag() {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct st_WolframRuntimeData {
-    pub _address: u8,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct st_WolframCompileLibrary_Functions {
     pub _address: u8,
 }
 #[repr(C)]
