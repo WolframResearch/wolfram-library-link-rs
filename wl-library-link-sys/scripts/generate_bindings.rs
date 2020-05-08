@@ -9,7 +9,7 @@
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
-const ENV_VAR: &str = "WL_LIBRARY_LINK_SYS_HEADER";
+const ENV_VAR: &str = "WOLFRAM_C_INCLUDES";
 const GENERATED_BINDINGS_FILE: &str = "LibraryLink_bindings.rs";
 
 // lazy_static! {
@@ -31,49 +31,37 @@ fn main() {
     //     panic!("no Wolfram System includes files exist at '{}'", WOLFRAM_INCLUDE_C.display());
     // }
 
-    let path = match std::env::var(ENV_VAR) {
+    let c_includes = match std::env::var(ENV_VAR) {
         Ok(path) => PathBuf::from(path),
         Err(err) => panic!(
-            "wl-library-link-sys: could not get environment variable: \
-             {}: {}",
+            "wl-library-link-sys: could not get environment variable: {}: {}",
             ENV_VAR, err
         ),
     };
-    if !path.is_file() {
+    if !c_includes.is_dir() {
         panic!(
-            "wl-library-link-sys: header file does not exist: {}",
-            path.display()
+            "wl-library-link-sys: header directory does not exist: {}",
+            c_includes.display()
         );
     }
-    if !path.is_absolute() {
+    if !c_includes.is_absolute() {
         panic!(
-            "wl-library-link-sys: expected path to header to be absolute: {}",
-            path.display()
+            "wl-library-link-sys: expected path to headers to be absolute: {}",
+            c_includes.display()
         )
     }
-    generate_bindings(path);
+    generate_bindings(c_includes);
 }
 
-fn generate_bindings(header_file: PathBuf) {
-    // For the time being there is no reason this shouldn't be "WolframLibrary.h"
-    assert_eq!(
-        header_file.file_name().and_then(OsStr::to_str),
-        Some("WolframLibrary.h")
-    );
+fn generate_bindings(c_includes: PathBuf) {
+    // For the time being there is no reason this shouldn't be here. 
+    assert!(c_includes.ends_with("SystemFiles/IncludeFiles/C/"));
+    assert!(c_includes.is_dir());
+    assert!(c_includes.is_absolute());
 
-    let header_dir = match header_file.parent() {
-        Some(parent) => parent,
-        None => panic!(
-            "wl-library-link-sys: header path has no parent directory: {}",
-            header_file.display()
-        ),
-    };
-
-    let bindings = bindgen::Builder::default()
-        // Add `header_dir` to the list of directories clang will look for header files in
-        // TODO: Are there any file path characters this would
-        .clang_arg(format!("-I/{}", header_dir.display()))
-        .header(header_file.display().to_string())
+    let bindings = bindgen::builder()
+        .header(c_includes.join("WolframLibrary.h").display().to_string())
+        .header(c_includes.join("WolframNumericArrayLibrary.h").display().to_string())
         .generate_comments(true)
         // NOTE: At time of writing this will silently fail to work if you are using a
         //       nightly version of Rust, making the generated bindings almost impossible

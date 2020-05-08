@@ -1960,6 +1960,262 @@ fn bindgen_test_layout_st_WolframLibraryData() {
         )
     );
 }
+pub const MNumericArray_Data_Type_MNumericArray_Type_Undef: MNumericArray_Data_Type = 0;
+pub const MNumericArray_Data_Type_MNumericArray_Type_Bit8: MNumericArray_Data_Type = 1;
+pub const MNumericArray_Data_Type_MNumericArray_Type_UBit8: MNumericArray_Data_Type = 2;
+pub const MNumericArray_Data_Type_MNumericArray_Type_Bit16: MNumericArray_Data_Type = 3;
+pub const MNumericArray_Data_Type_MNumericArray_Type_UBit16: MNumericArray_Data_Type = 4;
+pub const MNumericArray_Data_Type_MNumericArray_Type_Bit32: MNumericArray_Data_Type = 5;
+pub const MNumericArray_Data_Type_MNumericArray_Type_UBit32: MNumericArray_Data_Type = 6;
+pub const MNumericArray_Data_Type_MNumericArray_Type_Bit64: MNumericArray_Data_Type = 7;
+pub const MNumericArray_Data_Type_MNumericArray_Type_UBit64: MNumericArray_Data_Type = 8;
+pub const MNumericArray_Data_Type_MNumericArray_Type_Real32: MNumericArray_Data_Type = 9;
+pub const MNumericArray_Data_Type_MNumericArray_Type_Real64: MNumericArray_Data_Type = 10;
+pub const MNumericArray_Data_Type_MNumericArray_Type_Complex_Real32:
+    MNumericArray_Data_Type = 11;
+pub const MNumericArray_Data_Type_MNumericArray_Type_Complex_Real64:
+    MNumericArray_Data_Type = 12;
+pub type MNumericArray_Data_Type = u32;
+pub use self::MNumericArray_Data_Type as numericarray_data_t;
+pub const MNumericArray_Convert_Method_MNumericArray_Convert_Check:
+    MNumericArray_Convert_Method = 1;
+pub const MNumericArray_Convert_Method_MNumericArray_Convert_Clip_Check:
+    MNumericArray_Convert_Method = 2;
+pub const MNumericArray_Convert_Method_MNumericArray_Convert_Coerce:
+    MNumericArray_Convert_Method = 3;
+pub const MNumericArray_Convert_Method_MNumericArray_Convert_Clip_Coerce:
+    MNumericArray_Convert_Method = 4;
+pub const MNumericArray_Convert_Method_MNumericArray_Convert_Round:
+    MNumericArray_Convert_Method = 5;
+pub const MNumericArray_Convert_Method_MNumericArray_Convert_Clip_Round:
+    MNumericArray_Convert_Method = 6;
+pub const MNumericArray_Convert_Method_MNumericArray_Convert_Scale:
+    MNumericArray_Convert_Method = 7;
+pub const MNumericArray_Convert_Method_MNumericArray_Convert_Clip_Scale:
+    MNumericArray_Convert_Method = 8;
+pub type MNumericArray_Convert_Method = u32;
+pub use self::MNumericArray_Convert_Method as numericarray_convert_method_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct st_WolframNumericArrayLibrary_Functions {
+    pub MNumericArray_new: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: numericarray_data_t,
+            arg2: mint,
+            arg3: *const mint,
+            arg4: *mut MNumericArray,
+        ) -> errcode_t,
+    >,
+    pub MNumericArray_free:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MNumericArray)>,
+    pub MNumericArray_clone: ::std::option::Option<
+        unsafe extern "C" fn(arg1: MNumericArray, arg2: *mut MNumericArray) -> errcode_t,
+    >,
+    pub MNumericArray_disown:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MNumericArray)>,
+    pub MNumericArray_disownAll:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MNumericArray)>,
+    pub MNumericArray_shareCount:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MNumericArray) -> mint>,
+    pub MNumericArray_getType: ::std::option::Option<
+        unsafe extern "C" fn(arg1: MNumericArray) -> numericarray_data_t,
+    >,
+    pub MNumericArray_getRank:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MNumericArray) -> mint>,
+    pub MNumericArray_getDimensions:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MNumericArray) -> *const mint>,
+    pub MNumericArray_getFlattenedLength:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MNumericArray) -> mint>,
+    pub MNumericArray_getData: ::std::option::Option<
+        unsafe extern "C" fn(arg1: MNumericArray) -> *mut ::std::os::raw::c_void,
+    >,
+    pub MNumericArray_convertType: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut MNumericArray,
+            arg2: MNumericArray,
+            arg3: numericarray_data_t,
+            arg4: numericarray_convert_method_t,
+            arg5: mreal,
+        ) -> errcode_t,
+    >,
+}
+#[test]
+fn bindgen_test_layout_st_WolframNumericArrayLibrary_Functions() {
+    assert_eq!(
+        ::std::mem::size_of::<st_WolframNumericArrayLibrary_Functions>(),
+        96usize,
+        concat!(
+            "Size of: ",
+            stringify!(st_WolframNumericArrayLibrary_Functions)
+        )
+    );
+    assert_eq!(
+        ::std::mem::align_of::<st_WolframNumericArrayLibrary_Functions>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(st_WolframNumericArrayLibrary_Functions)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframNumericArrayLibrary_Functions>()))
+                .MNumericArray_new as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframNumericArrayLibrary_Functions),
+            "::",
+            stringify!(MNumericArray_new)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframNumericArrayLibrary_Functions>()))
+                .MNumericArray_free as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframNumericArrayLibrary_Functions),
+            "::",
+            stringify!(MNumericArray_free)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframNumericArrayLibrary_Functions>()))
+                .MNumericArray_clone as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframNumericArrayLibrary_Functions),
+            "::",
+            stringify!(MNumericArray_clone)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframNumericArrayLibrary_Functions>()))
+                .MNumericArray_disown as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframNumericArrayLibrary_Functions),
+            "::",
+            stringify!(MNumericArray_disown)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframNumericArrayLibrary_Functions>()))
+                .MNumericArray_disownAll as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframNumericArrayLibrary_Functions),
+            "::",
+            stringify!(MNumericArray_disownAll)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframNumericArrayLibrary_Functions>()))
+                .MNumericArray_shareCount as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframNumericArrayLibrary_Functions),
+            "::",
+            stringify!(MNumericArray_shareCount)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframNumericArrayLibrary_Functions>()))
+                .MNumericArray_getType as *const _ as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframNumericArrayLibrary_Functions),
+            "::",
+            stringify!(MNumericArray_getType)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframNumericArrayLibrary_Functions>()))
+                .MNumericArray_getRank as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframNumericArrayLibrary_Functions),
+            "::",
+            stringify!(MNumericArray_getRank)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframNumericArrayLibrary_Functions>()))
+                .MNumericArray_getDimensions as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframNumericArrayLibrary_Functions),
+            "::",
+            stringify!(MNumericArray_getDimensions)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframNumericArrayLibrary_Functions>()))
+                .MNumericArray_getFlattenedLength as *const _ as usize
+        },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframNumericArrayLibrary_Functions),
+            "::",
+            stringify!(MNumericArray_getFlattenedLength)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframNumericArrayLibrary_Functions>()))
+                .MNumericArray_getData as *const _ as usize
+        },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframNumericArrayLibrary_Functions),
+            "::",
+            stringify!(MNumericArray_getData)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframNumericArrayLibrary_Functions>()))
+                .MNumericArray_convertType as *const _ as usize
+        },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframNumericArrayLibrary_Functions),
+            "::",
+            stringify!(MNumericArray_convertType)
+        )
+    );
+}
+pub type WolframNumericArrayLibrary_Functions =
+    *mut st_WolframNumericArrayLibrary_Functions;
 pub type __builtin_va_list = [__va_list_tag; 1usize];
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2059,10 +2315,5 @@ pub struct st_WolframImageLibrary_Functions {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct st_WolframRawArrayLibrary_Functions {
-    pub _address: u8,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct st_WolframNumericArrayLibrary_Functions {
     pub _address: u8,
 }
