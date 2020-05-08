@@ -112,11 +112,10 @@ Cell[BoxData[{
  RowBox[{
   RowBox[{
   "PacletDirectoryLoad", "[", 
-   "\"\</Users/connorgray/Dev/WL/SyntaxHighlight/build/\>\"", "]"}], 
-  ";"}], "\n", 
+   "\"\</Users/connorgray/Dev/WL/SyntaxHighlight/\>\"", "]"}], ";"}], "\n", 
  RowBox[{"Needs", "[", "\"\<SyntaxHighlight`\>\"", 
   "]"}]}], "Input", "ExcludedMaterial",
- CellLabel->"In[3]:=",
+ CellLabel->"In[40]:=",
  CellID->1326244152,ExpressionUUID->"b89ccef3-c3f3-4ee1-9df3-1513467dff02"],
 
 Cell["\<\
@@ -140,7 +139,7 @@ documentation is suitable for Rust developers.\
  CellID->1797251224,ExpressionUUID->"2c8cf2e4-04be-4bc3-8363-78609acd74f8"],
 
 Cell["\<\
-[[ TODO: Link to more advanced tutorials for people who want to dive in ]]\
+[[ TODO: Link to more targeted, smaller tutorials for specific features ]]\
 \>", "Text",
  CellID->792026942,ExpressionUUID->"37e28acd-f4a0-4a7e-aea7-17ea2ecf4f9b"],
 
@@ -235,7 +234,12 @@ below:\
 \>", "Text",
  CellID->1281688278,ExpressionUUID->"b1afb711-5eaf-44c1-8b70-318586c8967f"],
 
-Cell["CreateDirectory[$projectDir]", "Program",
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"$projectDir", "=", "\"\</some/directory/you/choose\>\""}], 
+  ";"}], "\n", 
+ RowBox[{"CreateDirectory", "[", "$projectDir", "]"}]}], "Input",
+ CellLabel->"In[36]:=",
  CellID->688449637,ExpressionUUID->"03b779f4-5ef6-4a9f-b16e-5e5e82efb518"]
 }, Open  ]],
 
@@ -248,32 +252,91 @@ subdirectories our paclet will need:\
 \>", "Text",
  CellID->1724757778,ExpressionUUID->"0f11d174-a80a-4f55-8c2f-8a8fb4e10565"],
 
-Cell["\<\
-CreateDirectory[FileNameJoin[{$projectDir, \"MyPackage/Kernel\"}]]
-CreateDirectory[FileNameJoin[{$projectDir, \"MyPackage/LibraryResources\"}]]
-CreateFile[FileNameJoin[{$projectDir, \"MyPackage/PacletInfo.wl\"}]]\
-\>", "Program",
+Cell[BoxData[{
+ RowBox[{"CreateDirectory", "[", 
+  RowBox[{"FileNameJoin", "[", 
+   RowBox[{"{", 
+    RowBox[{"$projectDir", ",", " ", "\"\<MyPackage/Kernel\>\""}], "}"}], 
+   "]"}], "]"}], "\n", 
+ RowBox[{"CreateDirectory", "[", 
+  RowBox[{"FileNameJoin", "[", 
+   RowBox[{"{", 
+    RowBox[{"$projectDir", ",", " ", "\"\<MyPackage/LibraryResources\>\""}], 
+    "}"}], "]"}], "]"}]}], "Input",
  CellID->1849576584,ExpressionUUID->"82e9044c-e8f7-441c-bd2e-53e35401cd95"]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell[TextData[{
- "Populate the new ",
+ "We'll create and populate the ",
  StyleBox["PacletInfo.wl", "InlineCode"],
  " file with the following contents:"
 }], "Text",
  CellID->1659982801,ExpressionUUID->"19531986-d96d-471b-ae3e-4c44a4265320"],
 
-Cell[TextData[{
- "Paclet[\n    Name -> \"MyPackage\",\n    Version -> \"0.1\",\n    \
-MathematicaVersion -> \"12.1+\",\n    ",
- StyleBox["Extensions",
-  FontColor->GrayLevel[0]],
- " -> {\n        {\"Kernel\", Root -> \"Kernel\", Context -> \"My`\"},\n      \
-  {\"LibraryLink\"}\n    }\n]"
-}], "Program",
+Cell["\<\
+Paclet[
+    \"Name\" -> \"MyPackage\",
+    \"Version\" -> \"0.1\",
+    \"WolframVersion\" -> \"12.1+\",
+    \"Extensions\" -> {
+        {\"Kernel\", \"Root\" -> \"Kernel\", \"Context\" -> \"MyPackage`\"},
+        {\"LibraryLink\"}
+    }
+]\
+\>", "Program",
  CellID->357710006,ExpressionUUID->"b4dbfa46-5cd3-4d1b-bbfe-5bb53a9121c7"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Evaluate the ",
+ Cell[BoxData[
+  ButtonBox["Put",
+   BaseStyle->"Link"]], "InlineFormula",ExpressionUUID->
+  "3ba995e7-ae3e-4643-9527-967705388d1f"],
+ " below to initialize ",
+ StyleBox["PacletInfo.wl", "InlineCode"],
+ " with the content above",
+ ":"
+}], "Text",
+ CellID->677066262,ExpressionUUID->"9cd1d416-d7fe-49f2-84c1-24bfcdb28917"],
+
+Cell[BoxData[
+ RowBox[{"Put", "[", 
+  RowBox[{
+   InterpretationBox[
+    DynamicModuleBox[{Typeset`open = False}, 
+     TemplateBox[{"Expression", 
+       RowBox[{"Paclet", "[", 
+         DynamicBox[
+          FEPrivate`FrontEndResource["FEBitmaps", "IconizeEllipsis"]], "]"}], 
+       
+       GridBox[{{
+          RowBox[{
+            TagBox["\"Byte count: \"", "IconizedLabel"], "\[InvisibleSpace]", 
+            
+            TagBox["1032", "IconizedItem"]}]}}, 
+        GridBoxAlignment -> {"Columns" -> {{Left}}}, DefaultBaseStyle -> 
+        "Column", 
+        GridBoxItemSize -> {
+         "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], 
+       Dynamic[Typeset`open]},
+      "IconizedObject"]],
+    $CellContext`Paclet[
+    "Name" -> "MyPackage", "Version" -> "0.1", "WolframVersion" -> "12.1+", 
+     "Extensions" -> {{
+       "Kernel", "Root" -> "Kernel", "Context" -> "MyPackage`"}, {
+       "LibraryLink"}}],
+    SelectWithContents->True,
+    Selectable->False], ",", 
+   RowBox[{"FileNameJoin", "[", 
+    RowBox[{"{", 
+     RowBox[{"$projectDir", ",", "\"\<MyPackage/PacletInfo.wl\>\""}], "}"}], 
+    "]"}]}], "]"}]], "Input",
+ CellID->1928735347,ExpressionUUID->"22458b68-7fad-4067-b2a1-0de880db8124"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -313,7 +376,7 @@ $ tree
 |\[NonBreakingSpace]\[NonBreakingSpace] \:251c Kernel
 |\[NonBreakingSpace]\[NonBreakingSpace] \:251c LibraryResources
 |\[NonBreakingSpace]\[NonBreakingSpace] \:2514 PacletInfo.wl
-\:2514\[HorizontalLine]\[HorizontalLine] my-library
+\:2514 my-library
     \:251c Cargo.toml
     \:2514 src
         \:2514 lib.rs\
@@ -409,11 +472,11 @@ Cell[BoxData[
  RowBox[{"SyntaxHighlight", "[", 
   RowBox[{
   "\"\<\\\nuse wl_expr::Expr;\nuse wl_library_link::{WolframEngine, \
-wolfram_library_function};\n\n#[wolfram_library_function]\nfn \
+wolfram_library_function};\n\n#[wolfram_library_function]\npub fn \
 say_hello(engine: &WolframEngine, args: Vec<Expr>) -> Expr {\n\tExpr::string(\
 \\\"Hello, World!\\\")\n}\>\"", ",", "\"\<Rust\>\""}], 
   "]"}]], "Input", "ExcludedMaterial",
- CellLabel->"In[6]:=",
+ CellLabel->"In[42]:=",
  CellID->380412895,ExpressionUUID->"13799c00-8952-4d16-aefc-fd47709d48c7"],
 
 Cell[BoxData[
@@ -528,6 +591,14 @@ Cell[BoxData[
       "RowDefault"]},
     {
      TemplateBox[{
+       StyleBox["\"pub\"", 
+        RGBColor[
+        0.6549019607843137, 0.11372549019607843`, 0.36470588235294116`, 1.], 
+        StripOnInput -> False], 
+       StyleBox["\" \"", 
+        RGBColor[
+        0.19607843137254902`, 0.19607843137254902`, 0.19607843137254902`, 1.],
+         StripOnInput -> False], 
        StyleBox["\"fn\"", 
         RGBColor[
         0.6549019607843137, 0.11372549019607843`, 0.36470588235294116`, 1.], 
@@ -679,27 +750,30 @@ Cell[BoxData[
    GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
    GridBoxSpacings->{"Columns" -> {{Automatic}}, "Rows" -> {{0.5}}}],
   "Column"]], "Output",
- CellID->540709146,ExpressionUUID->"c6aa4f3c-c64c-4742-82d7-e7bfb3763ff7"]
-}, Closed]]
+ CellLabel->"Out[42]=",
+ CellID->382380582,ExpressionUUID->"63ffc91e-8258-49c2-9137-61e99da32774"]
+}, {2}]]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell[TextData[{
- "Then, add a new file to ",
- StyleBox["MyPackage/Kernel/", "InlineCode",
-  Background->GrayLevel[0.85]],
+ "Then, create and open a new file in ",
+ StyleBox["MyPackage/Kernel/", "InlineCode"],
  " called ",
- StyleBox["MyPackage.wl", "InlineCode",
-  Background->GrayLevel[0.85]],
+ StyleBox["MyPackage.wl", "InlineCode"],
  ":"
 }], "Text",
  CellID->2032601565,ExpressionUUID->"c16cd366-cc4e-456a-a7eb-669ea89b6fda"],
 
-Cell["\<\
-NotebookOpen[CreateFile[
-  FileNameJoin[{$projectDir, \"MyPackage/Kernel/MyPackage.wl\"}]]]\
-\>", "Program",
+Cell[BoxData[
+ RowBox[{"NotebookOpen", "[", 
+  RowBox[{"CreateFile", "[", "\n", "  ", 
+   RowBox[{"FileNameJoin", "[", 
+    RowBox[{"{", 
+     RowBox[{
+     "$projectDir", ",", " ", "\"\<MyPackage/Kernel/MyPackage.wl\>\""}], 
+     "}"}], "]"}], "]"}], "]"}]], "Input",
  CellID->1971300495,ExpressionUUID->"116ec361-eb31-4be6-b7ef-dc807ab455cc"]
 }, Open  ]],
 
@@ -726,9 +800,9 @@ $ContextPath = {}\n},\n\tlibraryFunction[args]\n]\n\nEnd[]\nEndPackage[]"
 Cell[CellGroupData[{
 
 Cell[TextData[{
- "Next, use Rust build tool, ",
- StyleBox["cargo", "InlineCode",
-  Background->GrayLevel[0.85]],
+ "Next, use the Rust build tool, ",
+ StyleBox["cargo,", "InlineCode",
+  FontColor->GrayLevel[0]],
  " to build the Rust code into a dynamic library."
 }], "Text",
  CellID->1245738120,ExpressionUUID->"aaa3a911-8317-46e3-b4b4-199c9ab9c34c"],
@@ -742,16 +816,84 @@ $ cargo build\
 
 Cell[CellGroupData[{
 
-Cell["\<\
-This will build the Rust code and output a dynamic library at \
-target/debug/libmy_library.dylib\
-\>", "Text",
+Cell[TextData[{
+ "This will build the Rust code and output a dynamic library at ",
+ StyleBox["target/debug/libmy_library.dylib. ", "InlineCode"],
+ "Copy that file to the ",
+ StyleBox["LibraryResources", "InlineCode"],
+ " directory created earlier: "
+}], "Text",
  CellID->1450824590,ExpressionUUID->"374f524e-20cf-42f5-86d4-089efda867be"],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
- RowBox[{"2", "+", "2"}]], "Input",
- CellID->1018055652,ExpressionUUID->"fca5359b-f1ba-4a7a-9283-1207c384f3a3"]
+ RowBox[{"With", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"name", "=", 
+     RowBox[{"\"\<libmy_library.\>\"", "<>", 
+      RowBox[{"System`Dump`LibraryExtension", "[", "]"}]}]}], "}"}], ",", 
+   "\[IndentingNewLine]", 
+   RowBox[{"CopyFile", "[", "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"FileNameJoin", "[", 
+      RowBox[{"{", 
+       RowBox[{"$projectDir", ",", 
+        RowBox[{"\"\<my-library/target/debug/\>\"", "<>", "name"}]}], " ", 
+       "}"}], "]"}], ",", "\[IndentingNewLine]", 
+     RowBox[{"FileNameJoin", "[", 
+      RowBox[{"{", 
+       RowBox[{"$projectDir", ",", 
+        RowBox[{"\"\<MyPackage/LibraryResources/\>\"", "<>", "name"}]}], 
+       "}"}], "]"}]}], "\n", "]"}]}], "]"}]], "Input",
+ CellLabel->"In[44]:=",
+ CellID->603917882,ExpressionUUID->"da7244ef-01bb-46c1-981e-a51fea3af91c"],
+
+Cell[BoxData["\<\"/some/directory/you/choose/my-library/target/debug/libmy_\
+library.dylib\"\>"], "Echo",
+ CellID->1677386697,ExpressionUUID->"0dd476e9-8379-4779-95c8-9c22b68632c0"],
+
+Cell[BoxData["$Failed"], "Output",
+ CellLabel->"Out[44]=",
+ CellID->866830757,ExpressionUUID->"3ffe4f10-af77-4867-91b0-e23fc0355d44"]
 }, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+The package is now finished, and we can load our function into the Wolfram \
+Language! Evaluate\
+\>", "Text",
+ CellID->1130586685,ExpressionUUID->"80edbe85-5cca-43e2-b99d-df56a4dac11b"],
+
+Cell[BoxData[{
+ RowBox[{"PacletDirectoryAdd", "[", "$projectDir", "]"}], "\n", 
+ RowBox[{"Needs", "[", "\"\<MyPackage`\>\"", "]"}]}], "Input",
+ CellID->24755907,ExpressionUUID->"64a8fcef-5ff3-4496-b7d6-6a4831dbaeeb"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "You should now be able to call ",
+ StyleBox["MyFunction", "InlineCode"],
+ ":"
+}], "Text",
+ CellID->1227043487,ExpressionUUID->"f5f5f72e-bc11-48fa-bf46-c1ee33465b80"],
+
+Cell[BoxData[
+ RowBox[{"MyFunction", "[", "]"}]], "Input",
+ CellID->2134896712,ExpressionUUID->"1e783700-4dec-4fd1-b6a9-5f553fb94272"]
+}, Open  ]],
+
+Cell[TextData[{
+ "If ",
+ StyleBox["\"Hello, World!\"", "InlineCode"],
+ " was returned, everything is working properly."
+}], "Text",
+ CellID->1023364555,ExpressionUUID->"c4e94be2-e760-491b-a032-f53b9e2ea4ec"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1059,8 +1201,8 @@ Cell["XXXX", "TutorialRelatedLinks",
 }, Open  ]]
 }, Open  ]]
 },
-WindowSize->{855, 1068},
-WindowMargins->{{995, Automatic}, {Automatic, 189}},
+WindowSize->{855, 1084},
+WindowMargins->{{977, Automatic}, {Automatic, 242}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TaggingRules->{
  "Author" -> "connorgray", "CreationDate" -> "04-16-2020 09:46:50", 
