@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "nightly", feature(proc_macro_diagnostic))]
+
 mod function;
 mod gen_wstp;
 mod gen_wxf;
@@ -79,43 +81,97 @@ fn wolfram_library_function_impl(
         ));
     }
 
-    let tokens = match options.protocol {
-        // WSTP is the default protocol.
-        // TODO: Change this default protocol if it turns out WXF is faster.
-        Some(Protocol::WSTP) | None => match function.arguments_mode {
+    // WSTP is the default protocol.
+    // TODO: Change this default protocol if it turns out WXF is faster.
+    let protocol = match options.protocol {
+        Some(Protocol::WSTP) | None => Protocol::WSTP,
+        Some(Protocol::WXF) => Protocol::WXF,
+    };
+
+    //
+    // Generate the wrapper function
+    //
+
+    let tokens = match protocol {
+        Protocol::WSTP => match function.arguments_mode {
             ArgumentsMode::ExprList => gen_wstp::gen_arg_mode_expr_list(
                 &function.item,
                 function.name,
-                wrapper_function_name,
+                wrapper_function_name.clone(),
             ),
             ArgumentsMode::PatternMatches {
                 ref pattern,
                 ref pattern_parameters,
             } => gen_wstp::gen_arg_mode_pattern(
                 &function,
-                wrapper_function_name,
+                wrapper_function_name.clone(),
                 &pattern,
                 &pattern_parameters,
             ),
         },
-        Some(Protocol::WXF) => match function.arguments_mode {
+        Protocol::WXF => match function.arguments_mode {
             ArgumentsMode::ExprList => gen_wxf::gen_arg_mode_expr_list(
                 &function.item,
                 function.name,
-                wrapper_function_name,
+                wrapper_function_name.clone(),
             ),
             ArgumentsMode::PatternMatches {
                 ref pattern,
                 ref pattern_parameters,
             } => gen_wxf::gen_arg_mode_pattern(
                 &function,
-                wrapper_function_name,
+                wrapper_function_name.clone(),
                 &pattern,
                 &pattern_parameters,
             ),
         },
     };
 
+    // If the nightly Diagnostic API is available, use it to insert a `note:` which
+    // includes the WL code needed to load the generated wrapper function. This hopefully
+    // minimizes the effort needed on the part of the developer to discover how to load
+    // their function.
+    // TODO: Provide a mechanism for silencing these notes; when the user has more than a
+    //       couple of `#[wolfram_library_function]` invocations, this quickly makes
+    //       the build output quite noisy.
+    // NOTE: One planned feature of wl-library-link is to provide safe wrappers around
+    //       many of the other datatypes provided by C LibraryLink (e.g. SparseArray,
+    //       Image, NumericArray's, etc.). This `note:` functionality will, I think, prove
+    //       quite useful in those situations, because it will enable the user to specify
+    //       the type of their function exactly using the safe wl-library-link wrapper
+    //       types, and have the appropriate WL code to load the function generated
+    //       automatically. The only thing the user will be required to do is copy and
+    //       paste the changed WL whenever they make a change to the functions signature.
+    #[cfg(feature = "nightly")]
+    {
+        use proc_macro::{Diagnostic, Level};
+
+        // let location = match std::env::var("CARGO_MANIFEST_IR") {
+        //     Ok(location) => format!("{}/target/debug/<name>.dylib", location),
+        //     Err(_) => String::from("<path/to/library.dylib>"),
+        // };
+        let location = "_";
+
+        let message = match protocol {
+            Protocol::WSTP => format!(
+                "load using `LibraryFunctionLoad[{location}, \"{wrapper}\", LinkObject, LinkObject]`",
+                location = location,
+                wrapper = wrapper_function_name,
+            ),
+            Protocol::WXF => format!(
+                "load using `LibraryFunctionLoad[{location}, \"{wrapper}\", {{LibraryDataType[ByteArray]}}, LibraryDataType[ByteArray]]`",
+                location = location,
+                wrapper = wrapper_function_name,
+            ),
+        };
+
+        Diagnostic::spanned(
+            vec![function.item.sig.ident.span().unwrap()],
+            Level::Note,
+            message,
+        )
+        .emit()
+    }
 
     Ok(tokens)
 }

@@ -24,7 +24,7 @@ wl-parse         = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-parse.g
 
 [features]
 default = []
-nightly = []
+nightly = ["wolfram-library-function-macro/nightly"]
 
 ############
 # Examples #
