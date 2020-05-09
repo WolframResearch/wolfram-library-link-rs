@@ -49,8 +49,8 @@ pub unsafe extern "C" fn demo_function(
 /// LibraryFunctionLoad[
 ///     "/path/to/target/debug/examples/libraw_librarylink_function.dylib",
 ///     "demo_function",
-///     {Integer, Integer},
-///     Integer
+///     {},
+///     LibraryDataType[ByteArray]
 /// ]
 /// ```
 #[no_mangle]
@@ -117,8 +117,8 @@ use wl_expr::Expr;
 /// function = LibraryFunctionLoad[
 ///     "/path/to/target/debug/examples/libraw_librarylink_function.dylib",
 ///     "demo_function",
-///     {Integer, Integer},
-///     Integer
+///     {},
+///     LibraryDataType[ByteArray]
 /// ];
 ///
 /// BinaryDeserialize[function[]]
