@@ -1,5 +1,6 @@
 mod function;
 mod gen_wstp;
+mod gen_wxf;
 
 use proc_macro2::TokenStream;
 
@@ -19,6 +20,16 @@ struct Options {
     /// The name to give the generated wrapper function. This is the name used as the
     /// 2nd argument of `LoadLibraryFunction`.
     name: Option<Ident>,
+    protocol: Option<Protocol>,
+}
+
+#[derive(Debug, PartialEq)]
+enum Protocol {
+    /// Pass expressions using a WSTP LinkObject.
+    WSTP,
+    /// Pass expresions by serializing them to WXF and then deserializing them on the
+    /// other end of the link.
+    WXF,
 }
 
 enum ArgumentsMode {
@@ -68,20 +79,43 @@ fn wolfram_library_function_impl(
         ));
     }
 
-    let tokens = match function.arguments_mode {
-        ArgumentsMode::ExprList => {
-            gen_wstp::gen_arg_mode_expr_list(&function.item, function.name, wrapper_function_name)
+    let tokens = match options.protocol {
+        // WSTP is the default protocol.
+        // TODO: Change this default protocol if it turns out WXF is faster.
+        Some(Protocol::WSTP) | None => match function.arguments_mode {
+            ArgumentsMode::ExprList => gen_wstp::gen_arg_mode_expr_list(
+                &function.item,
+                function.name,
+                wrapper_function_name,
+            ),
+            ArgumentsMode::PatternMatches {
+                ref pattern,
+                ref pattern_parameters,
+            } => gen_wstp::gen_arg_mode_pattern(
+                &function,
+                wrapper_function_name,
+                &pattern,
+                &pattern_parameters,
+            ),
         },
-        ArgumentsMode::PatternMatches {
-            ref pattern,
-            ref pattern_parameters,
-        } => gen_wstp::gen_arg_mode_pattern(
-            &function,
-            wrapper_function_name,
-            &pattern,
-            &pattern_parameters,
-        ),
+        Some(Protocol::WXF) => match function.arguments_mode {
+            ArgumentsMode::ExprList => gen_wxf::gen_arg_mode_expr_list(
+                &function.item,
+                function.name,
+                wrapper_function_name,
+            ),
+            ArgumentsMode::PatternMatches {
+                ref pattern,
+                ref pattern_parameters,
+            } => gen_wxf::gen_arg_mode_pattern(
+                &function,
+                wrapper_function_name,
+                &pattern,
+                &pattern_parameters,
+            ),
+        },
     };
+
 
     Ok(tokens)
 }
@@ -90,6 +124,7 @@ fn parse_attributes(attr_args: AttributeArgs) -> Result<Options> {
     use syn::NestedMeta;
 
     let mut name_option: Option<Ident> = None;
+    let mut protocol: Option<Protocol> = None;
 
     for attr in attr_args {
         let MetaNameValue {
@@ -106,24 +141,34 @@ fn parse_attributes(attr_args: AttributeArgs) -> Result<Options> {
             },
         };
 
-        if !path.is_ident("name") {
+        if path.is_ident("name") {
+            // Verify that we have not already parsed a value for the `name` option. E.g,
+            // prevent `#[wolfram_library_function(name = "name1", name = "name2")]`.
+            if name_option.is_some() {
+                return Err(Error::new(path.span(), "attribute appears more than once"));
+            }
+
+            debug_assert!(name_option == None);
+            name_option = Some(parse_name_option_value(lit)?);
+        } else if path.is_ident("protocol") {
+            if protocol.is_some() {
+                return Err(Error::new(path.span(), "attribute appears more than once"));
+            }
+
+            debug_assert!(protocol == None);
+            protocol = Some(parse_mode_option_value(lit)?);
+        } else {
             return Err(Error::new(
                 path.span(),
-                "expected `name = \"..\"` attribute",
+                "expected `name = \"..\"` or `protocol = \"..\"` attribute",
             ));
         }
-
-        // Verify that we have not already parsed a value for the `name` option. E.g,
-        // prevent `#[wolfram_library_function(name = "name1", name = "name2")]`.
-        if name_option.is_some() {
-            return Err(Error::new(path.span(), "attribute appears more than once"));
-        }
-
-        debug_assert!(name_option == None);
-        name_option = Some(parse_name_option_value(lit)?);
     }
 
-    Ok(Options { name: name_option })
+    Ok(Options {
+        name: name_option,
+        protocol,
+    })
 }
 
 fn parse_name_option_value(lit: syn::Lit) -> Result<Ident> {
@@ -145,4 +190,22 @@ fn parse_name_option_value(lit: syn::Lit) -> Result<Ident> {
     Ok(name_ident)
 }
 
+fn parse_mode_option_value(lit: syn::Lit) -> Result<Protocol> {
+    let litstr = match lit {
+        Lit::Str(string) => string,
+        _ => return Err(Error::new(lit.span(), "expected string literal")),
+    };
 
+    let mode = match litstr.value().as_str() {
+        "WXF" => Protocol::WXF,
+        "WSTP" => Protocol::WSTP,
+        _ => {
+            return Err(Error::new(
+                litstr.span(),
+                "valid modes are 'WXF' and 'WSTP'",
+            ))
+        },
+    };
+
+    Ok(mode)
+}

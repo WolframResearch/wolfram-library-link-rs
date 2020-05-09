@@ -53,7 +53,9 @@
 #[doc(hidden)]
 pub mod catch_panic;
 
+use std::convert::TryFrom;
 use std::ffi::CString;
+use std::mem::MaybeUninit;
 
 use wl_expr::{forms::ToPrettyExpr, Expr, ExprKind};
 use wl_library_link_sys::{mint, WolframLibraryData, LIBRARY_NO_ERROR, WSLINK};
@@ -69,6 +71,8 @@ use wl_wstp::WSTPLink;
 /// Re-export of `wl_library_link_sys`
 pub use wl_library_link_sys as sys;
 pub use wl_wstp as wstp;
+
+use self::sys::MArgument;
 
 /// Attribute to generate a [LibraryLink][library-link]-compatible wrapper around a Rust
 /// function.
@@ -208,7 +212,7 @@ impl WolframEngine {
             Ok(returned) => returned,
             Err(msg) => panic!(
                 "WolframEngine::evaluate: evaluation of expression failed: \
-                {}\n\texpression: {}",
+                {}: \n\texpression: {}",
                 msg, expr
             ),
         }
@@ -265,13 +269,97 @@ impl WolframEngine {
 
         Ok(())
     }
+
+    unsafe fn new_numeric_byte_array(&self, length: usize) -> NumericArray {
+        use crate::sys::{MNumericArray, MNumericArray_Data_Type};
+
+        let mut byte_array: MNumericArray = std::ptr::null_mut();
+
+        let rank = 1;
+
+        let na_funs = *(*self.wl_lib).numericarrayLibraryFunctions;
+
+        let err_code = (na_funs.MNumericArray_new.unwrap())(
+            MNumericArray_Data_Type::MNumericArray_Type_UBit8,
+            rank,
+            &i64::try_from(length).expect("NumericArray length overflows i64"),
+            &mut byte_array,
+        );
+
+        if err_code != 0 {
+            panic!(
+                "new_numeric_error(): error creating new NumericArray: {}",
+                err_code
+            );
+        }
+
+        NumericArray(byte_array)
+    }
 }
 
 // TODO: Allow any type which implements FromExpr in wrapper parameter lists?
 
+/// Extremely basic wrapper around raw MNumericArray. Basically only suitable for working
+/// with ByteArray[]'s (for serializing/deserializing WXF).
+struct NumericArray(self::sys::MNumericArray);
+
+impl NumericArray {
+    /// # Safety
+    ///
+    /// This method must only be called when it's assured that the data contained by this
+    /// NumericArray has been initialized.
+    unsafe fn data_bytes(&self) -> &[u8] {
+        let NumericArray(numeric_array) = *self;
+
+        let data_ptr: *mut std::ffi::c_void = (*numeric_array).data;
+        let data_ptr = data_ptr as *mut u8;
+
+        std::slice::from_raw_parts(data_ptr, self.length_in_bytes())
+    }
+
+    unsafe fn data_bytes_mut(&mut self) -> &mut [MaybeUninit<u8>] {
+        let NumericArray(numeric_array) = self;
+
+        let data_ptr: *mut std::ffi::c_void = (**numeric_array).data;
+        let data_ptr = data_ptr as *mut MaybeUninit<u8>;
+
+        std::slice::from_raw_parts_mut(data_ptr, self.length_in_bytes())
+    }
+
+    fn length_in_bytes(&self) -> usize {
+        let dims = self.dimensions();
+
+        let length: i64 = dims.iter().product();
+        let length =
+            usize::try_from(length).expect("NumericArray length overflows usize");
+
+        // FIXME: This should multiple `length` by the size-in-bytes of
+        //        st_MNumericArray.tensor_property_type.
+        length
+    }
+
+    fn dimensions(&self) -> &[self::sys::mint] {
+        let numeric_array: self::sys::st_MNumericArray = unsafe { *self.0 };
+
+        let rank = usize::try_from(numeric_array.rank)
+            .expect("NumericArray rank overflows usize");
+
+        let dims: *mut self::sys::mint = numeric_array.dims;
+
+        debug_assert!(rank != 0);
+        debug_assert!(!dims.is_null());
+
+        unsafe { std::slice::from_raw_parts(dims, rank) }
+    }
+}
+
 //======================================
 // #[wolfram_library_function] helpers
 //======================================
+
+//==================
+// WSTP helpers
+//==================
 
 /// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
 ///
@@ -351,4 +439,102 @@ pub fn call_wstp_wolfram_library_function<
             LIBRARY_NO_ERROR
         },
     }
+}
+
+//==================
+// WXF helpers
+//==================
+
+/// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
+///
+/// [wlf]: attr.wolfram_library_function.html
+pub fn call_wxf_wolfram_library_function_expr_list(
+    libdata: WolframLibraryData,
+    wxf_argument: MArgument,
+    wxf_result: MArgument,
+    function: fn(&WolframEngine, Vec<Expr>) -> Expr,
+) -> std::os::raw::c_uint {
+    call_wxf_wolfram_library_function(
+        libdata,
+        wxf_argument,
+        wxf_result,
+        |engine: &WolframEngine, argument_expr: Expr| -> Expr {
+            let arguments = match argument_expr.to_kind() {
+                ExprKind::Normal(normal) => normal.contents,
+                _ => panic!("WXF argument expression was non-Normal"),
+            };
+
+            function(engine, arguments)
+        },
+    )
+}
+
+/// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
+///
+/// [wlf]: attr.wolfram_library_function.html
+pub fn call_wxf_wolfram_library_function<
+    F: FnOnce(&WolframEngine, Expr) -> Expr + std::panic::UnwindSafe,
+>(
+    libdata: WolframLibraryData,
+    wxf_argument: MArgument,
+    wxf_result: MArgument,
+    function: F,
+) -> std::os::raw::c_uint {
+    use self::catch_panic::{call_and_catch_panic, CaughtPanic};
+
+    let result: Result<(), CaughtPanic> = unsafe {
+        call_and_catch_panic(|| {
+            // Contruct the engine
+            let engine = WolframEngine::from_library_data(libdata);
+
+            let argument_numeric_array = NumericArray(*wxf_argument.numeric);
+
+            let arguments = wxf::deserialize(argument_numeric_array.data_bytes()).expect(
+                "wolfram_library_function: failed to deserialize argument WXF data",
+            );
+
+            let result: Expr = function(&engine, arguments);
+
+            *wxf_result.numeric = wxf_numeric_array_from_expr(&engine, &result).0;
+        })
+    };
+
+    match result {
+        Ok(()) => LIBRARY_NO_ERROR,
+        // NOTE: This block tries to minimize calls to functions which could potentially
+        //       panic, on a best-effort basis. If a panic were to occur within this code
+        //       it would not be caught and the Rust stack unwinder would likely abort
+        //       the Kernel process, which isn't very user friendly.
+        Err(caught_panic) => {
+            let pretty_expr = caught_panic.to_pretty_expr();
+
+            unsafe {
+                let engine = WolframEngine::from_library_data(libdata);
+                *wxf_result.numeric =
+                    wxf_numeric_array_from_expr(&engine, &pretty_expr).0;
+            }
+
+            LIBRARY_NO_ERROR
+        },
+    }
+}
+
+unsafe fn wxf_numeric_array_from_expr(
+    engine: &WolframEngine,
+    expr: &Expr,
+) -> NumericArray {
+    let result_wxf: Vec<u8> = wxf::serialize(expr)
+        .expect("wolfram_library_function: failed to serialize result expression to WXF");
+
+    let mut numeric_array = engine.new_numeric_byte_array(result_wxf.len());
+
+    debug_assert!(numeric_array.data_bytes_mut().len() == result_wxf.len());
+
+    // FIXME: It's very inefficient to do this copy 1 byte at a time. Replace this with
+    //        std::ptr::copy_nonoverlapping().
+    for (index, byte) in numeric_array.data_bytes_mut().iter_mut().enumerate() {
+        *byte = MaybeUninit::new(result_wxf[index]);
+    }
+
+    numeric_array
 }
