@@ -1,4 +1,4 @@
-use syn::{Item, Ident, Result, spanned::Spanned, punctuated::Punctuated, Error};
+use syn::{punctuated::Punctuated, spanned::Spanned, Error, Ident, Item, Result};
 
 use crate::ArgumentsMode;
 

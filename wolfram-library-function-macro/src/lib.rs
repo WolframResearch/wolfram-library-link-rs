@@ -4,8 +4,7 @@ mod gen_wstp;
 use proc_macro2::TokenStream;
 
 use syn::{
-    spanned::Spanned, AttributeArgs, Error, Ident, Lit,
-    Meta, MetaNameValue, Result,
+    spanned::Spanned, AttributeArgs, Error, Ident, Lit, Meta, MetaNameValue, Result,
 };
 
 use self::function::Function;
