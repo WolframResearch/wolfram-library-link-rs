@@ -20,6 +20,7 @@ cfg-if = "0.1"
 
 [dev-dependencies]
 wl-pattern-match = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-pattern-match.git" }
+wxf = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wxf.git" }
 
 [features]
 default = []
