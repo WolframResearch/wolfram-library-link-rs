@@ -48,12 +48,6 @@ pub(crate) fn gen_arg_mode_pattern(
     quote::quote! {
         #fn_item
 
-        #[derive(wl_expr::FromExpr)]
-        #[pattern({ #pattern })]
-        #[allow(non_camel_case_types)]
-        struct #struct_name {
-            #(#parameter_pairs)*
-        }
 
         #[no_mangle]
         pub extern "C" fn #wrapper_function_name(
@@ -67,6 +61,13 @@ pub(crate) fn gen_arg_mode_pattern(
                 libdata,
                 unsafe_link,
                 |engine: &WolframEngine, argument_expr: Expr| -> Expr {
+                    #[derive(wl_expr::FromExpr)]
+                    #[pattern({ #pattern })]
+                    #[allow(non_camel_case_types)]
+                    struct #struct_name {
+                        #(#parameter_pairs)*
+                    }
+
                     // `argument_expr` should have the head `List`, due to how LibraryFunction[]
                     // is implemented.
                     let args = match <#struct_name as FromExpr>::from_expr(&argument_expr) {
