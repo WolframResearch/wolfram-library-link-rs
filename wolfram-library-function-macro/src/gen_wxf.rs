@@ -47,7 +47,7 @@ pub(crate) fn gen_arg_mode_pattern<'a>(
         ::wl_library_link::call_wxf_wolfram_library_function(
             libdata,
             wxf_argument,
-            wxf_result
+            wxf_result,
             |engine: &WolframEngine, argument_expr: Expr| -> Expr {
                 #[derive(wl_expr::FromExpr)]
                 #[pattern({ #pattern })]
