@@ -11,7 +11,6 @@ wl-library-link-sys            = { path = "./wl-library-link-sys" }
 
 wl-wstp             = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-wstp.git" }
 wl-expr             = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr.git" }
-wl-parse            = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-parse.git" }
 wl-symbol-table     = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-symbol-table.git" }
 
 lazy_static = "^1"
@@ -20,6 +19,7 @@ cfg-if = "0.1"
 
 [dev-dependencies]
 wl-pattern-match = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-pattern-match.git" }
+wl-parse         = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-parse.git" }
 wxf = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wxf.git" }
 
 [features]

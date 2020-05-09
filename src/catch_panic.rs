@@ -8,7 +8,7 @@ use std::time::Instant;
 use backtrace::Backtrace;
 use lazy_static::lazy_static;
 
-use wl_expr::{forms::ToPrettyExpr, Expr};
+use wl_expr::{forms::ToPrettyExpr, Expr, Symbol};
 use wl_symbol_table as sym;
 
 lazy_static! {
@@ -47,7 +47,7 @@ impl ToPrettyExpr for CaughtPanic {
         let location = Expr::string(location.unwrap_or("Unknown".into()));
         let backtrace = display_backtrace(backtrace);
 
-        let head = Expr::symbol(wl_parse::parse_symbol("LibraryLink`Panic").unwrap());
+        let head = Expr::symbol(Symbol::new("LibraryLink`Panic").unwrap());
 
         Expr! {
             Failure['head[Panel[Column[{
