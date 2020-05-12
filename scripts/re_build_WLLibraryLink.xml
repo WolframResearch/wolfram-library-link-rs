@@ -1,0 +1,13 @@
+<project name='WLLibraryLink' basedir='..'>
+    
+    <property name='component' value='${ant.project.name}' />
+    
+    <property name='app.name' value='${component}' />
+    <property name='inputDir' value='${basedir}/Documentation' />
+    <property name='language' value='### Must be set by Jenkins ###' />
+    <property name='system_id' value='### Must be set by Jenkins ###' />
+    
+    <property environment='env' />
+    <import file='${env.RE_ANTLIBRARY_HOME}/ant-lib.xml' />
+    
+</project>
