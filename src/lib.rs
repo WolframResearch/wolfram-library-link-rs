@@ -60,9 +60,9 @@ use std::mem::MaybeUninit;
 use wl_expr::{forms::ToPrettyExpr, Expr, ExprKind};
 use wl_library_link_sys::{mint, WolframLibraryData, LIBRARY_NO_ERROR, WSLINK};
 use wl_symbol_table as sym;
-use wl_wstp::WSTPLink;
+use wstp::Link;
 
-// Re-export `wl_library_link_sys` and `wl_wstp`.
+// Re-export `wl_library_link_sys` and `wstp`.
 //
 // TODO(!): Only selectively re-export the parts of these API's which are actually
 //          needed? These should at least have module documentation saying that they
@@ -70,7 +70,7 @@ use wl_wstp::WSTPLink;
 
 /// Re-export of `wl_library_link_sys`
 pub use wl_library_link_sys as sys;
-pub use wl_wstp as wstp;
+pub use wstp;
 
 use self::sys::MArgument;
 
@@ -221,14 +221,16 @@ impl WolframEngine {
     /// Attempt to evaluate `expr`, returning an error if a WSTP transport error occurred
     /// or evaluation failed.
     pub fn try_evaluate(&self, expr: &Expr) -> Result<Expr, String> {
-        let link = self.get_wstp_link();
+        let mut link = self.get_wstp_link();
 
         // Send an EvaluatePacket['expr].
-        let _: () = link.put_expr(&Expr! { EvaluatePacket['expr] })?;
+        let _: () = link
+            .put_expr(&Expr! { EvaluatePacket['expr] })
+            .map_err(|e| e.to_string())?;
 
         let _: () = self.process_wstp_link(&link)?;
 
-        let return_packet: Expr = link.get_expr()?;
+        let return_packet: Expr = link.get_expr().map_err(|e| e.to_string())?;
 
         let returned_expr = match return_packet.kind() {
             ExprKind::Normal(normal) => {
@@ -245,15 +247,15 @@ impl WolframEngine {
         Ok(returned_expr)
     }
 
-    fn get_wstp_link(&self) -> WSTPLink {
+    fn get_wstp_link(&self) -> Link {
         unsafe {
             let unsafe_link = (self.getWSLINK)(self.wl_lib);
             // Go from *mut MLINK -> *mut WSLINK
-            WSTPLink::new(unsafe_link as *mut _)
+            Link::unchecked_new(unsafe_link as *mut _)
         }
     }
 
-    fn process_wstp_link(&self, link: &WSTPLink) -> Result<(), String> {
+    fn process_wstp_link(&self, link: &Link) -> Result<(), String> {
         let raw_link = unsafe { link.raw_link() };
 
         // Process the packet on the link.
@@ -262,7 +264,7 @@ impl WolframEngine {
         if code == 0 {
             let error_message = link
                 .error_message()
-                .unwrap_or_else(|| "unknown error occurred on WSTPLink".into());
+                .unwrap_or_else(|| "unknown error occurred on WSTP Link".into());
 
             return Err(error_message);
         }
@@ -403,14 +405,14 @@ pub fn call_wstp_wolfram_library_function<
             // Contruct the engine
             let engine = WolframEngine::from_library_data(libdata);
 
-            let link = WSTPLink::new(unsafe_link);
+            let mut link = Link::unchecked_new(unsafe_link);
 
             let arguments: Expr = match link.get_expr() {
                 Ok(args) => args,
                 Err(message) => {
                     let _: Result<_, _> = link.put_expr(&Expr! {
                         Failure["LibraryFunctionWSTPError", <|
-                            "Message" -> %[Expr::string(message)]
+                            "Message" -> %[Expr::string(message.to_string())]
                         |>]
                     });
                     return;

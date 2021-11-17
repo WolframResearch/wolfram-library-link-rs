@@ -14,7 +14,7 @@ Features:
   * Check for and respond to Wolfram language aborts while in Rust code.
   * Seamlessly construct native Rust datastructures from expressions using the pattern
     language via `derive(FromExpr)`.
-  * Safe API for the WSTP, using [`wl-wstp`][wl-wstp]
+  * Safe API for the WSTP, using the [`wstp`][wstp] crate.
 
 Advantages over the LibraryLink/WSTP C API:
 
@@ -116,14 +116,13 @@ pub fn sum_of_numbers(engine: &WolframEngine, arguments: Vec<Expr>) -> Expr {
 
 ### Writing a LibraryLink ABI compatible function manually
 
-This example makes use of the [`wl-wstp`][wl-wstp] library to provide a safe wrapper around
+This example makes use of the [`wstp`][wstp] crate to provide a safe wrapper around
 around the WSTP link object, which can be used to read the argument expression and write
 out the return expression.
 
 ```rust
 use wl_library_link::{WolframLibraryData, LIBRARY_NO_ERROR, LIBRARY_FUNCTION_ERROR};
-use wl_wstp::WSTPLink;
-use wl_wstp_sys::WSLINK;
+use wstp::{Link, sys::WSLINK};
 
 #[no_mangle]
 pub extern "C" fn wstp_function(
@@ -131,7 +130,7 @@ pub extern "C" fn wstp_function(
     unsafe_link: WSLINK,
 ) -> c_uint {
     let link = unsafe {
-        WSTPLink::new(unsafe_link)
+        Link::unchecked_new(unsafe_link)
     };
 
     let expr = match link.get_expr() {
@@ -181,7 +180,7 @@ use std::os::raw::{c_int, c_uint};
 use wl_library_link::{
     mint, MArgument, WolframLibraryData, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
 };
-use wl_wstp_sys::{
+use wstp_sys::{
     WSGetInteger, WSNewPacket, WSPutInteger, WSTestHead, WSLINK,
 };
 
@@ -232,7 +231,7 @@ pub unsafe extern "C" fn demo_wstp_function(
 }
 ```
 
-[wl-wstp]: https://stash.wolfram.com/users/connorg/repos/wl-wstp/browse
+[wstp]: https://stash.wolfram.com/users/connorg/repos/wstp/browse
 [cargo-paclet]: https://stash.wolfram.com/users/connorg/repos/cargo-paclet/browse
 [library-link]: https://reference.wolfram.com/language/guide/LibraryLink.html
 [library-function-load]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html

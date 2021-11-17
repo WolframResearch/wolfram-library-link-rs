@@ -6,7 +6,6 @@ use wl_expr::{
 };
 use wl_library_link::{wolfram_library_function, WolframEngine};
 
-
 #[derive(FromExpr)]
 #[pattern(numbers:{___})]
 struct Numbers {

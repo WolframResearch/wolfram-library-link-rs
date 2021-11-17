@@ -3,7 +3,7 @@
 //! WSTP would.
 //!
 //! This also includes an example of mixing the low-level LibraryLink bindings with the
-//! higher-level bindings provided by the `wl-wstp` crate.
+//! higher-level bindings provided by the `wstp` crate.
 
 use std::os::raw::{c_int, c_uint};
 
@@ -11,9 +11,9 @@ use wl_expr::Expr;
 use wl_library_link::sys::{
     WolframLibraryData, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
 };
-use wl_wstp::{
+use wstp::{
     sys::{WSGetInteger, WSNewPacket, WSPutInteger, WSTestHead, WSLINK},
-    WSTPLink,
+    Link,
 };
 
 /// This function is loaded by evaluating:
@@ -80,14 +80,15 @@ pub extern "C" fn demo_wstp_function_callback(
     lib: WolframLibraryData,
     link: WSLINK,
 ) -> c_uint {
-    let link = unsafe { WSTPLink::new(link) };
+    let mut link = unsafe { Link::unchecked_new(link) };
 
     link.get_expr().unwrap();
 
     let callback_link = unsafe { (*lib).getWSLINK.unwrap()(lib) };
 
     {
-        let safe_callback_link = unsafe { WSTPLink::new(callback_link as *mut _) };
+        let mut safe_callback_link =
+            unsafe { Link::unchecked_new(callback_link as *mut _) };
 
         safe_callback_link
             .put_expr(&Expr! {
@@ -101,7 +102,7 @@ pub extern "C" fn demo_wstp_function_callback(
 
         // FIXME: Is this necessary? -- Answer, yes, otherwise the link has unread data.
         if let Err(message) = safe_callback_link.get_expr() {
-            link.put_expr(&Expr::string(message)).unwrap();
+            link.put_expr(&Expr::string(message.to_string())).unwrap();
             return LIBRARY_NO_ERROR;
         }
     }

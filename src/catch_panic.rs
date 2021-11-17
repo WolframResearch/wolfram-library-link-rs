@@ -22,12 +22,12 @@ lazy_static! {
 #[derive(Clone)]
 pub struct CaughtPanic {
     /// Note: In certain circumstances, this message will NOT match the message used
-    ///       in panic!(). This can happen when user code changes the panic hook, or when
-    ///       the panic occurs in a different thread from the one `call_and_catch_panic()`
-    ///       was called in.
+    /// in panic!(). This can happen when user code changes the panic hook, or when
+    /// the panic occurs in a different thread from the one `call_and_catch_panic()`
+    /// was called in.
     ///
-    ///       An inaccurate instance of `CaughtPanic` can also be reported when panic's
-    ///       occur in multiple threads at once.
+    /// An inaccurate instance of `CaughtPanic` can also be reported when panic's
+    /// occur in multiple threads at once.
     message: Option<String>,
     location: Option<String>,
     backtrace: Option<Backtrace>,

@@ -9,7 +9,7 @@ publish = false
 wolfram-library-function-macro = { path = "./wolfram-library-function-macro" }
 wl-library-link-sys            = { path = "./wl-library-link-sys" }
 
-wl-wstp             = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-wstp.git" }
+wstp                = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wstp.git" }
 wl-expr             = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr.git" }
 wl-symbol-table     = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-symbol-table.git" }
 wxf                 = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wxf.git" }
