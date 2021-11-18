@@ -60,7 +60,7 @@ use std::ffi::CString;
 use std::mem::MaybeUninit;
 
 use wl_expr::{forms::ToPrettyExpr, Expr, ExprKind};
-use wl_library_link_sys::{mint, WolframLibraryData, LIBRARY_NO_ERROR, WSLINK};
+use wl_library_link_sys::{mint, LIBRARY_NO_ERROR, WSLINK};
 use wl_symbol_table as sym;
 use wstp::Link;
 
@@ -155,19 +155,19 @@ const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 /// Callbacks to the Wolfram Engine.
 #[allow(non_snake_case)]
 pub struct WolframEngine {
-    wl_lib: WolframLibraryData,
+    wl_lib: sys::WolframLibraryData,
 
     // TODO: Is this function thread safe? Can it be called from a thread other than the
     //       one the LibraryLink wrapper was originally invoked from?
     AbortQ: unsafe extern "C" fn() -> mint,
-    getWSLINK: unsafe extern "C" fn(WolframLibraryData) -> WSLINK,
+    getWSLINK: unsafe extern "C" fn(sys::WolframLibraryData) -> WSLINK,
     processWSLINK: unsafe extern "C" fn(WSLINK) -> i32,
 }
 
 impl WolframEngine {
     /// Initialize a `WolframEngine` from the callbacks in a [`WolframLibraryData`]
     /// object.
-    unsafe fn from_library_data(libdata: WolframLibraryData) -> Self {
+    unsafe fn from_library_data(libdata: sys::WolframLibraryData) -> Self {
         // TODO(!): Use the library version to verify this is still correct?
         // TODO(!): Audit this
         // NOTE: That these fields are even an Option is likely just bindgen being
@@ -312,7 +312,7 @@ impl WolframEngine {
 ///
 /// [wlf]: attr.wolfram_library_function.html
 pub fn call_wstp_wolfram_library_function_expr_list(
-    libdata: WolframLibraryData,
+    libdata: sys::WolframLibraryData,
     unsafe_link: wstp::sys::WSLINK,
     function: fn(&WolframEngine, Vec<Expr>) -> Expr,
 ) -> std::os::raw::c_uint {
@@ -336,7 +336,7 @@ pub fn call_wstp_wolfram_library_function_expr_list(
 pub fn call_wstp_wolfram_library_function<
     F: FnOnce(&WolframEngine, Expr) -> Expr + std::panic::UnwindSafe,
 >(
-    libdata: WolframLibraryData,
+    libdata: sys::WolframLibraryData,
     unsafe_link: wstp::sys::WSLINK,
     function: F,
 ) -> std::os::raw::c_uint {
@@ -396,7 +396,7 @@ pub fn call_wstp_wolfram_library_function<
 ///
 /// [wlf]: attr.wolfram_library_function.html
 pub fn call_wxf_wolfram_library_function_expr_list(
-    libdata: WolframLibraryData,
+    libdata: sys::WolframLibraryData,
     wxf_argument: MArgument,
     wxf_result: MArgument,
     function: fn(&WolframEngine, Vec<Expr>) -> Expr,
@@ -422,7 +422,7 @@ pub fn call_wxf_wolfram_library_function_expr_list(
 pub fn call_wxf_wolfram_library_function<
     F: FnOnce(&WolframEngine, Expr) -> Expr + std::panic::UnwindSafe,
 >(
-    libdata: WolframLibraryData,
+    libdata: sys::WolframLibraryData,
     wxf_argument: MArgument,
     wxf_result: MArgument,
     function: F,
