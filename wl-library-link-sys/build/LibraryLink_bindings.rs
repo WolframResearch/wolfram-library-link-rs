@@ -82,6 +82,7 @@ pub const MType_Complex: u32 = 4;
 pub type size_t = ::std::os::raw::c_ulong;
 pub type wchar_t = ::std::os::raw::c_int;
 pub type max_align_t = u128;
+#[doc = " 7.18.1.2 Minimum-width integer types"]
 pub type int_least8_t = i8;
 pub type int_least16_t = i16;
 pub type int_least32_t = i32;
@@ -90,6 +91,7 @@ pub type uint_least8_t = u8;
 pub type uint_least16_t = u16;
 pub type uint_least32_t = u32;
 pub type uint_least64_t = u64;
+#[doc = " 7.18.1.3 Fastest-width integer types"]
 pub type int_fast8_t = i8;
 pub type int_fast16_t = i16;
 pub type int_fast32_t = i32;
@@ -108,11 +110,29 @@ pub type __int64_t = ::std::os::raw::c_longlong;
 pub type __uint64_t = ::std::os::raw::c_ulonglong;
 pub type __darwin_intptr_t = ::std::os::raw::c_long;
 pub type __darwin_natural_t = ::std::os::raw::c_uint;
+#[doc = " The rune type below is declared to be an ``int'' instead of the more natural"]
+#[doc = " ``unsigned long'' or ``long''.  Two things are happening here.  It is not"]
+#[doc = " unsigned so that EOF (-1) can be naturally assigned to it and used.  Also,"]
+#[doc = " it looks like 10646 will be a 31 bit standard.  This means that if your"]
+#[doc = " ints cannot hold 32 bits, you will be in trouble.  The reason an int was"]
+#[doc = " chosen over a long is that the is*() and to*() routines take ints (says"]
+#[doc = " ANSI C), but they use __darwin_ct_rune_t instead of int.  By changing it"]
+#[doc = " here, you lose a bit of ANSI conformance, but your programs will still"]
+#[doc = " work."]
+#[doc = ""]
+#[doc = " NOTE: rune_t is not covered by ANSI nor other standards, and should not"]
+#[doc = " be instantiated outside of lib/libc/locale.  Use wchar_t.  wchar_t and"]
+#[doc = " rune_t must be the same type.  Also wint_t must be no narrower than"]
+#[doc = " wchar_t, and should also be able to hold all members of the largest"]
+#[doc = " character set plus one extra value (WEOF). wint_t must be at least 16 bits."]
 pub type __darwin_ct_rune_t = ::std::os::raw::c_int;
+#[doc = " mbstate_t is an opaque object to keep conversion state, during multibyte"]
+#[doc = " stream conversions.  The content must not be referenced by user programs."]
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union __mbstate_t {
     pub __mbstate8: [::std::os::raw::c_char; 128usize],
+    #[doc = " for alignment"]
     pub _mbstateL: ::std::os::raw::c_longlong,
     _bindgen_union_align: [u64; 16usize],
 }
@@ -185,8 +205,10 @@ pub type __darwin_uuid_string_t = [::std::os::raw::c_char; 37usize];
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct __darwin_pthread_handler_rec {
+    #[doc = " Routine to call"]
     pub __routine:
         ::std::option::Option<unsafe extern "C" fn(arg1: *mut ::std::os::raw::c_void)>,
+    #[doc = " Argument to pass"]
     pub __arg: *mut ::std::os::raw::c_void,
     pub __next: *mut __darwin_pthread_handler_rec,
 }
@@ -670,6 +692,7 @@ pub type u_int16_t = ::std::os::raw::c_ushort;
 pub type u_int32_t = ::std::os::raw::c_uint;
 pub type u_int64_t = ::std::os::raw::c_ulonglong;
 pub type register_t = i64;
+#[doc = " These types are used for reserving the largest possible size."]
 pub type user_addr_t = u_int64_t;
 pub type user_size_t = u_int64_t;
 pub type user_ssize_t = i64;
@@ -677,6 +700,7 @@ pub type user_long_t = i64;
 pub type user_ulong_t = u_int64_t;
 pub type user_time_t = i64;
 pub type user_off_t = i64;
+#[doc = " This defines the size of syscall arguments after copying into the kernel:"]
 pub type syscall_arg_t = u_int64_t;
 pub type intmax_t = ::std::os::raw::c_long;
 pub type uintmax_t = ::std::os::raw::c_ulong;
@@ -688,6 +712,7 @@ pub type type_t = ::std::os::raw::c_int;
 pub type errcode_t = ::std::os::raw::c_int;
 pub type UBIT32 = u32;
 pub type UBIT64 = u64;
+#[doc = " Platform specific variants in mcomplex.h"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mcomplex {
@@ -721,6 +746,7 @@ fn bindgen_test_layout_mcomplex() {
 pub struct st_MNumericArray {
     _unused: [u8; 0],
 }
+#[doc = " Incomplete types"]
 pub type MTensor = *mut st_MNumericArray;
 pub type MRawArray = *mut st_MNumericArray;
 pub type MNumericArray = *mut st_MNumericArray;
@@ -889,6 +915,7 @@ pub const LIBRARY_NUMERICAL_ERROR: _bindgen_ty_1 = 4;
 pub const LIBRARY_MEMORY_ERROR: _bindgen_ty_1 = 5;
 pub const LIBRARY_FUNCTION_ERROR: _bindgen_ty_1 = 6;
 pub const LIBRARY_VERSION_ERROR: _bindgen_ty_1 = 7;
+#[doc = " Error types for LibraryErrorHandler"]
 pub type _bindgen_ty_1 = u32;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1010,6 +1037,7 @@ pub struct st_WolframLibraryData {
     pub runtimeData: *mut st_WolframRuntimeData,
     pub compileLibraryFunctions: *mut st_WolframCompileLibrary_Functions,
     pub VersionNumber: mint,
+    #[doc = " Added in WolframLibraryVersion 2"]
     pub registerInputStreamMethod: ::std::option::Option<
         unsafe extern "C" fn(
             name: *const ::std::os::raw::c_char,
@@ -1112,6 +1140,7 @@ pub struct st_WolframLibraryData {
     >,
     pub releaseLibraryCallbackFunction:
         ::std::option::Option<unsafe extern "C" fn(id: mint) -> ::std::os::raw::c_int>,
+    #[doc = " security callback"]
     pub validatePath: ::std::option::Option<
         unsafe extern "C" fn(
             path: *mut ::std::os::raw::c_char,
@@ -1121,6 +1150,10 @@ pub struct st_WolframLibraryData {
     pub protectedModeQ: ::std::option::Option<unsafe extern "C" fn() -> mbool>,
     pub rawarrayLibraryFunctions: *mut st_WolframRawArrayLibrary_Functions,
     pub numericarrayLibraryFunctions: *mut st_WolframNumericArrayLibrary_Functions,
+    #[doc = "Sets the value ParallelThreadNumber and returns the old value, or the input if invalid."]
+    #[doc = "The old value should be stored in a local variable."]
+    #[doc = "The old value must be restored using restoreParallelThreadNumber"]
+    #[doc = "before the setting routine exits."]
     pub setParallelThreadNumber: ::std::option::Option<
         unsafe extern "C" fn(arg1: ::std::os::raw::c_int) -> ::std::os::raw::c_int,
     >,
