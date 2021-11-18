@@ -64,8 +64,8 @@ use wl_library_link_sys::{mint, WolframLibraryData, LIBRARY_NO_ERROR, WSLINK};
 use wl_symbol_table as sym;
 use wstp::Link;
 
-use self::sys::MArgument;
 use self::numeric_array::NumericArray;
+use self::sys::MArgument;
 
 
 pub use wl_library_link_sys as sys;
