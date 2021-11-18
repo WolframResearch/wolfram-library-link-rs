@@ -62,17 +62,12 @@ use wl_library_link_sys::{mint, WolframLibraryData, LIBRARY_NO_ERROR, WSLINK};
 use wl_symbol_table as sym;
 use wstp::Link;
 
-// Re-export `wl_library_link_sys` and `wstp`.
-//
-// TODO(!): Only selectively re-export the parts of these API's which are actually
-//          needed? These should at least have module documentation saying that they
-//          shouldn't be used?
+use self::sys::MArgument;
 
-/// Re-export of `wl_library_link_sys`
+
 pub use wl_library_link_sys as sys;
 pub use wstp;
 
-use self::sys::MArgument;
 
 /// Attribute to generate a [LibraryLink][library-link]-compatible wrapper around a Rust
 /// function.
