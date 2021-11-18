@@ -2,7 +2,7 @@
 name = "wl-library-link"
 version = "0.1.1"
 authors = ["Connor Gray <accounts@connorgray.com>"]
-edition = "2018"
+edition = "2021"
 publish = false
 
 [dependencies]
