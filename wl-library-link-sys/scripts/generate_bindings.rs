@@ -54,11 +54,12 @@ fn main() {
 }
 
 fn generate_bindings(c_includes: PathBuf) {
-    // For the time being there is no reason this shouldn't be here. 
+    // For the time being there is no reason this shouldn't be here.
     assert!(c_includes.ends_with("SystemFiles/IncludeFiles/C/"));
     assert!(c_includes.is_dir());
     assert!(c_includes.is_absolute());
 
+    #[rustfmt::skip]
     let bindings = bindgen::builder()
         .header(c_includes.join("WolframLibrary.h").display().to_string())
         .header(c_includes.join("WolframNumericArrayLibrary.h").display().to_string())
