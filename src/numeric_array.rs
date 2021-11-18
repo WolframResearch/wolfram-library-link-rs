@@ -1,10 +1,20 @@
 use std::mem::MaybeUninit;
 
+use crate::sys;
+
 /// Extremely basic wrapper around raw MNumericArray. Basically only suitable for working
 /// with ByteArray[]'s (for serializing/deserializing WXF).
-pub struct NumericArray(pub(crate) crate::sys::MNumericArray);
+pub struct NumericArray(sys::MNumericArray);
 
 impl NumericArray {
+    pub unsafe fn from_raw(array: sys::MNumericArray) -> Self {
+        NumericArray(array)
+    }
+
+    pub unsafe fn into_raw(self) -> sys::MNumericArray {
+        self.0
+    }
+
     /// # Safety
     ///
     /// This method must only be called when it's assured that the data contained by this

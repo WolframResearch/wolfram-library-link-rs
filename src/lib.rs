@@ -293,7 +293,7 @@ impl WolframEngine {
             );
         }
 
-        NumericArray(byte_array)
+        NumericArray::from_raw(byte_array)
     }
 }
 
@@ -434,7 +434,7 @@ pub fn call_wxf_wolfram_library_function<
             // Contruct the engine
             let engine = WolframEngine::from_library_data(libdata);
 
-            let argument_numeric_array = NumericArray(*wxf_argument.numeric);
+            let argument_numeric_array = NumericArray::from_raw(*wxf_argument.numeric);
 
             let arguments = wxf::deserialize(argument_numeric_array.data_bytes()).expect(
                 "wolfram_library_function: failed to deserialize argument WXF data",
@@ -442,7 +442,8 @@ pub fn call_wxf_wolfram_library_function<
 
             let result: Expr = function(&engine, arguments);
 
-            *wxf_result.numeric = wxf_numeric_array_from_expr(&engine, &result).0;
+            *wxf_result.numeric =
+                wxf_numeric_array_from_expr(&engine, &result).into_raw();
         })
     };
 
@@ -458,7 +459,7 @@ pub fn call_wxf_wolfram_library_function<
             unsafe {
                 let engine = WolframEngine::from_library_data(libdata);
                 *wxf_result.numeric =
-                    wxf_numeric_array_from_expr(&engine, &pretty_expr).0;
+                    wxf_numeric_array_from_expr(&engine, &pretty_expr).into_raw();
             }
 
             LIBRARY_NO_ERROR
