@@ -52,6 +52,7 @@
 /// message.
 #[doc(hidden)]
 pub mod catch_panic;
+mod library_data;
 mod numeric_array;
 
 
@@ -71,6 +72,9 @@ use self::sys::MArgument;
 pub use wl_library_link_sys as sys;
 pub use wstp;
 
+pub use self::library_data::initialize;
+
+pub(crate) use self::library_data::get_library_data;
 
 /// Attribute to generate a [LibraryLink][library-link]-compatible wrapper around a Rust
 /// function.

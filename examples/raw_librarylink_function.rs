@@ -88,7 +88,8 @@ pub unsafe extern "C" fn demo_byte_array(
     // Fill the NumericArray with the number 1 to 10
     //
 
-    let data_ptr: *mut std::ffi::c_void = (*byte_array).data;
+    let data_ptr: *mut std::ffi::c_void =
+        (na_funs.MNumericArray_getData.unwrap())(byte_array);
     let data_ptr = data_ptr as *mut MaybeUninit<u8>;
 
     let slice = std::slice::from_raw_parts_mut(data_ptr, LENGTH);
@@ -159,7 +160,8 @@ pub unsafe extern "C" fn demo_wxf_byte_array(
     // Fill the NumericArray with WXF representing the expression above.
     //
 
-    let data_ptr: *mut std::ffi::c_void = (*byte_array).data;
+    let data_ptr: *mut std::ffi::c_void =
+        (na_funs.MNumericArray_getData.unwrap())(byte_array);
     let data_ptr = data_ptr as *mut MaybeUninit<u8>;
 
     let slice = std::slice::from_raw_parts_mut(data_ptr, wxf_bytes.len());
