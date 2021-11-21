@@ -14,7 +14,7 @@ thread_local! {
 
 /// Initialize static data for the current Wolfram library.
 ///
-/// This function should be called during by the [initialization hook][lib-init]
+/// This function should be called during the execution of the [`WolframLibrary_initialize()` hook][lib-init]
 /// provided by this library.
 ///
 /// # Example
@@ -27,29 +27,28 @@ thread_local! {
 ///
 /// ```
 /// use std::os::raw::c_int;
-/// use wl_library_link::{sys, initialize, WolframLibraryData};
+/// use wl_library_link::{sys, initialize};
 ///
 /// #[no_mangle]
 /// extern "C" fn WolframLibrary_initialize(data: sys::WolframLibraryData) -> c_int {
-///     match WolframLibraryData::new(data) {
-///         Ok(data) => {
-///             initialize(data);
-///             return 0;
-///         },
-///         Err(_) => return 1,
+///     match initialize(data) {
+///         Ok(()) => return 0,
+///         Err(()) => return 1,
 ///     }
 /// }
 /// ```
 ///
 /// [lib-init]: https://reference.wolfram.com/language/LibraryLink/tutorial/LibraryStructure.html#280210622
-pub fn initialize(data: WolframLibraryData) {
+pub fn initialize(data: sys::WolframLibraryData) -> Result<(), ()> {
+    let data = WolframLibraryData::new(data)?;
+
     LIBRARY_DATA.with(|static_data| {
-        let mut static_data = static_data
-            .lock()
-            .expect("failed to acquire lock on global Wolfram LIBRARY_DATA");
+        let mut static_data = static_data.lock().map_err(|_| ())?;
 
         *static_data = Some(data);
-    });
+
+        Ok(())
+    })
 }
 
 pub(crate) fn get_library_data() -> WolframLibraryData {
