@@ -1,0 +1,19 @@
+[tasks.paclet]
+dependencies = ["copy-library-resources"]
+script = { file = "./scripts/BuildPaclet.wls"}
+
+[tasks.copy-library-resources]
+dependencies = ["clean-library-resources", "build-library-resources"]
+script = '''
+mkdir LibraryResources
+cp ./target/debug/examples/libraw_wstp_function.dylib ./LibraryResources/
+'''
+
+[tasks.clean-library-resources]
+script = '''
+rm -rf ./LibraryResources
+'''
+
+[tasks.build-library-resources]
+command = "cargo"
+args = ["build"]
