@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "wl-library-link",
+    "wl-library-link-sys"
+]
