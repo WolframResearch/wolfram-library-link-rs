@@ -10,7 +10,7 @@ default_to_workspace = false
 #-----------
 
 [tasks.paclet]
-dependencies = ["copy-library-resources"]
+dependencies = ["clean-library-resources", "build-library-resources"]
 script = { file = "./scripts/BuildPaclet.wls"}
 
 [tasks.paclet-test]
@@ -20,13 +20,6 @@ script = { file = "./scripts/RunTests.wls"}
 #--------------------
 # Building the paclet
 #--------------------
-
-[tasks.copy-library-resources]
-dependencies = ["clean-library-resources", "build-library-resources"]
-script = '''
-mkdir RustLink/LibraryResources
-cp ./target/debug/examples/libraw_wstp_function.dylib ./RustLink/LibraryResources/
-'''
 
 [tasks.clean-library-resources]
 script = '''

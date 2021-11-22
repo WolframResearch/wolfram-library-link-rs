@@ -14,5 +14,32 @@ result = PacletTest[
 	Parallelization -> False
 ];
 
+result = Flatten[result];
 
-Echo @ CodeFormat @ ToString[result, InputForm];
+If[!ListQ[result],
+	Echo[CodeFormat @ ToString[result, InputForm], "not list"];
+	Exit[-1];
+];
+
+Scan[
+	Replace[report_ :> Module[{failedCases},
+		If[Head[report] =!= TestReportObject,
+			Echo[CodeFormat @ ToString[result, InputForm], "unexpected head"];
+			Exit[-1];
+		];
+
+		failedCases = Flatten[Values[Join[Values[report["TestsFailed"]]]]];
+
+		Replace[failedCases, {
+			{__} :> (
+				Echo[CodeFormat @ ToString[failedCases, InputForm], "tests failed"];
+			),
+			{} :> Null,
+			_ :> (
+				Exit[-1]
+			)
+		}]
+	]]
+	,
+	result
+]
