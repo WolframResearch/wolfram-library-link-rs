@@ -9,7 +9,10 @@ Needs["PacletTools`"]
 Needs["CodeFormatter`"]
 
 
-Echo @ CodeFormat @ ToString[
-	PacletBuild[FileNameJoin[{Directory[], "RustLink"}]],
-	InputForm
-]
+result = PacletBuild[FileNameJoin[{Directory[], "RustLink"}]];
+
+Echo @ CodeFormat @ ToString[result, InputForm];
+
+If[FailureQ[result],
+	Exit[-1];
+];
