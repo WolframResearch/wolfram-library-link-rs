@@ -8,7 +8,8 @@ PacletObject[<|
     "MathematicaVersion" -> "12.3+",
     "Extensions" -> {
         {"Documentation", Language -> "English"},
-        {"LibraryLink"}
+        {"LibraryLink"},
+        {"Tests", "Method" -> "Experimental-v1"}
     }
 |>]
 

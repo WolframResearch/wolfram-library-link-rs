@@ -1,13 +1,25 @@
 [config]
 default_to_workspace = false
 
-#-----------------
+#=======================================
 # Task definitions
-#-----------------
+#=======================================
+
+#-----------
+# Main tasks
+#-----------
 
 [tasks.paclet]
 dependencies = ["copy-library-resources"]
 script = { file = "./scripts/BuildPaclet.wls"}
+
+[tasks.paclet-test]
+dependencies = ["paclet"]
+script = { file = "./scripts/RunTests.wls"}
+
+#--------------------
+# Building the paclet
+#--------------------
 
 [tasks.copy-library-resources]
 dependencies = ["clean-library-resources", "build-library-resources"]
