@@ -1,6 +1,8 @@
 use std::ffi::c_void;
 use std::mem::MaybeUninit;
 
+use static_assertions::{assert_eq_align, assert_eq_size};
+
 use crate::sys;
 
 /// Extremely basic wrapper around raw MNumericArray. Basically only suitable for working
@@ -51,9 +53,7 @@ impl NumericArray {
     pub fn length_in_bytes(&self) -> usize {
         let dims = self.dimensions();
 
-        let length: i64 = dims.iter().product();
-        let length =
-            usize::try_from(length).expect("NumericArray length overflows usize");
+        let length: usize = dims.iter().product();
 
         // FIXME: This should multiple `length` by the size-in-bytes of
         //        st_MNumericArray.tensor_property_type.
@@ -78,7 +78,7 @@ impl NumericArray {
         rank
     }
 
-    fn dimensions(&self) -> &[crate::sys::mint] {
+    fn dimensions(&self) -> &[usize] {
         let NumericArray(numeric_array) = *self;
 
         let rank = self.rank();
@@ -95,6 +95,9 @@ impl NumericArray {
 
             getter(numeric_array)
         };
+
+        assert_eq_size!(sys::mint, usize);
+        let dims: *mut usize = dims as *mut usize;
 
         debug_assert!(!dims.is_null());
 

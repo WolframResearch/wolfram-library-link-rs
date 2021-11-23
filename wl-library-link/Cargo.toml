@@ -17,6 +17,7 @@ wxf                 = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wxf.git
 lazy_static = "^1"
 backtrace = "^0.3.46"
 cfg-if = "0.1"
+static_assertions = "1.1.0"
 
 [dev-dependencies]
 wl-pattern-match = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-pattern-match.git" }
