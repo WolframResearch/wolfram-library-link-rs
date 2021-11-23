@@ -82,7 +82,10 @@ pub extern "C" fn demo_wstp_function_callback(
 ) -> c_uint {
     let mut link = unsafe { Link::unchecked_new(link) };
 
-    link.get_expr().unwrap();
+    // Skip reading the argument list packet.
+    if link.raw_get_next().and_then(|_| link.new_packet()).is_err() {
+        return LIBRARY_FUNCTION_ERROR;
+    }
 
     let callback_link = unsafe { (*lib).getWSLINK.unwrap()(lib) };
 
@@ -100,10 +103,14 @@ pub extern "C" fn demo_wstp_function_callback(
             (*lib).processWSLINK.unwrap()(callback_link);
         }
 
-        // FIXME: Is this necessary? -- Answer, yes, otherwise the link has unread data.
-        if let Err(message) = safe_callback_link.get_expr() {
-            link.put_expr(&Expr::string(message.to_string())).unwrap();
-            return LIBRARY_NO_ERROR;
+        // Skip the return value packet. This is necessary, otherwise the link has
+        // unread data and the return value of this function cannot be processed properly.
+        if safe_callback_link
+            .raw_get_next()
+            .and_then(|_| safe_callback_link.new_packet())
+            .is_err()
+        {
+            return LIBRARY_FUNCTION_ERROR;
         }
     }
 
