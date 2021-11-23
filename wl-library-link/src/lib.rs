@@ -341,7 +341,7 @@ pub fn call_wstp_wolfram_library_function<
     F: FnOnce(&WolframEngine, Expr) -> Expr + std::panic::UnwindSafe,
 >(
     libdata: sys::WolframLibraryData,
-    unsafe_link: wstp::sys::WSLINK,
+    mut unsafe_link: wstp::sys::WSLINK,
     function: F,
 ) -> std::os::raw::c_uint {
     use self::{
@@ -350,11 +350,11 @@ pub fn call_wstp_wolfram_library_function<
     };
 
     let result: Result<(), CaughtPanic> = unsafe {
-        call_and_catch_panic(|| {
+        call_and_catch_panic(move || {
             // Contruct the engine
             let engine = WolframEngine::from_library_data(libdata);
 
-            let mut link = Link::unchecked_new(unsafe_link);
+            let link = Link::unchecked_ref_cast_mut(&mut unsafe_link);
 
             let arguments: Expr = match link.get_expr() {
                 Ok(args) => args,

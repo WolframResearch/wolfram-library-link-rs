@@ -130,7 +130,7 @@ pub extern "C" fn wstp_function(
     unsafe_link: WSLINK,
 ) -> c_uint {
     let link = unsafe {
-        Link::unchecked_new(unsafe_link)
+        Link::unchecked_ref_cast_mut(unsafe_link)
     };
 
     let expr = match link.get_expr() {

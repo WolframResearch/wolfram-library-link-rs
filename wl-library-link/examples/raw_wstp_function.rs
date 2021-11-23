@@ -9,7 +9,7 @@ use std::os::raw::{c_int, c_uint};
 
 use wl_expr::Expr;
 use wl_library_link::sys::{
-    WolframLibraryData, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
+    self as wll_sys, WolframLibraryData, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
 };
 use wstp::{
     sys::{WSGetInteger, WSNewPacket, WSPutInteger, WSTestHead, WSLINK},
@@ -78,9 +78,11 @@ pub unsafe extern "C" fn demo_wstp_function(
 #[no_mangle]
 pub extern "C" fn demo_wstp_function_callback(
     lib: WolframLibraryData,
-    link: WSLINK,
+    mut link: WSLINK,
 ) -> c_uint {
-    let mut link = unsafe { Link::unchecked_new(link) };
+    // Create a safe Link wrapper around the raw `WSLINK`. This is a borrowed rather than
+    // owned Link because the caller (the Kernel) owns the link.
+    let link: &mut Link = unsafe { Link::unchecked_ref_cast_mut(&mut link) };
 
     // Skip reading the argument list packet.
     if link.raw_get_next().and_then(|_| link.new_packet()).is_err() {
@@ -88,10 +90,11 @@ pub extern "C" fn demo_wstp_function_callback(
     }
 
     let callback_link = unsafe { (*lib).getWSLINK.unwrap()(lib) };
+    let mut callback_link = callback_link as wstp::sys::WSLINK;
 
     {
-        let mut safe_callback_link =
-            unsafe { Link::unchecked_new(callback_link as *mut _) };
+        let safe_callback_link =
+            unsafe { Link::unchecked_ref_cast_mut(&mut callback_link) };
 
         safe_callback_link
             .put_expr(&Expr! {
@@ -100,7 +103,9 @@ pub extern "C" fn demo_wstp_function_callback(
             .unwrap();
 
         unsafe {
-            (*lib).processWSLINK.unwrap()(callback_link);
+            (*lib).processWSLINK.unwrap()(
+                safe_callback_link.raw_link() as wll_sys::WSLINK
+            );
         }
 
         // Skip the return value packet. This is necessary, otherwise the link has
