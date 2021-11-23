@@ -24,7 +24,10 @@ Scan[
 		FileNameJoin[{"target", "debug", "examples", exampleLib}],
 		FileNameJoin[{$dir, exampleLib}]
 	],
-	{"libraw_wstp_function.dylib"}
+	{
+		"libraw_wstp_function.dylib",
+		"libbasic_expressions.dylib"
+	}
 ]
 
 

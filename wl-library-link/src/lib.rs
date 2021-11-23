@@ -359,6 +359,11 @@ pub fn call_wstp_wolfram_library_function<
             let arguments: Expr = match link.get_expr() {
                 Ok(args) => args,
                 Err(message) => {
+                    // Skip reading the argument list packet.
+                    if link.raw_get_next().and_then(|_| link.new_packet()).is_err() {
+                        return;
+                    }
+
                     let _: Result<_, _> = link.put_expr(&Expr! {
                         Failure["LibraryFunctionWSTPError", <|
                             "Message" -> %[Expr::string(message.to_string())]
