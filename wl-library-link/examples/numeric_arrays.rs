@@ -41,15 +41,15 @@ pub extern "C" fn sum_int_numeric_array(
 
     #[rustfmt::skip]
     let sum: i64 = match na.kind() {
-        NumericArrayKind::Bit8(na) => na.data().into_iter().copied().map(i64::from).sum(),
-        NumericArrayKind::Bit16(na) => na.data().into_iter().copied().map(i64::from).sum(),
-        NumericArrayKind::Bit32(na) => na.data().into_iter().copied().map(i64::from).sum(),
-        NumericArrayKind::Bit64(na) => na.data().into_iter().sum(),
-        NumericArrayKind::UBit8(na) => na.data().into_iter().copied().map(i64::from).sum(),
-        NumericArrayKind::UBit16(na) => na.data().into_iter().copied().map(i64::from).sum(),
-        NumericArrayKind::UBit32(na) => na.data().into_iter().copied().map(i64::from).sum(),
+        NumericArrayKind::Bit8(na) => na.as_slice().into_iter().copied().map(i64::from).sum(),
+        NumericArrayKind::Bit16(na) => na.as_slice().into_iter().copied().map(i64::from).sum(),
+        NumericArrayKind::Bit32(na) => na.as_slice().into_iter().copied().map(i64::from).sum(),
+        NumericArrayKind::Bit64(na) => na.as_slice().into_iter().sum(),
+        NumericArrayKind::UBit8(na) => na.as_slice().into_iter().copied().map(i64::from).sum(),
+        NumericArrayKind::UBit16(na) => na.as_slice().into_iter().copied().map(i64::from).sum(),
+        NumericArrayKind::UBit32(na) => na.as_slice().into_iter().copied().map(i64::from).sum(),
         NumericArrayKind::UBit64(na) => {
-            match i64::try_from(na.data().into_iter().sum::<u64>()) {
+            match i64::try_from(na.as_slice().into_iter().sum::<u64>()) {
                 Ok(sum) => sum,
                 Err(_) => return LIBRARY_NUMERICAL_ERROR,
             }

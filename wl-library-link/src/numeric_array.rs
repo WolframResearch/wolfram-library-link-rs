@@ -1,6 +1,6 @@
 use std::ffi::c_void;
+use std::fmt;
 use std::marker::PhantomData;
-use std::mem::MaybeUninit;
 
 use static_assertions::{assert_eq_align, assert_eq_size};
 
@@ -189,14 +189,6 @@ assert_eq_align!(sys::mcomplex, f64);
 //======================================
 
 impl NumericArray {
-    pub unsafe fn from_raw(array: sys::MNumericArray) -> Self {
-        NumericArray(array, PhantomData)
-    }
-
-    pub unsafe fn into_raw(self) -> sys::MNumericArray {
-        self.0
-    }
-
     pub fn kind(&self) -> NumericArrayKind {
         /// The purpose of this intermediate function is to limit the scope of the call to
         /// transmute(). `transmute()` is a *very* unsafe function, so it seems prudent to
@@ -273,6 +265,14 @@ impl NumericArray {
 }
 
 impl<T> NumericArray<T> {
+    pub unsafe fn from_raw(array: sys::MNumericArray) -> NumericArray<T> {
+        NumericArray(array, PhantomData)
+    }
+
+    pub unsafe fn into_raw(self) -> sys::MNumericArray {
+        self.0
+    }
+
     /// *LibraryLink C API Documentation:* [`MNumericArray_getData`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MNumericArray_getData.html)
     pub fn data_ptr(&self) -> *mut c_void {
         let NumericArray(numeric_array, _) = *self;
@@ -288,7 +288,7 @@ impl<T> NumericArray<T> {
     }
 
     /// Access the elements stored in this [`NumericArray`] as a flat buffer.
-    pub fn data(&self) -> &[T] {
+    pub fn as_slice(&self) -> &[T] {
         let ptr: *mut c_void = self.data_ptr();
 
         debug_assert!(!ptr.is_null());
@@ -299,6 +299,20 @@ impl<T> NumericArray<T> {
         let ptr = ptr as *const T;
 
         unsafe { std::slice::from_raw_parts(ptr, self.flattened_length()) }
+    }
+
+    /// Access the elements stored in this [`NumericArray`] as a mutable flat buffer.
+    pub fn as_slice_mut(&mut self) -> &mut [T] {
+        let ptr: *mut c_void = self.data_ptr();
+
+        debug_assert!(!ptr.is_null());
+
+        // Assert that `ptr` is aligned to `T`.
+        debug_assert!(ptr as usize % std::mem::size_of::<T>() == 0);
+
+        let ptr = ptr as *mut T;
+
+        unsafe { std::slice::from_raw_parts_mut(ptr, self.flattened_length()) }
     }
 
     fn data_type(&self) -> NumericArrayDataType {
@@ -323,24 +337,6 @@ impl<T> NumericArray<T> {
 
             getter(numeric_array)
         }
-    }
-
-    /// # Safety
-    ///
-    /// This method must only be called when it's assured that the data contained by this
-    /// NumericArray has been initialized.
-    pub unsafe fn data_bytes(&self) -> &[u8] {
-        let data_ptr: *mut c_void = self.data_ptr();
-        let data_ptr = data_ptr as *mut u8;
-
-        std::slice::from_raw_parts(data_ptr, self.length_in_bytes())
-    }
-
-    pub unsafe fn data_bytes_mut(&mut self) -> &mut [MaybeUninit<u8>] {
-        let data_ptr: *mut c_void = self.data_ptr();
-        let data_ptr = data_ptr as *mut MaybeUninit<u8>;
-
-        std::slice::from_raw_parts_mut(data_ptr, self.length_in_bytes())
     }
 
     pub fn length_in_bytes(&self) -> usize {
@@ -441,6 +437,15 @@ impl NumericArrayDataType {
             // ComplexReal32 => NumericArrayKind::ComplexReal32(trans(self)),
             ComplexReal64 => std::mem::size_of::<sys::mcomplex>(),
         }
+    }
+}
+
+impl<T> fmt::Debug for NumericArray<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("NumericArray")
+            .field("raw", &self.0)
+            .field("data_type", &self.data_type())
+            .finish()
     }
 }
 

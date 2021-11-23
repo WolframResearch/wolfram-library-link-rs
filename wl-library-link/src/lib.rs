@@ -58,7 +58,6 @@ mod numeric_array;
 
 use std::convert::TryFrom;
 use std::ffi::CString;
-use std::mem::MaybeUninit;
 
 use wl_expr::{forms::ToPrettyExpr, Expr, ExprKind};
 use wl_library_link_sys::{mint, LIBRARY_NO_ERROR, WSLINK};
@@ -274,7 +273,8 @@ impl WolframEngine {
         Ok(())
     }
 
-    unsafe fn new_numeric_byte_array(&self, length: usize) -> NumericArray {
+    // FIXME: This is unsafe, because the NumericArray data might not be initialized(?).
+    unsafe fn new_numeric_byte_array(&self, length: usize) -> NumericArray<u8> {
         use crate::sys::MNumericArray;
 
         let mut byte_array: MNumericArray = std::ptr::null_mut();
@@ -443,9 +443,13 @@ pub fn call_wxf_wolfram_library_function<
             // Contruct the engine
             let engine = WolframEngine::from_library_data(libdata);
 
-            let argument_numeric_array = NumericArray::from_raw(*wxf_argument.numeric);
+            let argument_numeric_array = NumericArray::from_raw(*wxf_argument.numeric)
+                .try_into_kind::<u8>()
+                .expect(
+                    "wolfram_library_function: expected NumericArray of UnsignedInteger8",
+                );
 
-            let arguments = wxf::deserialize(argument_numeric_array.data_bytes()).expect(
+            let arguments = wxf::deserialize(argument_numeric_array.as_slice()).expect(
                 "wolfram_library_function: failed to deserialize argument WXF data",
             );
 
@@ -479,18 +483,18 @@ pub fn call_wxf_wolfram_library_function<
 unsafe fn wxf_numeric_array_from_expr(
     engine: &WolframEngine,
     expr: &Expr,
-) -> NumericArray {
+) -> NumericArray<u8> {
     let result_wxf: Vec<u8> = wxf::serialize(expr)
         .expect("wolfram_library_function: failed to serialize result expression to WXF");
 
     let mut numeric_array = engine.new_numeric_byte_array(result_wxf.len());
 
-    debug_assert!(numeric_array.data_bytes_mut().len() == result_wxf.len());
+    debug_assert!(numeric_array.as_slice_mut().len() == result_wxf.len());
 
     // FIXME: It's very inefficient to do this copy 1 byte at a time. Replace this with
     //        std::ptr::copy_nonoverlapping().
-    for (index, byte) in numeric_array.data_bytes_mut().iter_mut().enumerate() {
-        *byte = MaybeUninit::new(result_wxf[index]);
+    for (index, byte) in numeric_array.as_slice_mut().iter_mut().enumerate() {
+        *byte = result_wxf[index];
     }
 
     numeric_array
