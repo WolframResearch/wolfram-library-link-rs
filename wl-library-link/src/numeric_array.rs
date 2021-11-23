@@ -344,9 +344,7 @@ impl<T> NumericArray<T> {
     }
 
     pub fn length_in_bytes(&self) -> usize {
-        let dims = self.dimensions();
-
-        let length: usize = dims.iter().product();
+        let length: usize = self.dimensions().iter().product();
 
         // FIXME: This should multiple `length` by the size-in-bytes of
         //        st_MNumericArray.tensor_property_type.
