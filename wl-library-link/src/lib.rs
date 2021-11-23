@@ -64,7 +64,9 @@ use wl_library_link_sys::{mint, LIBRARY_NO_ERROR, WSLINK};
 use wl_symbol_table as sym;
 use wstp::Link;
 
-pub use self::numeric_array::{NumericArray, NumericArrayKind};
+pub use self::numeric_array::{
+    NumericArray, NumericArrayDataType, NumericArrayKind, NumericArrayType,
+};
 use self::sys::MArgument;
 
 

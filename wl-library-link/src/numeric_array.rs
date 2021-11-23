@@ -25,13 +25,10 @@ use crate::sys::MNumericArray_Data_Type::{
     MNumericArray_Type_Complex_Real64 as COMPLEX_REAL64_TYPE,
 };
 
-/// This type is an ABI-compatible wrapper around [`wl_kernel_sys::st_MNumericArray`].
+/// This type is an ABI-compatible wrapper around [`wl_library_link_sys::MNumericArray`].
 ///
 /// A [`NumericArray`] can contain any type `T` which satisfies the trait
 /// [`NumericArrayType`].
-///
-/// This type should not be confused with the [`ENumericArray`] type, which represents a
-/// Raw-type expression containing a `NumericArray`.
 ///
 /// Use [`UninitNumericArray`] to construct a [`NumericArray`] without requiring an
 /// intermediate allocation to copy the elements from.
@@ -49,7 +46,7 @@ pub struct NumericArray<T = ()>(sys::MNumericArray, PhantomData<T>);
 ///   * [`u8`], [`u16`], [`u32`], [`u64`]
 ///   * [`i8`], [`i16`], [`i32`], [`i64`]
 ///   * [`f32`], [`f64`]
-///   * [`complexreal32`][sys::complexreal32], [`complexreal64`][sys::complexreal64]
+///   * [`mcomplex`][sys::mcomplex]
 ///
 /// [`NumericArrayDataType`] is an enumeration of all the types which satisfy this trait.
 pub trait NumericArrayType: private::Sealed {
