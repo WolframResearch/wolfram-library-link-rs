@@ -1849,27 +1849,25 @@ fn bindgen_test_layout_st_WolframLibraryData() {
         )
     );
 }
-#[repr(u32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum MNumericArray_Data_Type {
-    MNumericArray_Type_Undef = 0,
-    MNumericArray_Type_Bit8 = 1,
-    MNumericArray_Type_UBit8 = 2,
-    MNumericArray_Type_Bit16 = 3,
-    MNumericArray_Type_UBit16 = 4,
-    MNumericArray_Type_Bit32 = 5,
-    MNumericArray_Type_UBit32 = 6,
-    MNumericArray_Type_Bit64 = 7,
-    MNumericArray_Type_UBit64 = 8,
-    MNumericArray_Type_Real32 = 9,
-    MNumericArray_Type_Real64 = 10,
-    MNumericArray_Type_Complex_Real32 = 11,
-    MNumericArray_Type_Complex_Real64 = 12,
-    MNumericArray_Type_Real16 = 13,
-    MNumericArray_Type_Complex_Real16 = 14,
+pub mod MNumericArray_Data_Type {
+    pub type Type = u32;
+    pub const MNumericArray_Type_Undef: Type = 0;
+    pub const MNumericArray_Type_Bit8: Type = 1;
+    pub const MNumericArray_Type_UBit8: Type = 2;
+    pub const MNumericArray_Type_Bit16: Type = 3;
+    pub const MNumericArray_Type_UBit16: Type = 4;
+    pub const MNumericArray_Type_Bit32: Type = 5;
+    pub const MNumericArray_Type_UBit32: Type = 6;
+    pub const MNumericArray_Type_Bit64: Type = 7;
+    pub const MNumericArray_Type_UBit64: Type = 8;
+    pub const MNumericArray_Type_Real32: Type = 9;
+    pub const MNumericArray_Type_Real64: Type = 10;
+    pub const MNumericArray_Type_Complex_Real32: Type = 11;
+    pub const MNumericArray_Type_Complex_Real64: Type = 12;
+    pub const MNumericArray_Type_Real16: Type = 13;
+    pub const MNumericArray_Type_Complex_Real16: Type = 14;
 }
-pub use self::MNumericArray_Data_Type as numericarray_data_t;
+pub use self::MNumericArray_Data_Type::Type as numericarray_data_t;
 pub const MNumericArray_Convert_Method_MNumericArray_Convert_Check:
     MNumericArray_Convert_Method = 1;
 pub const MNumericArray_Convert_Method_MNumericArray_Convert_Clip_Check:

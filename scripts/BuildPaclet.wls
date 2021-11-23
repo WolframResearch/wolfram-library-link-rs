@@ -26,7 +26,8 @@ Scan[
 	],
 	{
 		"libraw_wstp_function.dylib",
-		"libbasic_expressions.dylib"
+		"libbasic_expressions.dylib",
+		"libnumeric_arrays.dylib"
 	}
 ]
 

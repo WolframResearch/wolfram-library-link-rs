@@ -42,3 +42,22 @@ Test[
 		"Message" -> "WSTP error: Symbol name `List` has no context"
 	|>]
 ]
+
+Test[
+	func = LibraryFunctionLoad[
+		"libnumeric_arrays",
+		"sum_int_numeric_array",
+		{NumericArray},
+		Integer
+	];
+
+	{
+		func[NumericArray[Range[10], "Integer64"]],
+		func[NumericArray[Range[255], "UnsignedInteger8"]]
+	}
+	,
+	{
+		55,
+		32640
+	}
+]

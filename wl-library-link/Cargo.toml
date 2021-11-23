@@ -50,3 +50,7 @@ crate-type = ["cdylib"]
 [[example]]
 name = "downvalue"
 crate-type = ["cdylib"]
+
+[[example]]
+name = "numeric_arrays"
+crate-type = ["cdylib"]

@@ -65,7 +65,7 @@ use wl_library_link_sys::{mint, LIBRARY_NO_ERROR, WSLINK};
 use wl_symbol_table as sym;
 use wstp::Link;
 
-use self::numeric_array::NumericArray;
+pub use self::numeric_array::{NumericArray, NumericArrayKind};
 use self::sys::MArgument;
 
 
@@ -275,7 +275,7 @@ impl WolframEngine {
     }
 
     unsafe fn new_numeric_byte_array(&self, length: usize) -> NumericArray {
-        use crate::sys::{MNumericArray, MNumericArray_Data_Type};
+        use crate::sys::MNumericArray;
 
         let mut byte_array: MNumericArray = std::ptr::null_mut();
 
@@ -284,7 +284,7 @@ impl WolframEngine {
         let na_funs = *(*self.wl_lib).numericarrayLibraryFunctions;
 
         let err_code = (na_funs.MNumericArray_new.unwrap())(
-            MNumericArray_Data_Type::MNumericArray_Type_UBit8,
+            sys::MNumericArray_Data_Type::MNumericArray_Type_UBit8,
             rank,
             &i64::try_from(length).expect("NumericArray length overflows i64"),
             &mut byte_array,
