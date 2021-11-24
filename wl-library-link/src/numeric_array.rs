@@ -1,6 +1,7 @@
 use std::ffi::c_void;
 use std::fmt;
 use std::marker::PhantomData;
+use std::mem::MaybeUninit;
 
 use static_assertions::{assert_eq_align, assert_eq_size};
 
@@ -34,6 +35,13 @@ use crate::sys::MNumericArray_Data_Type::{
 /// intermediate allocation to copy the elements from.
 #[repr(transparent)]
 pub struct NumericArray<T = ()>(sys::MNumericArray, PhantomData<T>);
+
+/// Represents a [`NumericArray`] which has been allocated, but whose elements have not
+/// yet been initialized.
+///
+/// Use [`as_slice_mut()`][`UninitNumericArray::as_slice_mut()`] to initialize the
+/// elements of this [`UninitNumericArray`].
+pub struct UninitNumericArray<T: NumericArrayType>(sys::MNumericArray, PhantomData<T>);
 
 //======================================
 // Traits
@@ -261,6 +269,55 @@ impl NumericArray {
     }
 }
 
+impl<T: NumericArrayType> NumericArray<T> {
+    /// Construct a new one-dimensional [`NumericArray`] from a slice.
+    ///
+    /// Use [`NumericArray::from_array()`] to construct multidimensional numeric arrays.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use wl_kernel::expr::array::NumericArray;
+    /// let array = NumericArray::from_slice(&[1, 2, 3, 4, 5]);
+    /// ```
+    ///
+    /// # Alternatives
+    ///
+    /// [`UninitNumericArray`] can be used to allocate a mutable numeric array,
+    /// eliminating the need for an intermediate allocation.
+    pub fn from_slice(data: &[T]) -> Result<NumericArray<T>, ()> {
+        let dim1 = data.len();
+
+        NumericArray::from_array(&[dim1], data)
+    }
+
+    /// Construct a new multidimensional [`NumericArray`] from a list of dimensions and the
+    /// flat slice of data.
+    ///
+    /// # Panics
+    ///
+    ///   * If `dimensions` is empty
+    ///   * If `data.len()` is not equal to product of `dimensions`.
+    ///
+    /// TODO: What if `dimensions` is something like `[0, 0, 0]`?
+    ///
+    /// # Example
+    ///
+    /// Construct the 2x2 [`NumericArray`] `{{1, 2}, {3, 4}}` from a list of dimensions and
+    /// a flat buffer.
+    ///
+    /// ```
+    /// # use wl_kernel::expr::array::NumericArray;
+    /// let array = NumericArray::from_array(&[2, 2], &[1, 2, 3, 4])
+    ///     .expect("allocation failure");
+    /// ```
+    pub fn from_array(dimensions: &[usize], data: &[T]) -> Result<NumericArray<T>, ()> {
+        let uninit = UninitNumericArray::new(dimensions)?;
+
+        Ok(uninit.init_from_slice(data))
+    }
+}
+
 impl<T> NumericArray<T> {
     pub unsafe fn from_raw(array: sys::MNumericArray) -> NumericArray<T> {
         NumericArray(array, PhantomData)
@@ -274,14 +331,7 @@ impl<T> NumericArray<T> {
     pub fn data_ptr(&self) -> *mut c_void {
         let NumericArray(numeric_array, _) = *self;
 
-        unsafe {
-            let getter: unsafe extern "C" fn(*mut sys::st_MNumericArray) -> *mut c_void =
-                (*crate::get_library_data().numericarrayLibraryFunctions)
-                    .MNumericArray_getData
-                    .expect("MNumericArray_getData callback is NULL");
-
-            getter(numeric_array)
-        }
+        unsafe { data_ptr(numeric_array) }
     }
 
     /// Access the elements stored in this [`NumericArray`] as a flat buffer.
@@ -352,16 +402,7 @@ impl<T> NumericArray<T> {
     pub fn flattened_length(&self) -> usize {
         let NumericArray(numeric_array, _) = *self;
 
-        let len: sys::mint = unsafe {
-            let getter: unsafe extern "C" fn(*mut sys::st_MNumericArray) -> sys::mint =
-                (*crate::get_library_data().numericarrayLibraryFunctions)
-                    .MNumericArray_getFlattenedLength
-                    .expect("MNumericArray_getFlattenedLength callback is NULL");
-
-            getter(numeric_array)
-        };
-
-        let len = usize::try_from(len).expect("i64 overflows usize");
+        let len = unsafe { flattened_length(numeric_array) };
 
         // Check that the stored length matches the length computed from the dimensions.
         debug_assert!(len == self.dimensions().iter().copied().product::<usize>());
@@ -414,6 +455,169 @@ impl<T> NumericArray<T> {
     }
 }
 
+unsafe fn data_ptr(numeric_array: sys::MNumericArray) -> *mut c_void {
+    let getter: unsafe extern "C" fn(*mut sys::st_MNumericArray) -> *mut c_void =
+        (*crate::get_library_data().numericarrayLibraryFunctions)
+            .MNumericArray_getData
+            .expect("MNumericArray_getData callback is NULL");
+
+    getter(numeric_array)
+}
+
+unsafe fn flattened_length(numeric_array: sys::MNumericArray) -> usize {
+    let getter: unsafe extern "C" fn(*mut sys::st_MNumericArray) -> sys::mint =
+        (*crate::get_library_data().numericarrayLibraryFunctions)
+            .MNumericArray_getFlattenedLength
+            .expect("MNumericArray_getFlattenedLength callback is NULL");
+
+    let len: sys::mint = getter(numeric_array);
+
+    let len = usize::try_from(len).expect("i64 overflows usize");
+
+    len
+}
+
+//======================================
+// UninitNumericArray
+//======================================
+
+impl<T: NumericArrayType> UninitNumericArray<T> {
+    /// Construct a new uninitialized NumericArray.
+    ///
+    /// This function will fail if the underlying allocation function returns `NULL`.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if `dimensions` is empty.
+    pub fn new(dimensions: &[usize]) -> Result<UninitNumericArray<T>, ()> {
+        assert!(!dimensions.is_empty());
+
+        let kind: NumericArrayDataType = <T as NumericArrayType>::TYPE;
+        let rank = dimensions.len();
+        debug_assert!(rank > 0);
+
+        unsafe {
+            let numeric_array_new: unsafe extern "C" fn(
+                sys::numericarray_data_t,
+                sys::mint,
+                *const sys::mint,
+                *mut sys::MNumericArray,
+            ) -> sys::errcode_t = (*crate::get_library_data()
+                .numericarrayLibraryFunctions)
+                .MNumericArray_new
+                .expect("MNumericArray_new callback is NULL");
+
+            let mut numeric_array: sys::MNumericArray = std::ptr::null_mut();
+
+            let err_code: sys::errcode_t = numeric_array_new(
+                kind as u32,
+                i64::try_from(rank).expect("usize overflows i64"),
+                dimensions.as_ptr() as *mut sys::mint,
+                &mut numeric_array,
+            );
+
+            if err_code != 0 || numeric_array.is_null() {
+                return Err(());
+            }
+
+            Ok(UninitNumericArray(numeric_array, PhantomData))
+        }
+    }
+
+    /// # Panics
+    ///
+    /// This function will panic if `source` does not have the same length as
+    /// this array's [`as_slice_mut()`][UninitNumericArray::as_slice_mut] slice.
+    pub fn init_from_slice(mut self, source: &[T]) -> NumericArray<T> {
+        let data = self.as_slice_mut();
+
+        // Safety: copy_from_slice_uninit() unconditionally asserts that `data` and
+        //         `source` have the same number of elements, so if it succeeds we're
+        //         certain that every element of the NumericArray has been initialized.
+        copy_from_slice_uninit(source, data);
+
+        unsafe { self.assume_init() }
+    }
+
+    /// Mutable access to the elements of this [`UninitNumericArray`].
+    ///
+    /// This function returns a mutable slice of [`std::mem::MaybeUninit<T>`]. This is done
+    /// because it is undefined behavior in Rust to construct a `&` (or `&mut`) reference
+    /// to a value which has not been initialized. Note that it is undefined behavior even
+    /// if the reference is never read from. The `MaybeUninit` type explicitly makes the
+    /// compiler aware that the `T` value might not be initialized.
+    ///
+    /// # Example
+    ///
+    /// Construct the numeric array `{1, 2, 3, 4, 5}`.
+    ///
+    /// ```
+    /// use wl_library_link::{NumericArray, UninitNumericArray};
+    ///
+    /// // Construct a `1x5` numeric array with elements of type `f64`.
+    /// let mut uninit = UninitNumericArray::<f64>::new(&[5])
+    ///     .expect("allocation failure");
+    ///
+    /// for (index, elem) in uninit.as_slice_mut().into_iter().enumerate() {
+    ///     elem.write(index as f64 + 1.0);
+    /// }
+    ///
+    /// // Now that we've taken responsibility for initializing every
+    /// // element of the UninitNumericArray, we've upheld the
+    /// // invariant necessary to make a call to `assume_init()` safe.
+    /// let array: NumericArray<f64> = unsafe { uninit.assume_init() };
+    /// ```
+    ///
+    /// See [`assume_init()`][UninitNumericArray::assume_init].
+    pub fn as_slice_mut(&mut self) -> &mut [MaybeUninit<T>] {
+        let UninitNumericArray(numeric_array, PhantomData) = *self;
+
+        unsafe {
+            let len = flattened_length(numeric_array);
+
+            let ptr: *mut c_void = data_ptr(numeric_array);
+            let ptr = ptr as *mut MaybeUninit<T>;
+
+            std::slice::from_raw_parts_mut(ptr, len)
+        }
+    }
+
+    /// Assume that this NumericArray's elements have been initialized.
+    ///
+    /// Use [`as_slice_mut()`][UninitNumericArray::as_slice_mut] to initialize the values
+    /// in this array.
+    ///
+    /// # Safety
+    ///
+    /// This function must only be called once all elements of this NumericArray have
+    /// been initialized. It is undefined behavior to construct a [`NumericArray`] without
+    /// first initializing the data array.
+    pub unsafe fn assume_init(self) -> NumericArray<T> {
+        let UninitNumericArray(expr, PhantomData) = self;
+
+        NumericArray(expr, PhantomData)
+    }
+}
+
+/// This function is modeled after after the `copy_from_slice()` method on the primitive
+/// `slice` type. This can be used to initialize an [`UninitNumericArray`] from a slice of
+/// data.
+fn copy_from_slice_uninit<T>(src: &[T], dest: &mut [MaybeUninit<T>]) {
+    assert_eq!(
+        src.len(),
+        dest.len(),
+        "destination and source slices have different lengths"
+    );
+
+    unsafe {
+        std::ptr::copy_nonoverlapping(
+            src.as_ptr(),
+            dest.as_mut_ptr() as *mut T,
+            dest.len(),
+        )
+    }
+}
+
 impl NumericArrayDataType {
     pub fn size_in_bytes(&self) -> usize {
         use NumericArrayDataType::*;
@@ -436,6 +640,10 @@ impl NumericArrayDataType {
         }
     }
 }
+
+//======================================
+// Formatting Impls
+//======================================
 
 impl<T> fmt::Debug for NumericArray<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

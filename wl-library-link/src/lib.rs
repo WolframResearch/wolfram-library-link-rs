@@ -56,7 +56,6 @@ mod library_data;
 mod numeric_array;
 
 
-use std::convert::TryFrom;
 use std::ffi::CString;
 
 use wl_expr::{forms::ToPrettyExpr, Expr, ExprKind};
@@ -66,6 +65,7 @@ use wstp::Link;
 
 pub use self::numeric_array::{
     NumericArray, NumericArrayDataType, NumericArrayKind, NumericArrayType,
+    UninitNumericArray,
 };
 use self::sys::MArgument;
 
@@ -274,33 +274,6 @@ impl WolframEngine {
 
         Ok(())
     }
-
-    // FIXME: This is unsafe, because the NumericArray data might not be initialized(?).
-    unsafe fn new_numeric_byte_array(&self, length: usize) -> NumericArray<u8> {
-        use crate::sys::MNumericArray;
-
-        let mut byte_array: MNumericArray = std::ptr::null_mut();
-
-        let rank = 1;
-
-        let na_funs = *(*self.wl_lib).numericarrayLibraryFunctions;
-
-        let err_code = (na_funs.MNumericArray_new.unwrap())(
-            sys::MNumericArray_Data_Type::MNumericArray_Type_UBit8,
-            rank,
-            &i64::try_from(length).expect("NumericArray length overflows i64"),
-            &mut byte_array,
-        );
-
-        if err_code != 0 {
-            panic!(
-                "new_numeric_error(): error creating new NumericArray: {}",
-                err_code
-            );
-        }
-
-        NumericArray::from_raw(byte_array)
-    }
 }
 
 // TODO: Allow any type which implements FromExpr in wrapper parameter lists?
@@ -440,6 +413,8 @@ pub fn call_wxf_wolfram_library_function<
 ) -> std::os::raw::c_uint {
     use self::catch_panic::{call_and_catch_panic, CaughtPanic};
 
+    let _ = initialize(libdata);
+
     let result: Result<(), CaughtPanic> = unsafe {
         call_and_catch_panic(|| {
             // Contruct the engine
@@ -457,8 +432,7 @@ pub fn call_wxf_wolfram_library_function<
 
             let result: Expr = function(&engine, arguments);
 
-            *wxf_result.numeric =
-                wxf_numeric_array_from_expr(&engine, &result).into_raw();
+            *wxf_result.numeric = wxf_numeric_array_from_expr(&result).into_raw();
         })
     };
 
@@ -472,9 +446,8 @@ pub fn call_wxf_wolfram_library_function<
             let pretty_expr = caught_panic.to_pretty_expr();
 
             unsafe {
-                let engine = WolframEngine::from_library_data(libdata);
                 *wxf_result.numeric =
-                    wxf_numeric_array_from_expr(&engine, &pretty_expr).into_raw();
+                    wxf_numeric_array_from_expr(&pretty_expr).into_raw();
             }
 
             LIBRARY_NO_ERROR
@@ -482,22 +455,10 @@ pub fn call_wxf_wolfram_library_function<
     }
 }
 
-unsafe fn wxf_numeric_array_from_expr(
-    engine: &WolframEngine,
-    expr: &Expr,
-) -> NumericArray<u8> {
+fn wxf_numeric_array_from_expr(expr: &Expr) -> NumericArray<u8> {
     let result_wxf: Vec<u8> = wxf::serialize(expr)
         .expect("wolfram_library_function: failed to serialize result expression to WXF");
 
-    let mut numeric_array = engine.new_numeric_byte_array(result_wxf.len());
-
-    debug_assert!(numeric_array.as_slice_mut().len() == result_wxf.len());
-
-    // FIXME: It's very inefficient to do this copy 1 byte at a time. Replace this with
-    //        std::ptr::copy_nonoverlapping().
-    for (index, byte) in numeric_array.as_slice_mut().iter_mut().enumerate() {
-        *byte = result_wxf[index];
-    }
-
-    numeric_array
+    NumericArray::from_slice(result_wxf.as_slice())
+        .expect("wolfram_library_function: failed to construct NumericArray<u8>")
 }
