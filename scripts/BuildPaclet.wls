@@ -27,7 +27,8 @@ Scan[
 	{
 		"libraw_wstp_function.dylib",
 		"libbasic_expressions.dylib",
-		"libnumeric_arrays.dylib"
+		"libnumeric_arrays.dylib",
+		"libraw_librarylink_function.dylib"
 	}
 ]
 

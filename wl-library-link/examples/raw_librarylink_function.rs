@@ -5,9 +5,12 @@ use std::convert::TryFrom;
 use std::mem::MaybeUninit;
 use std::os::raw::c_uint;
 
-use wl_library_link::sys::{
-    mint, MArgument, MNumericArray, MNumericArray_Data_Type, WolframLibraryData,
-    LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
+use wl_library_link::{
+    sys::{
+        mint, MArgument, MNumericArray, MNumericArray_Data_Type, WolframLibraryData,
+        LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
+    },
+    NumericArray,
 };
 
 /// This function is loaded by evaluating:
@@ -175,5 +178,50 @@ pub unsafe extern "C" fn demo_wxf_byte_array(
     //
 
     *res.numeric = byte_array;
+    LIBRARY_NO_ERROR
+}
+
+/// This function is identical to [`demo_wxf_byte_array()`], except that it uses the safe
+/// [`NumericArray`] wrapper type.
+///
+/// This function is loaded by evaluating:
+///
+/// ```wolfram
+/// function = LibraryFunctionLoad[
+///     "/path/to/target/debug/examples/libraw_librarylink_function.dylib",
+///     "demo_wxf_safe_byte_array",
+///     {},
+///     LibraryDataType[ByteArray]
+/// ];
+///
+/// BinaryDeserialize[function[]]
+/// ```
+#[no_mangle]
+pub unsafe extern "C" fn demo_wxf_safe_byte_array(
+    lib_data: WolframLibraryData,
+    arg_count: mint,
+    _args: *mut MArgument,
+    res: MArgument,
+) -> c_uint {
+    if let Err(_) = wl_library_link::initialize(lib_data) {
+        return LIBRARY_FUNCTION_ERROR;
+    }
+
+    if arg_count != 0 {
+        return LIBRARY_FUNCTION_ERROR;
+    }
+
+    let wxf_bytes =
+        wxf::serialize(&Expr! { <| "a" -> 1, "b" -> 2, "c" -> 3 |> }).unwrap();
+
+    // Allocate and fill a new one dimensional NumericArray<u8> with WXF data.
+    let byte_array: NumericArray<u8> =
+        match NumericArray::from_slice(wxf_bytes.as_slice()) {
+            Ok(array) => array,
+            Err(_) => return LIBRARY_FUNCTION_ERROR,
+        };
+
+    // Return the NumericArray
+    *res.numeric = byte_array.into_raw();
     LIBRARY_NO_ERROR
 }

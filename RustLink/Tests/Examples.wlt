@@ -61,3 +61,37 @@ Test[
 		32640
 	}
 ]
+
+Test[
+	func = LibraryFunctionLoad[
+		"libraw_librarylink_function",
+		"demo_wxf_byte_array",
+		{},
+		LibraryDataType[ByteArray]
+	];
+
+	data = func[];
+	{data, BinaryDeserialize[data]}
+	,
+	{
+		ByteArray["ODpmA3MLQXNzb2NpYXRpb25mAnMEUnVsZVMBYUMBZgJzBFJ1bGVTAWJDAmYCcwRSdWxlUwFjQwM="],
+		<| "a" -> 1, "b" -> 2, "c" -> 3|>
+	}
+]
+
+Test[
+	func = LibraryFunctionLoad[
+		"libraw_librarylink_function",
+		"demo_wxf_safe_byte_array",
+		{},
+		LibraryDataType[ByteArray]
+	];
+
+	data = func[];
+	{data, BinaryDeserialize[data]}
+	,
+	{
+		ByteArray["ODpmA3MLQXNzb2NpYXRpb25mAnMEUnVsZVMBYUMBZgJzBFJ1bGVTAWJDAmYCcwRSdWxlUwFjQwM="],
+		<| "a" -> 1, "b" -> 2, "c" -> 3|>
+	}
+]
