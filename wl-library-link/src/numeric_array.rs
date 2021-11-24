@@ -341,8 +341,8 @@ impl<T: NumericArrayType> NumericArray<T> {
     ///
     /// # Example
     ///
-    /// ```
-    /// # use wl_kernel::expr::array::NumericArray;
+    /// ```no_run
+    /// # use wl_library_link::NumericArray;
     /// let array = NumericArray::from_slice(&[1, 2, 3, 4, 5]);
     /// ```
     ///
@@ -371,8 +371,8 @@ impl<T: NumericArrayType> NumericArray<T> {
     /// Construct the 2x2 [`NumericArray`] `{{1, 2}, {3, 4}}` from a list of dimensions and
     /// a flat buffer.
     ///
-    /// ```
-    /// # use wl_kernel::expr::array::NumericArray;
+    /// ```no_run
+    /// # use wl_library_link::NumericArray;
     /// let array = NumericArray::from_array(&[2, 2], &[1, 2, 3, 4])
     ///     .expect("allocation failure");
     /// ```
@@ -624,7 +624,7 @@ impl<T: NumericArrayType> UninitNumericArray<T> {
     ///
     /// Construct the numeric array `{1, 2, 3, 4, 5}`.
     ///
-    /// ```
+    /// ```no_run
     /// use wl_library_link::{NumericArray, UninitNumericArray};
     ///
     /// // Construct a `1x5` numeric array with elements of type `f64`.
