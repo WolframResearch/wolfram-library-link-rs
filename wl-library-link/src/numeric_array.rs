@@ -386,12 +386,6 @@ impl<T> NumericArray<T> {
         }
     }
 
-    pub fn length_in_bytes(&self) -> usize {
-        let length: usize = self.dimensions().iter().product();
-
-        self.data_type().size_in_bytes() * length
-    }
-
     /// The number of elements in the underlying flat data array.
     ///
     /// This is the product of the dimension lengths of this [`NumericArray`].
@@ -615,29 +609,6 @@ fn copy_from_slice_uninit<T>(src: &[T], dest: &mut [MaybeUninit<T>]) {
             dest.as_mut_ptr() as *mut T,
             dest.len(),
         )
-    }
-}
-
-impl NumericArrayDataType {
-    pub fn size_in_bytes(&self) -> usize {
-        use NumericArrayDataType::*;
-
-        match self {
-            Bit8  | UBit8  => 1,
-            Bit16 | UBit16 => 2,
-            Bit32 | UBit32 => 4,
-            Bit64 | UBit64 => 8,
-
-            Real32 => 4,
-            Real64 => 8,
-
-            // TODO: Handle this case? Is there a 32 bit complex real typedef?
-            ComplexReal32 => unimplemented!(
-                "NumericArrayDataType::size_in_bytes(): ComplexReal32 is not currently supported."
-            ),
-            // ComplexReal32 => NumericArrayKind::ComplexReal32(trans(self)),
-            ComplexReal64 => std::mem::size_of::<sys::mcomplex>(),
-        }
     }
 }
 
