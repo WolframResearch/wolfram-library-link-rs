@@ -31,6 +31,9 @@ use crate::sys::MNumericArray_Data_Type::{
 /// A [`NumericArray`] can contain any type `T` which satisfies the trait
 /// [`NumericArrayType`].
 ///
+/// Use [`NumericArray::kind()`] to dynamically resolve a `NumericArray` with unknown
+/// element type into a `NumericArray<T>` with explicit element type.
+///
 /// Use [`UninitNumericArray`] to construct a [`NumericArray`] without requiring an
 /// intermediate allocation to copy the elements from.
 #[repr(transparent)]
@@ -58,6 +61,8 @@ pub struct UninitNumericArray<T: NumericArrayType>(sys::MNumericArray, PhantomDa
 ///
 /// [`NumericArrayDataType`] is an enumeration of all the types which satisfy this trait.
 pub trait NumericArrayType: private::Sealed {
+    /// The [`NumericArrayDataType`] which dynamically represents the type which this
+    /// trait is implemented for.
     const TYPE: NumericArrayDataType;
 }
 
@@ -133,6 +138,7 @@ impl NumericArrayType for sys::mcomplex {
 /// This is an enumeration of all the types which satisfy [`NumericArrayType`].
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(u32)]
+#[allow(missing_docs)]
 pub enum NumericArrayDataType {
     Bit8 = BIT8_TYPE as u32,
     Bit16 = BIT16_TYPE as u32,
@@ -154,6 +160,7 @@ pub enum NumericArrayDataType {
 /// Data array borrowed from a [`NumericArray`].
 ///
 /// Use [`NumericArray::kind()`] to get an instance of this type.
+#[allow(missing_docs)]
 pub enum NumericArrayKind<'e> {
     //
     // Signed integer types
@@ -194,6 +201,37 @@ assert_eq_align!(sys::mcomplex, f64);
 //======================================
 
 impl NumericArray {
+    /// Dynamically resolve a `NumericArray` of unknown element type into a
+    /// `NumericArray<T>` with explicit element type.
+    ///
+    /// # Example
+    ///
+    /// Implement a function which returns the sum of an integral `NumericArray`
+    ///
+    /// ```no_run
+    /// use wl_library_link::{NumericArray, NumericArrayKind};
+    ///
+    /// fn sum(array: NumericArray) -> i64 {
+    ///     match array.kind() {
+    ///         NumericArrayKind::Bit8(na) => na.as_slice().into_iter().copied().map(i64::from).sum(),
+    ///         NumericArrayKind::Bit16(na) => na.as_slice().into_iter().copied().map(i64::from).sum(),
+    ///         NumericArrayKind::Bit32(na) => na.as_slice().into_iter().copied().map(i64::from).sum(),
+    ///         NumericArrayKind::Bit64(na) => na.as_slice().into_iter().sum(),
+    ///         NumericArrayKind::UBit8(na) => na.as_slice().into_iter().copied().map(i64::from).sum(),
+    ///         NumericArrayKind::UBit16(na) => na.as_slice().into_iter().copied().map(i64::from).sum(),
+    ///         NumericArrayKind::UBit32(na) => na.as_slice().into_iter().copied().map(i64::from).sum(),
+    ///         NumericArrayKind::UBit64(na) => {
+    ///             match i64::try_from(na.as_slice().into_iter().sum::<u64>()) {
+    ///                 Ok(sum) => sum,
+    ///                 Err(_) => panic!("overflows i64"),
+    ///             }
+    ///         },
+    ///         NumericArrayKind::Real32(_)
+    ///         | NumericArrayKind::Real64(_)
+    ///         | NumericArrayKind::ComplexReal64(_) => panic!("bad type"),
+    ///     }
+    /// }
+    /// ```
     pub fn kind(&self) -> NumericArrayKind {
         /// The purpose of this intermediate function is to limit the scope of the call to
         /// transmute(). `transmute()` is a *very* unsafe function, so it seems prudent to
@@ -230,6 +268,28 @@ impl NumericArray {
         }
     }
 
+    /// Attempt to resolve this `NumericArray` into a `&NumericArray<T>` of the specified
+    /// element type.
+    ///
+    /// If the element type of this array does not match `T`, an error will be returned.
+    ///
+    /// # Example
+    ///
+    /// Implement a function which unwraps the `&[u8]` data in a `NumericArray` of 8-bit
+    /// integers.
+    ///
+    /// ```no_run
+    /// use wl_library_link::NumericArray;
+    ///
+    /// fn bytes(array: &NumericArray) -> &[u8] {
+    ///     let byte_array: &NumericArray<u8> = match array.try_kind::<u8>() {
+    ///         Ok(array) => array,
+    ///         Err(_) => panic!("expected NumericArray of UnsignedInteger8")
+    ///     };
+    ///
+    ///     byte_array.as_slice()
+    /// }
+    /// ```
     pub fn try_kind<T>(&self) -> Result<&NumericArray<T>, ()>
     where
         T: NumericArrayType,
@@ -249,6 +309,11 @@ impl NumericArray {
         Err(())
     }
 
+    /// Attempt to resolve this `NumericArray` into a `NumericArray<T>` of the specified
+    /// element type.
+    ///
+    /// If the element type of this array does not match `T`, the original untyped array
+    /// will be returned as the error value.
     pub fn try_into_kind<T>(self) -> Result<NumericArray<T>, NumericArray>
     where
         T: NumericArrayType,
@@ -319,10 +384,24 @@ impl<T: NumericArrayType> NumericArray<T> {
 }
 
 impl<T> NumericArray<T> {
+    /// Construct a `NumericArray<T>` from a raw [`MNumericArray`][sys::MNumericArray].
+    ///
+    /// # Safety
+    ///
+    /// The following conditions must be met for safe usage of this function:
+    ///
+    /// * `array` must be a fully initialized and valid numeric array object
+    /// * `T` must either:
+    ///   - be `()`, representing an array with dynamic element type, or
+    ///   - `T` must satisfy [`NumericArrayType`], and the element type of `array` must
+    ///     be the same as `T`.
+    // TODO: Add something about the reference count in the above list?
     pub unsafe fn from_raw(array: sys::MNumericArray) -> NumericArray<T> {
         NumericArray(array, PhantomData)
     }
 
+    /// Convert this `NumericArray` into a raw [`MNumericArray`][sys::MNumericArray]
+    /// object.
     pub unsafe fn into_raw(self) -> sys::MNumericArray {
         self.0
     }
