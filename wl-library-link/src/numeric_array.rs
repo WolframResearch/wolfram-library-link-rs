@@ -501,7 +501,21 @@ impl<T> NumericArray<T> {
         rank
     }
 
-    fn dimensions(&self) -> &[usize] {
+    /// Get the dimensions of this `NumericArray`.
+    ///
+    /// *LibraryLink C API Documentation:* [`MNumericArray_getDimensions`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MNumericArray_getDimensions.html)
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use wl_library_link::NumericArray;
+    /// let array = NumericArray::from_array(&[2, 2], &[1, 2, 3, 4])
+    ///     .expect("allocation failure");
+    ///
+    /// assert_eq!(array.dimensions(), &[2, 2]);
+    /// assert_eq!(array.rank(), array.dimensions.len());
+    /// ```
+    pub fn dimensions(&self) -> &[usize] {
         let NumericArray(numeric_array, _) = *self;
 
         let rank = self.rank();
