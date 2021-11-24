@@ -79,6 +79,14 @@ pub const False: u32 = 0;
 pub const MType_Integer: u32 = 2;
 pub const MType_Real: u32 = 3;
 pub const MType_Complex: u32 = 4;
+pub const MType_Undef: u32 = 0;
+pub const MType_Boolean: u32 = 1;
+pub const MType_Tensor: u32 = 5;
+pub const MType_SparseArray: u32 = 6;
+pub const MType_NumericArray: u32 = 7;
+pub const MType_Image: u32 = 8;
+pub const MType_UTF8String: u32 = 9;
+pub const MType_DataStore: u32 = 10;
 pub type size_t = ::std::os::raw::c_ulong;
 pub type wchar_t = ::std::os::raw::c_int;
 pub type max_align_t = u128;
@@ -2111,6 +2119,673 @@ fn bindgen_test_layout_st_WolframNumericArrayLibrary_Functions() {
 }
 pub type WolframNumericArrayLibrary_Functions =
     *mut st_WolframNumericArrayLibrary_Functions;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct DataStoreNode_t {
+    _unused: [u8; 0],
+}
+pub type DataStoreNode = *mut DataStoreNode_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct st_WolframIOLibrary_Functions {
+    pub createAsynchronousTaskWithoutThread:
+        ::std::option::Option<unsafe extern "C" fn() -> mint>,
+    pub createAsynchronousTaskWithThread: ::std::option::Option<
+        unsafe extern "C" fn(
+            asyncRunner: ::std::option::Option<
+                unsafe extern "C" fn(
+                    asyncTaskID: mint,
+                    initData: *mut ::std::os::raw::c_void,
+                ),
+            >,
+            initData: *mut ::std::os::raw::c_void,
+        ) -> mint,
+    >,
+    pub raiseAsyncEvent: ::std::option::Option<
+        unsafe extern "C" fn(
+            asyncTaskID: mint,
+            eventType: *mut ::std::os::raw::c_char,
+            arg1: DataStore,
+        ),
+    >,
+    pub asynchronousTaskAliveQ:
+        ::std::option::Option<unsafe extern "C" fn(asyncTaskID: mint) -> mbool>,
+    pub asynchronousTaskStartedQ:
+        ::std::option::Option<unsafe extern "C" fn(asyncTaskID: mint) -> mbool>,
+    pub createDataStore: ::std::option::Option<unsafe extern "C" fn() -> DataStore>,
+    pub DataStore_addInteger:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore, arg2: mint)>,
+    pub DataStore_addReal:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore, arg2: mreal)>,
+    pub DataStore_addComplex:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore, arg2: mcomplex)>,
+    pub DataStore_addString: ::std::option::Option<
+        unsafe extern "C" fn(arg1: DataStore, arg2: *mut ::std::os::raw::c_char),
+    >,
+    pub DataStore_addMTensor:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore, arg2: MTensor)>,
+    pub DataStore_addMRawArray:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore, arg2: MRawArray)>,
+    pub DataStore_addMImage:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore, arg2: MImage)>,
+    pub DataStore_addDataStore:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore, arg2: DataStore)>,
+    pub DataStore_addNamedInteger: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: DataStore,
+            arg2: *mut ::std::os::raw::c_char,
+            arg3: mint,
+        ),
+    >,
+    pub DataStore_addNamedReal: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: DataStore,
+            arg2: *mut ::std::os::raw::c_char,
+            arg3: mreal,
+        ),
+    >,
+    pub DataStore_addNamedComplex: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: DataStore,
+            arg2: *mut ::std::os::raw::c_char,
+            arg3: mcomplex,
+        ),
+    >,
+    pub DataStore_addNamedString: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: DataStore,
+            arg2: *mut ::std::os::raw::c_char,
+            arg3: *mut ::std::os::raw::c_char,
+        ),
+    >,
+    pub DataStore_addNamedMTensor: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: DataStore,
+            arg2: *mut ::std::os::raw::c_char,
+            arg3: MTensor,
+        ),
+    >,
+    pub DataStore_addNamedMRawArray: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: DataStore,
+            arg2: *mut ::std::os::raw::c_char,
+            arg3: MRawArray,
+        ),
+    >,
+    pub DataStore_addNamedMImage: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: DataStore,
+            arg2: *mut ::std::os::raw::c_char,
+            arg3: MImage,
+        ),
+    >,
+    pub DataStore_addNamedDataStore: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: DataStore,
+            arg2: *mut ::std::os::raw::c_char,
+            arg3: DataStore,
+        ),
+    >,
+    pub removeAsynchronousTask:
+        ::std::option::Option<unsafe extern "C" fn(asyncTaskID: mint) -> mint>,
+    pub deleteDataStore: ::std::option::Option<unsafe extern "C" fn(arg1: DataStore)>,
+    pub copyDataStore:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore) -> DataStore>,
+    pub DataStore_getLength:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore) -> mint>,
+    pub DataStore_getFirstNode:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore) -> DataStoreNode>,
+    pub DataStore_getLastNode:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore) -> DataStoreNode>,
+    pub DataStoreNode_getNextNode:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStoreNode) -> DataStoreNode>,
+    pub DataStoreNode_getDataType:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStoreNode) -> type_t>,
+    pub DataStoreNode_getData: ::std::option::Option<
+        unsafe extern "C" fn(arg1: DataStoreNode, arg2: *mut MArgument) -> errcode_t,
+    >,
+    pub DataStoreNode_getName: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: DataStoreNode,
+            arg2: *mut *mut ::std::os::raw::c_char,
+        ) -> errcode_t,
+    >,
+    pub DataStore_addBoolean:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore, arg2: mbool)>,
+    pub DataStore_addNamedBoolean: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: DataStore,
+            arg2: *mut ::std::os::raw::c_char,
+            arg3: mbool,
+        ),
+    >,
+    pub DataStore_addMNumericArray:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore, arg2: MNumericArray)>,
+    pub DataStore_addNamedMNumericArray: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: DataStore,
+            arg2: *mut ::std::os::raw::c_char,
+            arg3: MNumericArray,
+        ),
+    >,
+    pub DataStore_addMSparseArray:
+        ::std::option::Option<unsafe extern "C" fn(arg1: DataStore, arg2: MSparseArray)>,
+    pub DataStore_addNamedMSparseArray: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: DataStore,
+            arg2: *mut ::std::os::raw::c_char,
+            arg3: MSparseArray,
+        ),
+    >,
+}
+#[test]
+fn bindgen_test_layout_st_WolframIOLibrary_Functions() {
+    assert_eq!(
+        ::std::mem::size_of::<st_WolframIOLibrary_Functions>(),
+        304usize,
+        concat!("Size of: ", stringify!(st_WolframIOLibrary_Functions))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<st_WolframIOLibrary_Functions>(),
+        8usize,
+        concat!("Alignment of ", stringify!(st_WolframIOLibrary_Functions))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .createAsynchronousTaskWithoutThread as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(createAsynchronousTaskWithoutThread)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .createAsynchronousTaskWithThread as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(createAsynchronousTaskWithThread)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>())).raiseAsyncEvent
+                as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(raiseAsyncEvent)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .asynchronousTaskAliveQ as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(asynchronousTaskAliveQ)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .asynchronousTaskStartedQ as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(asynchronousTaskStartedQ)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>())).createDataStore
+                as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(createDataStore)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>())).DataStore_addInteger
+                as *const _ as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addInteger)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>())).DataStore_addReal
+                as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addReal)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>())).DataStore_addComplex
+                as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addComplex)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>())).DataStore_addString
+                as *const _ as usize
+        },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addString)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>())).DataStore_addMTensor
+                as *const _ as usize
+        },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addMTensor)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addMRawArray as *const _ as usize
+        },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addMRawArray)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>())).DataStore_addMImage
+                as *const _ as usize
+        },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addMImage)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addDataStore as *const _ as usize
+        },
+        104usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addDataStore)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addNamedInteger as *const _ as usize
+        },
+        112usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addNamedInteger)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addNamedReal as *const _ as usize
+        },
+        120usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addNamedReal)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addNamedComplex as *const _ as usize
+        },
+        128usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addNamedComplex)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addNamedString as *const _ as usize
+        },
+        136usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addNamedString)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addNamedMTensor as *const _ as usize
+        },
+        144usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addNamedMTensor)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addNamedMRawArray as *const _ as usize
+        },
+        152usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addNamedMRawArray)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addNamedMImage as *const _ as usize
+        },
+        160usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addNamedMImage)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addNamedDataStore as *const _ as usize
+        },
+        168usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addNamedDataStore)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .removeAsynchronousTask as *const _ as usize
+        },
+        176usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(removeAsynchronousTask)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>())).deleteDataStore
+                as *const _ as usize
+        },
+        184usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(deleteDataStore)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>())).copyDataStore
+                as *const _ as usize
+        },
+        192usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(copyDataStore)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>())).DataStore_getLength
+                as *const _ as usize
+        },
+        200usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_getLength)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_getFirstNode as *const _ as usize
+        },
+        208usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_getFirstNode)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_getLastNode as *const _ as usize
+        },
+        216usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_getLastNode)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStoreNode_getNextNode as *const _ as usize
+        },
+        224usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStoreNode_getNextNode)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStoreNode_getDataType as *const _ as usize
+        },
+        232usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStoreNode_getDataType)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStoreNode_getData as *const _ as usize
+        },
+        240usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStoreNode_getData)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStoreNode_getName as *const _ as usize
+        },
+        248usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStoreNode_getName)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>())).DataStore_addBoolean
+                as *const _ as usize
+        },
+        256usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addBoolean)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addNamedBoolean as *const _ as usize
+        },
+        264usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addNamedBoolean)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addMNumericArray as *const _ as usize
+        },
+        272usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addMNumericArray)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addNamedMNumericArray as *const _ as usize
+        },
+        280usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addNamedMNumericArray)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addMSparseArray as *const _ as usize
+        },
+        288usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addMSparseArray)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframIOLibrary_Functions>()))
+                .DataStore_addNamedMSparseArray as *const _ as usize
+        },
+        296usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframIOLibrary_Functions),
+            "::",
+            stringify!(DataStore_addNamedMSparseArray)
+        )
+    );
+}
+pub type WolframIOLibrary_Functions = *mut st_WolframIOLibrary_Functions;
 pub type __builtin_va_list = [__va_list_tag; 1usize];
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2190,11 +2865,6 @@ pub struct st_WolframRuntimeData {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct st_WolframCompileLibrary_Functions {
-    pub _address: u8,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct st_WolframIOLibrary_Functions {
     pub _address: u8,
 }
 #[repr(C)]
