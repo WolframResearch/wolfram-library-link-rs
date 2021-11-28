@@ -45,6 +45,7 @@
 #![cfg_attr(feature = "nightly", feature(panic_info_message))]
 #![warn(missing_docs)]
 
+mod args;
 mod async_tasks;
 /// This module is *semver exempt*. This is not intended to be part of the public API of
 /// wl-library-link.
@@ -76,6 +77,7 @@ pub use wl_library_link_sys as sys;
 pub use wstp;
 
 pub use self::{
+    args::{from_args, FromArg, FromArgs},
     async_tasks::{spawn_async_task_with_thread, AsyncTask, AsyncTaskObject},
     data_store::DataStore,
     library_data::{get_library_data, initialize, WolframLibraryData},
