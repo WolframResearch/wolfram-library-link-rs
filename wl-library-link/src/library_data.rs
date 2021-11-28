@@ -8,8 +8,8 @@ use crate::sys::{
     MOutputStream, MTensor, WSENV, WSLINK,
 };
 
-thread_local! {
-    static LIBRARY_DATA: Mutex<Option<WolframLibraryData>> = Mutex::new(None);
+lazy_static::lazy_static! {
+    static ref LIBRARY_DATA: Mutex<Option<WolframLibraryData>> = Mutex::new(None);
 }
 
 /// Initialize static data for the current Wolfram library.
@@ -42,23 +42,23 @@ thread_local! {
 pub fn initialize(data: sys::WolframLibraryData) -> Result<(), ()> {
     let data = WolframLibraryData::new(data)?;
 
-    LIBRARY_DATA.with(|static_data| {
-        let mut static_data = static_data.lock().map_err(|_| ())?;
+    let mut static_data = LIBRARY_DATA.lock().map_err(|_| ())?;
 
-        *static_data = Some(data);
+    *static_data = Some(data);
 
-        Ok(())
-    })
+    Ok(())
 }
 
-pub(crate) fn get_library_data() -> WolframLibraryData {
-    let data = LIBRARY_DATA.with(|static_data| {
-        let static_data = static_data
-            .lock()
-            .expect("failed to acquire lock on global Wolfram LIBRARY_DATA");
+/// Get the [`WolframLibraryData`] instance recorded by the last call to [`initialize()`].
+pub fn get_library_data() -> WolframLibraryData {
+    let static_data = LIBRARY_DATA
+        .lock()
+        .expect("failed to acquire lock on global Wolfram LIBRARY_DATA");
 
-        *static_data
-    });
+    let data = *static_data;
+
+    // Avoid poisoning the lock if the library is not yet initialized.
+    drop(static_data);
 
     // TODO: Include a comment here mentioning that the library could/should provide a
     //       WolframLibrary_initialize() function which calls initialize_library_data()?
@@ -69,6 +69,7 @@ pub(crate) fn get_library_data() -> WolframLibraryData {
 
 #[allow(non_snake_case)]
 #[derive(Copy, Clone)]
+#[allow(missing_docs)]
 pub struct WolframLibraryData {
     pub UTF8String_disown: unsafe extern "C" fn(arg1: *mut ::std::os::raw::c_char),
 
@@ -286,6 +287,20 @@ pub struct WolframLibraryData {
     pub getParallelThreadNumber: unsafe extern "C" fn() -> ::std::os::raw::c_int,
 }
 
+/// # Safety
+///
+/// The `WolframLibraryData` stucture contains function pointers to functions in the
+/// Wolfram Runtime Library (RTL). Sending function pointers to another thread is not
+/// dangerous; but calling some of the `unsafe` functions from that thread may be.
+/// Therefore, this type should be [`Send`].
+///
+/// Not all of the functions in the Wolfram RTL are safe to call from any thread other
+/// than the main Kernel thread. Therefore, the presense of an instance of
+/// `WolframLibraryData` on a thread other than the main Kernel thread does not imply that
+/// it is safe to call all of the functions listed in this structure from that thread.
+/// Each function is marked unsafe, and has independent safety considerations.
+unsafe impl Send for WolframLibraryData {}
+
 macro_rules! unwrap_fields {
     ($data:expr, [ $($field:ident),+ ]) => {{
         WolframLibraryData {
@@ -303,6 +318,7 @@ macro_rules! unwrap_fields {
 }
 
 impl WolframLibraryData {
+    /// Construct a new `WolframLibraryData` from a [`wl_library_link_sys::WolframLibraryData`].
     pub fn new(data_ptr: sys::WolframLibraryData) -> Result<Self, ()> {
         if data_ptr.is_null() {
             return Err(());

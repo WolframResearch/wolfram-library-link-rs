@@ -54,3 +54,12 @@ crate-type = ["cdylib"]
 [[example]]
 name = "numeric_arrays"
 crate-type = ["cdylib"]
+
+#---------------
+# Async examples
+#---------------
+
+[[example]]
+name = "async_file_watcher_raw"
+path = "examples/async/async_file_watcher_raw.rs"
+crate-type = ["cdylib"]

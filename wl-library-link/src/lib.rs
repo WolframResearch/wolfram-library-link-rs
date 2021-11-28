@@ -73,9 +73,8 @@ use self::sys::MArgument;
 pub use wl_library_link_sys as sys;
 pub use wstp;
 
-pub use self::library_data::initialize;
+pub use self::library_data::{get_library_data, initialize, WolframLibraryData};
 
-pub(crate) use self::library_data::get_library_data;
 
 /// Attribute to generate a [LibraryLink][library-link]-compatible wrapper around a Rust
 /// function.
