@@ -43,8 +43,9 @@
 //! [cargo-features]: https://doc.rust-lang.org/cargo/reference/features.html
 
 #![cfg_attr(feature = "nightly", feature(panic_info_message))]
-#![deny(missing_docs)]
+#![warn(missing_docs)]
 
+mod async_tasks;
 /// This module is *semver exempt*. This is not intended to be part of the public API of
 /// wl-library-link.
 ///
@@ -52,6 +53,7 @@
 /// message.
 #[doc(hidden)]
 pub mod catch_panic;
+mod data_store;
 mod library_data;
 /// This module is *semver exempt*. This is not intended to be part of the public API of
 /// wl-library-link.
@@ -74,6 +76,8 @@ pub use wl_library_link_sys as sys;
 pub use wstp;
 
 pub use self::{
+    async_tasks::{spawn_async_task_with_thread, AsyncTask, AsyncTaskObject},
+    data_store::DataStore,
     library_data::{get_library_data, initialize, WolframLibraryData},
     numeric_array::{
         NumericArray, NumericArrayDataType, NumericArrayKind, NumericArrayType,

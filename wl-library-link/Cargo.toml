@@ -60,6 +60,11 @@ crate-type = ["cdylib"]
 #---------------
 
 [[example]]
+name = "async_file_watcher"
+path = "examples/async/async_file_watcher.rs"
+crate-type = ["cdylib"]
+
+[[example]]
 name = "async_file_watcher_raw"
 path = "examples/async/async_file_watcher_raw.rs"
 crate-type = ["cdylib"]
