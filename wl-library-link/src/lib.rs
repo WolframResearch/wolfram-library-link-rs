@@ -69,17 +69,17 @@ use wl_library_link_sys::{mint, WSLINK};
 use wl_symbol_table as sym;
 use wstp::Link;
 
-pub use self::numeric_array::{
-    NumericArray, NumericArrayDataType, NumericArrayKind, NumericArrayType,
-    UninitNumericArray,
-};
-
 
 pub use wl_library_link_sys as sys;
 pub use wstp;
 
-pub use self::library_data::{get_library_data, initialize, WolframLibraryData};
-
+pub use self::{
+    library_data::{get_library_data, initialize, WolframLibraryData},
+    numeric_array::{
+        NumericArray, NumericArrayDataType, NumericArrayKind, NumericArrayType,
+        UninitNumericArray,
+    },
+};
 
 /// Attribute to generate a [LibraryLink][library-link]-compatible wrapper around a Rust
 /// function.
