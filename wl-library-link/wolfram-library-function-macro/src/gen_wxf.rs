@@ -9,7 +9,7 @@ pub(crate) fn gen_arg_mode_expr_list<'a>(
     wrapper_function_name: Ident,
 ) -> TokenStream {
     let inner = quote::quote! {
-        ::wl_library_link::call_wxf_wolfram_library_function_expr_list(
+        ::wl_library_link::macro_utils::call_wxf_wolfram_library_function_expr_list(
             libdata,
             wxf_argument,
             wxf_result,
@@ -44,7 +44,7 @@ pub(crate) fn gen_arg_mode_pattern<'a>(
         use ::wl_expr::{Expr, forms::{FromExpr, FormError}};
         use ::wl_library_link::WolframEngine;
 
-        ::wl_library_link::call_wxf_wolfram_library_function(
+        ::wl_library_link::macro_utils::call_wxf_wolfram_library_function(
             libdata,
             wxf_argument,
             wxf_result,
