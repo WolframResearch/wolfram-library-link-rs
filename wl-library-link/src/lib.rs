@@ -14,7 +14,7 @@
 //!     for arg in args {
 //!         engine.evaluate(&Expr! { Print["Hello ", 'arg, "!"] });
 //!     }
-//!  
+//!
 //!     Expr::null()
 //! }
 //! ```
