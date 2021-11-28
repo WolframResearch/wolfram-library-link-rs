@@ -513,7 +513,7 @@ impl<T> NumericArray<T> {
     ///     .expect("allocation failure");
     ///
     /// assert_eq!(array.dimensions(), &[2, 2]);
-    /// assert_eq!(array.rank(), array.dimensions.len());
+    /// assert_eq!(array.rank(), array.dimensions().len());
     /// ```
     pub fn dimensions(&self) -> &[usize] {
         let NumericArray(numeric_array, _) = *self;
