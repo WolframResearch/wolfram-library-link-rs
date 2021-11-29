@@ -88,7 +88,7 @@ impl AsyncTaskObject {
 
         unsafe {
             // raise_async_event(id, name.as_ptr() as *mut c_char, data.into_ptr());
-            rtl::raiseAsyncEvent(id, name.into_raw(), data.into_ptr());
+            rtl::raiseAsyncEvent(id, name.into_raw(), data.into_raw());
         }
     }
 }

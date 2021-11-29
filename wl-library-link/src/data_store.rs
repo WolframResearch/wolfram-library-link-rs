@@ -31,7 +31,7 @@ impl DataStore {
     }
 
     /// Convert this `DataStore` into a raw [`wl_library_link_sys::DataStore`] pointer.
-    pub fn into_ptr(self) -> sys::DataStore {
+    pub fn into_raw(self) -> sys::DataStore {
         let DataStore(ds) = self;
         ds
     }
