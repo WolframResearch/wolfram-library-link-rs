@@ -12,10 +12,7 @@ use std::{
 
 use static_assertions::assert_not_impl_any;
 
-use crate::{
-    sys::{self, mint},
-    DataStore,
-};
+use crate::{rtl, sys, DataStore};
 
 
 /// Handle to a Wolfram Language [`AsynchronousTaskObject`](https://reference.wolfram.com/language/ref/AsynchronousTaskObject.html)
@@ -51,14 +48,7 @@ impl AsyncTaskObject {
     ///
     /// *LibraryLink C Function:* [`asynchronousTaskAliveQ`][sys::st_WolframIOLibrary_Functions::asynchronousTaskAliveQ].
     pub fn is_alive(&self) -> bool {
-        let io_funcs = unsafe { *crate::get_library_data().ioLibraryFunctions };
-
-        let async_task_is_alive: unsafe extern "C" fn(sys::mint) -> std::os::raw::c_int =
-            io_funcs
-                .asynchronousTaskAliveQ
-                .expect("asynchronousTaskAliveQ callback is NULL");
-
-        let is_alive: i32 = unsafe { async_task_is_alive(self.id()) };
+        let is_alive: i32 = unsafe { rtl::asynchronousTaskAliveQ(self.id()) };
 
         is_alive != 0
     }
@@ -67,15 +57,7 @@ impl AsyncTaskObject {
     ///
     /// *LibraryLink C Function:* [`asynchronousTaskStartedQ`][sys::st_WolframIOLibrary_Functions::asynchronousTaskStartedQ].
     pub fn is_started(&self) -> bool {
-        let io_funcs = unsafe { *crate::get_library_data().ioLibraryFunctions };
-
-        let async_task_is_started: unsafe extern "C" fn(
-            sys::mint,
-        ) -> std::os::raw::c_int = io_funcs
-            .asynchronousTaskStartedQ
-            .expect("asynchronousTaskStartedQ callback is NULL");
-
-        let is_started: i32 = unsafe { async_task_is_started(self.id()) };
+        let is_started: i32 = unsafe { rtl::asynchronousTaskStartedQ(self.id()) };
 
         is_started != 0
     }
@@ -99,45 +81,26 @@ impl AsyncTaskObject {
     /// task_object.raise_async_event("change", DataStore::new());
     /// ```
     pub fn raise_async_event(&self, name: &str, data: DataStore) {
-        use std::os::raw::c_char;
-
         let AsyncTaskObject(id) = *self;
 
         let name = CString::new(name)
             .expect("unable to convert raised async event name to CString");
 
-        let raise_async_event: unsafe extern "C" fn(mint, *mut c_char, sys::DataStore) = {
-            let io_funcs = unsafe { *crate::get_library_data().ioLibraryFunctions };
-
-            io_funcs
-                .raiseAsyncEvent
-                .expect("raiseAsyncEvent callback is NULL")
-        };
-
         unsafe {
             // raise_async_event(id, name.as_ptr() as *mut c_char, data.into_ptr());
-            raise_async_event(id, name.into_raw(), data.into_ptr());
+            rtl::raiseAsyncEvent(id, name.into_raw(), data.into_ptr());
         }
     }
 }
 
 /// Spawn a new Wolfram Language asynchronous task.
 pub fn spawn_async_task_with_thread<F: AsyncTask>(task: F) -> AsyncTaskObject {
-    let create_async_task_with_thread: unsafe extern "C" fn(
-        Option<unsafe extern "C" fn(i64, *mut c_void)>,
-        *mut c_void,
-    ) -> sys::mint = unsafe {
-        (*crate::get_library_data().ioLibraryFunctions)
-            .createAsynchronousTaskWithThread
-            .expect("createAsynchronousTaskWithThread callback is NULL")
-    };
-
     // FIXME: This box is being leaked. Where is an appropriate place to drop it?
     let boxed_closure = Box::into_raw(Box::new(task));
 
     // Spawn a background thread using the user closure.
     let task_id: sys::mint = unsafe {
-        create_async_task_with_thread(
+        rtl::createAsynchronousTaskWithThread(
             Some(async_task_thread_trampoline::<F>),
             boxed_closure as *mut c_void,
         )

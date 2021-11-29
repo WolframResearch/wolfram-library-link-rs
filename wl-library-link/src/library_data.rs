@@ -17,6 +17,9 @@ lazy_static::lazy_static! {
 /// This function should be called during the execution of the [`WolframLibrary_initialize()` hook][lib-init]
 /// provided by this library.
 ///
+/// This function initializes the lazy Wolfram Runtime Library bindings in the
+/// [`rtl`][`crate::rtl`] module.
+///
 /// # Example
 ///
 /// When a dynamic library is loaded by the Wolfram Language (for example, via

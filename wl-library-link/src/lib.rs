@@ -65,6 +65,7 @@ mod library_data;
 #[doc(hidden)]
 pub mod macro_utils;
 mod numeric_array;
+pub mod rtl;
 
 
 use wl_expr::{Expr, ExprKind};

@@ -1,13 +1,13 @@
 use std::{
     ffi::CStr,
     fs,
-    os::raw::{c_char, c_uint, c_void},
+    os::raw::{c_uint, c_void},
     path::PathBuf,
     time::{Duration, SystemTime},
 };
 
 use wl_library_link::{
-    self as wll,
+    self as wll, rtl,
     sys::{self, mint, MArgument, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR},
 };
 
@@ -50,23 +50,16 @@ pub extern "C" fn start_file_watcher(
         }
     };
 
-    let create_async_task_with_thread: unsafe extern "C" fn(
-        Option<unsafe extern "C" fn(i64, *mut c_void)>,
-        *mut c_void,
-    ) -> sys::mint = unsafe {
-        (*wll::get_library_data().ioLibraryFunctions)
-            .createAsynchronousTaskWithThread
-            .expect("createAsynchronousTaskWithThread callback is NULL")
-    };
-
     // FIXME: This box is being leaked. Where is an appropriate place to drop it?
     let task_arg = Box::into_raw(Box::new(task_arg)) as *mut c_void;
 
     // Spawn a new thread, which will run in the background and check for file
     // modifications.
     unsafe {
-        let task_id: mint =
-            create_async_task_with_thread(Some(file_watch_thread_function), task_arg);
+        let task_id: mint = wll::rtl::createAsynchronousTaskWithThread(
+            Some(file_watch_thread_function),
+            task_arg,
+        );
         *res.integer = task_id;
     }
 
@@ -82,35 +75,6 @@ extern "C" fn file_watch_thread_function(async_object_id: mint, task_arg: *mut c
         pause_interval_ms,
         ref path,
     } = *task_arg;
-
-    let (
-        async_task_is_alive,
-        create_data_store,
-        data_store_add_integer,
-        raise_async_event,
-    ): (
-        unsafe extern "C" fn(mint) -> sys::mbool,
-        unsafe extern "C" fn() -> sys::DataStore,
-        unsafe extern "C" fn(sys::DataStore, mint),
-        unsafe extern "C" fn(mint, *mut c_char, sys::DataStore),
-    ) = {
-        let io_funcs = unsafe { *wll::get_library_data().ioLibraryFunctions };
-
-        (
-            io_funcs
-                .asynchronousTaskAliveQ
-                .expect("asynchronousTaskAliveQ callback is NULL"),
-            io_funcs
-                .createDataStore
-                .expect("createDataStore callback is NULL"),
-            io_funcs
-                .DataStore_addInteger
-                .expect("DataStore_addInteger callback is NULL"),
-            io_funcs
-                .raiseAsyncEvent
-                .expect("raiseAsyncEvent callback is NULL"),
-        )
-    };
 
     let mut prev_changed: Option<SystemTime> = fs::metadata(path)
         .and_then(|metadata| metadata.modified())
@@ -156,7 +120,7 @@ extern "C" fn file_watch_thread_function(async_object_id: mint, task_arg: *mut c
     };
 
     loop {
-        if unsafe { async_task_is_alive(async_object_id) } == 0 {
+        if unsafe { rtl::asynchronousTaskAliveQ(async_object_id) } == 0 {
             break;
         }
 
@@ -164,10 +128,10 @@ extern "C" fn file_watch_thread_function(async_object_id: mint, task_arg: *mut c
         // called "change", and attach the modification timestamp as event data.
         if let Some(modification) = check_for_modification() {
             unsafe {
-                let data_store: sys::DataStore = create_data_store();
-                data_store_add_integer(data_store, modification as i64);
+                let data_store: sys::DataStore = rtl::createDataStore();
+                rtl::DataStore_addInteger(data_store, modification as i64);
 
-                raise_async_event(
+                rtl::raiseAsyncEvent(
                     async_object_id,
                     "change\0".as_ptr() as *mut _,
                     data_store,

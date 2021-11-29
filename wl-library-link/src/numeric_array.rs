@@ -5,7 +5,7 @@ use std::mem::MaybeUninit;
 
 use static_assertions::{assert_eq_align, assert_eq_size};
 
-use crate::sys;
+use crate::{rtl, sys};
 
 #[rustfmt::skip]
 use crate::sys::MNumericArray_Data_Type::{
@@ -452,17 +452,7 @@ impl<T> NumericArray<T> {
     fn tensor_property_type(&self) -> u32 {
         let NumericArray(numeric_array, _) = *self;
 
-        unsafe {
-            let getter: unsafe extern "C" fn(
-                *mut sys::st_MNumericArray,
-            )
-                -> sys::MNumericArray_Data_Type::Type = (*crate::get_library_data()
-                .numericarrayLibraryFunctions)
-                .MNumericArray_getType
-                .expect("MNumericArray_getType callback is NULL");
-
-            getter(numeric_array)
-        }
+        unsafe { rtl::MNumericArray_getType(numeric_array) }
     }
 
     /// The number of elements in the underlying flat data array.
@@ -487,14 +477,7 @@ impl<T> NumericArray<T> {
     pub fn rank(&self) -> usize {
         let NumericArray(numeric_array, _) = *self;
 
-        let rank: sys::mint = unsafe {
-            let getter: unsafe extern "C" fn(*mut sys::st_MNumericArray) -> sys::mint =
-                (*crate::get_library_data().numericarrayLibraryFunctions)
-                    .MNumericArray_getRank
-                    .expect("MNumericArray_getRank callback is NULL");
-
-            getter(numeric_array)
-        };
+        let rank: sys::mint = unsafe { rtl::MNumericArray_getRank(numeric_array) };
 
         let rank = usize::try_from(rank).expect("NumericArray rank overflows usize");
 
@@ -522,16 +505,8 @@ impl<T> NumericArray<T> {
 
         debug_assert!(rank != 0);
 
-        let dims: *const crate::sys::mint = unsafe {
-            let getter: unsafe extern "C" fn(
-                *mut sys::st_MNumericArray,
-            ) -> *const sys::mint = (*crate::get_library_data()
-                .numericarrayLibraryFunctions)
-                .MNumericArray_getDimensions
-                .expect("MNumericArray_getDimensions callback is NULL");
-
-            getter(numeric_array)
-        };
+        let dims: *const crate::sys::mint =
+            unsafe { rtl::MNumericArray_getDimensions(numeric_array) };
 
         assert_eq_size!(sys::mint, usize);
         let dims: *mut usize = dims as *mut usize;
@@ -543,21 +518,11 @@ impl<T> NumericArray<T> {
 }
 
 unsafe fn data_ptr(numeric_array: sys::MNumericArray) -> *mut c_void {
-    let getter: unsafe extern "C" fn(*mut sys::st_MNumericArray) -> *mut c_void =
-        (*crate::get_library_data().numericarrayLibraryFunctions)
-            .MNumericArray_getData
-            .expect("MNumericArray_getData callback is NULL");
-
-    getter(numeric_array)
+    rtl::MNumericArray_getData(numeric_array)
 }
 
 unsafe fn flattened_length(numeric_array: sys::MNumericArray) -> usize {
-    let getter: unsafe extern "C" fn(*mut sys::st_MNumericArray) -> sys::mint =
-        (*crate::get_library_data().numericarrayLibraryFunctions)
-            .MNumericArray_getFlattenedLength
-            .expect("MNumericArray_getFlattenedLength callback is NULL");
-
-    let len: sys::mint = getter(numeric_array);
+    let len: sys::mint = rtl::MNumericArray_getFlattenedLength(numeric_array);
 
     let len = usize::try_from(len).expect("i64 overflows usize");
 
@@ -584,19 +549,9 @@ impl<T: NumericArrayType> UninitNumericArray<T> {
         debug_assert!(rank > 0);
 
         unsafe {
-            let numeric_array_new: unsafe extern "C" fn(
-                sys::numericarray_data_t,
-                sys::mint,
-                *const sys::mint,
-                *mut sys::MNumericArray,
-            ) -> sys::errcode_t = (*crate::get_library_data()
-                .numericarrayLibraryFunctions)
-                .MNumericArray_new
-                .expect("MNumericArray_new callback is NULL");
-
             let mut numeric_array: sys::MNumericArray = std::ptr::null_mut();
 
-            let err_code: sys::errcode_t = numeric_array_new(
+            let err_code: sys::errcode_t = rtl::MNumericArray_new(
                 kind as u32,
                 i64::try_from(rank).expect("usize overflows i64"),
                 dimensions.as_ptr() as *mut sys::mint,

@@ -1,6 +1,6 @@
 use static_assertions::assert_not_impl_any;
 
-use crate::sys::{self, mint};
+use crate::{rtl, sys};
 
 
 /// Storage for heterogenous data.
@@ -25,13 +25,7 @@ impl DataStore {
     ///
     /// *LibraryLink C Function:* [`createDataStore`][sys::st_WolframIOLibrary_Functions::createDataStore].
     pub fn new() -> Self {
-        let io_funcs = unsafe { *crate::get_library_data().ioLibraryFunctions };
-
-        let create_data_store: unsafe extern "C" fn() -> sys::DataStore = io_funcs
-            .createDataStore
-            .expect("createDataStore callback is NULL");
-
-        let ds: sys::DataStore = unsafe { create_data_store() };
+        let ds: sys::DataStore = unsafe { rtl::createDataStore() };
 
         DataStore(ds)
     }
@@ -42,13 +36,7 @@ impl DataStore {
     pub fn add_i64(&mut self, value: i64) {
         let DataStore(ds) = *self;
 
-        let io_funcs = unsafe { *crate::get_library_data().ioLibraryFunctions };
-
-        let data_store_add_integer: unsafe extern "C" fn(sys::DataStore, mint) = io_funcs
-            .DataStore_addInteger
-            .expect("DataStore_addInteger callback is NULL");
-
-        unsafe { data_store_add_integer(ds, value) }
+        unsafe { rtl::DataStore_addInteger(ds, value) }
     }
 
     /// Convert this `DataStore` into a raw [`wl_library_link_sys::DataStore`] pointer.
