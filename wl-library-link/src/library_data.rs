@@ -53,6 +53,9 @@ pub fn initialize(data: sys::WolframLibraryData) -> Result<(), ()> {
 }
 
 /// Get the [`WolframLibraryData`] instance recorded by the last call to [`initialize()`].
+///
+/// Prefer to use the lazy function bindings from the [`rtl`][crate::rtl] module instead
+/// of accessing the fields of [`WolframLibraryData`] directly.
 pub fn get_library_data() -> WolframLibraryData {
     let static_data = LIBRARY_DATA
         .lock()
