@@ -216,7 +216,7 @@ pub unsafe extern "C" fn demo_wxf_safe_byte_array(
 
     // Allocate and fill a new one dimensional NumericArray<u8> with WXF data.
     let byte_array: NumericArray<u8> =
-        match NumericArray::from_slice(wxf_bytes.as_slice()) {
+        match NumericArray::try_from_slice(wxf_bytes.as_slice()) {
             Ok(array) => array,
             Err(_) => return LIBRARY_FUNCTION_ERROR,
         };

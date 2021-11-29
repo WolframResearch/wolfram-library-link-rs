@@ -119,9 +119,7 @@ pub unsafe extern "C" fn test_named_numeric_array_data_store(
     _: *mut MArgument,
     res: MArgument,
 ) -> c_uint {
-    let array = NumericArray::<i64>::from_slice(&[1, 2, 3])
-        .unwrap()
-        .into_generic();
+    let array = NumericArray::<i64>::from_slice(&[1, 2, 3]).into_generic();
 
     let mut data = DataStore::new();
     data.add_named_numeric_array("array", array);

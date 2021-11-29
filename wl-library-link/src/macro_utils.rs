@@ -190,5 +190,4 @@ fn wxf_numeric_array_from_expr(expr: &Expr) -> NumericArray<u8> {
         .expect("wolfram_library_function: failed to serialize result expression to WXF");
 
     NumericArray::from_slice(result_wxf.as_slice())
-        .expect("wolfram_library_function: failed to construct NumericArray<u8>")
 }

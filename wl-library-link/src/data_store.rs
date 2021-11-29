@@ -159,7 +159,7 @@ impl DataStore {
     /// ```no_run
     /// use wl_library_link::{DataStore, NumericArray};
     ///
-    /// let array: NumericArray<i64> = NumericArray::from_slice(&[1, 2, 3]).unwrap();
+    /// let array: NumericArray<i64> = NumericArray::from_slice(&[1, 2, 3]);
     ///
     /// let mut store = DataStore::new();
     ///

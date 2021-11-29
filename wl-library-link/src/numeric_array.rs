@@ -339,6 +339,11 @@ impl<T: NumericArrayType> NumericArray<T> {
     ///
     /// Use [`NumericArray::from_array()`] to construct multidimensional numeric arrays.
     ///
+    /// # Panics
+    ///
+    /// This function will panic if [`NumericArray::try_from_array()`] returns
+    /// an error.
+    ///
     /// # Example
     ///
     /// ```no_run
@@ -350,10 +355,16 @@ impl<T: NumericArrayType> NumericArray<T> {
     ///
     /// [`UninitNumericArray`] can be used to allocate a mutable numeric array,
     /// eliminating the need for an intermediate allocation.
-    pub fn from_slice(data: &[T]) -> Result<NumericArray<T>, ()> {
+    pub fn from_slice(data: &[T]) -> NumericArray<T> {
+        NumericArray::<T>::try_from_slice(data)
+            .expect("failed to create NumericArray from slice")
+    }
+
+    /// Fallible alternative to [`NumericArray::from_slice()`].
+    pub fn try_from_slice(data: &[T]) -> Result<NumericArray<T>, ()> {
         let dim1 = data.len();
 
-        NumericArray::from_array(&[dim1], data)
+        NumericArray::try_from_array(&[dim1], data)
     }
 
     /// Construct a new multidimensional [`NumericArray`] from a list of dimensions and the
@@ -361,10 +372,8 @@ impl<T: NumericArrayType> NumericArray<T> {
     ///
     /// # Panics
     ///
-    ///   * If `dimensions` is empty
-    ///   * If `data.len()` is not equal to product of `dimensions`.
-    ///
-    /// TODO: What if `dimensions` is something like `[0, 0, 0]`?
+    /// This function will panic if [`NumericArray::try_from_array()`] returns
+    /// an error.
     ///
     /// # Example
     ///
@@ -373,10 +382,24 @@ impl<T: NumericArrayType> NumericArray<T> {
     ///
     /// ```no_run
     /// # use wl_library_link::NumericArray;
-    /// let array = NumericArray::from_array(&[2, 2], &[1, 2, 3, 4])
-    ///     .expect("allocation failure");
+    /// let array = NumericArray::from_array(&[2, 2], &[1, 2, 3, 4]);
     /// ```
-    pub fn from_array(dimensions: &[usize], data: &[T]) -> Result<NumericArray<T>, ()> {
+    pub fn from_array(dimensions: &[usize], data: &[T]) -> NumericArray<T> {
+        NumericArray::<T>::try_from_array(dimensions, data)
+            .expect("failed to create NumericArray from array")
+    }
+
+    /// Fallible alternative to [`NumericArray::from_array()`].
+    ///
+    /// This function will return an error if:
+    ///
+    /// * `dimensions` is empty
+    /// * the product of `dimensions` is 0
+    /// * `data.len()` is not equal to the product of `dimensions`
+    pub fn try_from_array(
+        dimensions: &[usize],
+        data: &[T],
+    ) -> Result<NumericArray<T>, ()> {
         let uninit = UninitNumericArray::try_from_dimensions(dimensions)?;
 
         Ok(uninit.init_from_slice(data))
@@ -392,7 +415,7 @@ impl<T> NumericArray<T> {
     ///
     /// ```no_run
     /// # use wl_library_link::NumericArray;
-    /// let array: NumericArray<i64> = NumericArray::from_slice(&[1, 2, 3]).unwrap();
+    /// let array: NumericArray<i64> = NumericArray::from_slice(&[1, 2, 3]);
     ///
     /// let array: NumericArray = array.into_generic();
     /// ```
@@ -509,8 +532,7 @@ impl<T> NumericArray<T> {
     ///
     /// ```no_run
     /// # use wl_library_link::NumericArray;
-    /// let array = NumericArray::from_array(&[2, 2], &[1, 2, 3, 4])
-    ///     .expect("allocation failure");
+    /// let array = NumericArray::from_array(&[2, 2], &[1, 2, 3, 4]);
     ///
     /// assert_eq!(array.dimensions(), &[2, 2]);
     /// assert_eq!(array.rank(), array.dimensions().len());
