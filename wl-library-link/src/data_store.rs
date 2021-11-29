@@ -30,6 +30,12 @@ impl DataStore {
         DataStore(ds)
     }
 
+    /// Convert this `DataStore` into a raw [`wl_library_link_sys::DataStore`] pointer.
+    pub fn into_ptr(self) -> sys::DataStore {
+        let DataStore(ds) = self;
+        ds
+    }
+
     /// Add an `i64` value to this `DataStore`.
     ///
     /// *LibraryLink C Function:* [`DataStore_addInteger`][sys::st_WolframIOLibrary_Functions::DataStore_addInteger].
@@ -37,11 +43,5 @@ impl DataStore {
         let DataStore(ds) = *self;
 
         unsafe { rtl::DataStore_addInteger(ds, value) }
-    }
-
-    /// Convert this `DataStore` into a raw [`wl_library_link_sys::DataStore`] pointer.
-    pub fn into_ptr(self) -> sys::DataStore {
-        let DataStore(ds) = self;
-        ds
     }
 }
