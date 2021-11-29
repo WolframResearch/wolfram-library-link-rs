@@ -384,6 +384,23 @@ impl<T: NumericArrayType> NumericArray<T> {
 }
 
 impl<T> NumericArray<T> {
+    /// Erase the concrete `T` data type associated with this `NumericArray`.
+    ///
+    /// Use [`NumericArray::try_into_kind()`] to convert back into a `NumericArray<T>`.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use wl_library_link::NumericArray;
+    /// let array: NumericArray<i64> = NumericArray::from_slice(&[1, 2, 3]).unwrap();
+    ///
+    /// let array: NumericArray = array.into_generic();
+    /// ```
+    pub fn into_generic(self) -> NumericArray {
+        let NumericArray(na, PhantomData) = self;
+        NumericArray(na, PhantomData)
+    }
+
     /// Construct a `NumericArray<T>` from a raw [`MNumericArray`][sys::MNumericArray].
     ///
     /// # Safety

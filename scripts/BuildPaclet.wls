@@ -25,6 +25,9 @@ Scan[
 		FileNameJoin[{$dir, exampleLib}]
 	],
 	{
+		(* Library Tests *)
+		"liblibrary_tests.dylib",
+		(* Examples *)
 		"libraw_wstp_function.dylib",
 		"libbasic_expressions.dylib",
 		"libnumeric_arrays.dylib",

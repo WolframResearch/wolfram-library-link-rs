@@ -69,3 +69,12 @@ crate-type = ["cdylib"]
 name = "async_file_watcher_raw"
 path = "examples/async/async_file_watcher_raw.rs"
 crate-type = ["cdylib"]
+
+#---------------
+# Tests -- see example/tests/README.md
+#---------------
+
+[[example]]
+name = "library_tests"
+path = "examples/tests/main.rs"
+crate-type = ["cdylib"]
