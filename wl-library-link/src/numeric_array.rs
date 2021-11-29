@@ -377,7 +377,7 @@ impl<T: NumericArrayType> NumericArray<T> {
     ///     .expect("allocation failure");
     /// ```
     pub fn from_array(dimensions: &[usize], data: &[T]) -> Result<NumericArray<T>, ()> {
-        let uninit = UninitNumericArray::new(dimensions)?;
+        let uninit = UninitNumericArray::try_from_dimensions(dimensions)?;
 
         Ok(uninit.init_from_slice(data))
     }
@@ -551,14 +551,27 @@ unsafe fn flattened_length(numeric_array: sys::MNumericArray) -> usize {
 //======================================
 
 impl<T: NumericArrayType> UninitNumericArray<T> {
-    /// Construct a new uninitialized NumericArray.
-    ///
-    /// This function will fail if the underlying allocation function returns `NULL`.
+    /// Construct a new uninitialized NumericArray with the specified dimensions.
     ///
     /// # Panics
     ///
-    /// This function will panic if `dimensions` is empty.
-    pub fn new(dimensions: &[usize]) -> Result<UninitNumericArray<T>, ()> {
+    /// This function will panic if [`UninitNumericArray::try_from_dimensions()`] returns
+    /// an error.
+    pub fn from_dimensions(dimensions: &[usize]) -> UninitNumericArray<T> {
+        UninitNumericArray::try_from_dimensions(dimensions)
+            .expect("failed to create UninitNumericArray from dimensions")
+    }
+
+    /// Try to construct a new uninitialized NumericArray with the specified dimensions.
+    ///
+    /// This function will return an error if:
+    ///
+    /// * `dimensions` is empty.
+    /// * the product of `dimensions` is equal to 0.
+    /// * the underlying allocation function returns `NULL`.
+    pub fn try_from_dimensions(
+        dimensions: &[usize],
+    ) -> Result<UninitNumericArray<T>, ()> {
         assert!(!dimensions.is_empty());
 
         let kind: NumericArrayDataType = <T as NumericArrayType>::TYPE;
@@ -614,8 +627,7 @@ impl<T: NumericArrayType> UninitNumericArray<T> {
     /// use wl_library_link::{NumericArray, UninitNumericArray};
     ///
     /// // Construct a `1x5` numeric array with elements of type `f64`.
-    /// let mut uninit = UninitNumericArray::<f64>::new(&[5])
-    ///     .expect("allocation failure");
+    /// let mut uninit = UninitNumericArray::<f64>::from_dimensions(&[5]);
     ///
     /// for (index, elem) in uninit.as_slice_mut().into_iter().enumerate() {
     ///     elem.write(index as f64 + 1.0);
