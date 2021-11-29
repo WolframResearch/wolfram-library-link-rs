@@ -23,8 +23,7 @@ use crate::{rtl, sys, NumericArray};
 #[derive(Debug)]
 pub struct DataStore(sys::DataStore);
 
-// TODO: Implement Clone for this type using the appropriate RTL callback.
-assert_not_impl_any!(DataStore: Copy, Clone);
+assert_not_impl_any!(DataStore: Copy);
 
 impl DataStore {
     /// Create an empty [`DataStore`].
@@ -54,6 +53,10 @@ impl DataStore {
     /// Convert this `DataStore` into a raw [`wl_library_link_sys::DataStore`] pointer.
     pub fn into_raw(self) -> sys::DataStore {
         let DataStore(ds) = self;
+
+        // Don't run Drop on `self`; ownership of this value is being given to the caller.
+        std::mem::forget(self);
+
         ds
     }
 
@@ -145,7 +148,8 @@ impl DataStore {
     /// ```
     pub fn add_data_store(&mut self, ds: DataStore) {
         let DataStore(this_ds) = *self;
-        let DataStore(other_ds) = ds;
+        // Use into_raw() to avoid running Drop on `ds`.
+        let other_ds = ds.into_raw();
 
         unsafe { rtl::DataStore_addDataStore(this_ds, other_ds) }
     }
@@ -292,7 +296,8 @@ impl DataStore {
     /// ```
     pub fn add_named_data_store(&mut self, name: &str, ds: DataStore) {
         let DataStore(this_ds) = *self;
-        let DataStore(other_ds) = ds;
+        // Use into_raw() to avoid running Drop on `ds`.
+        let other_ds = ds.into_raw();
 
         let name = CString::new(name).expect("could not convert &str to CString");
 
@@ -319,5 +324,28 @@ impl DataStore {
         unsafe {
             rtl::DataStore_addNamedMNumericArray(ds, name.as_ptr() as *mut c_char, array)
         }
+    }
+}
+
+//======================================
+// Clone and Drop Impls
+//======================================
+
+impl Clone for DataStore {
+    fn clone(&self) -> DataStore {
+        let DataStore(ds) = *self;
+
+        let duplicate = unsafe { rtl::copyDataStore(ds) };
+
+        DataStore(duplicate)
+    }
+}
+
+impl Drop for DataStore {
+    fn drop(&mut self) {
+        let DataStore(ds) = *self;
+        let ds: sys::DataStore = ds;
+
+        unsafe { rtl::deleteDataStore(ds) }
     }
 }

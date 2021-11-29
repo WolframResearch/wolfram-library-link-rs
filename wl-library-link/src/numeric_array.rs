@@ -443,7 +443,12 @@ impl<T> NumericArray<T> {
     /// Convert this `NumericArray` into a raw [`MNumericArray`][sys::MNumericArray]
     /// object.
     pub unsafe fn into_raw(self) -> sys::MNumericArray {
-        self.0
+        let NumericArray(raw, PhantomData) = self;
+
+        // Don't run Drop on `self`; ownership of this value is being given to the caller.
+        std::mem::forget(self);
+
+        raw
     }
 
     /// *LibraryLink C API Documentation:* [`MNumericArray_getData`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MNumericArray_getData.html)

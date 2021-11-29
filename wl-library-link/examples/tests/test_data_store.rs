@@ -147,3 +147,24 @@ pub unsafe extern "C" fn test_nested_data_store(
 
     LIBRARY_NO_ERROR
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn test_iterated_nested_data_store(
+    _: WolframLibraryData,
+    _: mint,
+    _: *mut MArgument,
+    res: MArgument,
+) -> c_uint {
+    let mut store = DataStore::new();
+
+    for level in 0..3 {
+        store.add_named_i64("level", level);
+        let mut new = DataStore::new();
+        new.add_data_store(store);
+        store = new;
+    }
+
+    *res.tensor = store.into_raw() as *mut _;
+
+    LIBRARY_NO_ERROR
+}

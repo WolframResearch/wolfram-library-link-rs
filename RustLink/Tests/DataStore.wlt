@@ -117,3 +117,24 @@ Test[
 		Developer`DataStore["is_inner" -> True]
 	]
 ]
+
+Test[
+	func = LibraryFunctionLoad[
+		"liblibrary_tests",
+		"test_iterated_nested_data_store",
+		{},
+		"DataStore"
+	];
+
+	func[]
+	,
+	Developer`DataStore[
+		Developer`DataStore[
+			Developer`DataStore[
+				Developer`DataStore["level" -> 0],
+				"level" -> 1
+			],
+			"level" -> 2
+		]
+	]
+]
