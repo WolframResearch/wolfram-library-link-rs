@@ -494,7 +494,8 @@ impl<T> NumericArray<T> {
         std::slice::from_raw_parts_mut(ptr, self.flattened_length())
     }
 
-    fn data_type(&self) -> NumericArrayDataType {
+    #[allow(missing_docs)]
+    pub fn data_type(&self) -> NumericArrayDataType {
         let value: u32 = u32::try_from(self.tensor_property_type())
             .expect("NumericArray tensor property type value overflows u32");
 

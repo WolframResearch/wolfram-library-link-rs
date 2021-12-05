@@ -1,45 +1,21 @@
 use std::{
-    ffi::CStr,
     fs,
-    os::raw::c_uint,
     path::PathBuf,
     time::{Duration, SystemTime},
 };
 
-use wl_library_link::{
-    self as wll,
-    sys::{self, mint, MArgument, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR},
-    AsyncTaskObject, DataStore,
-};
+use wl_library_link::{self as wll, sys::mint, AsyncTaskObject, DataStore};
+
+wll::export![start_file_watcher(_, _)];
 
 /// Start an asynchronous task that will watch for modifications to a file.
 ///
 /// See `RustLink/Tests/AsyncExamples.wlt` for example usage of this function.
-#[no_mangle]
-pub extern "C" fn start_file_watcher(
-    lib_data: sys::WolframLibraryData,
-    arg_count: mint,
-    args: *mut MArgument,
-    res: MArgument,
-) -> c_uint {
-    let args = unsafe { std::slice::from_raw_parts(args, arg_count as usize) };
-
-    if args.len() != 2 {
-        return LIBRARY_FUNCTION_ERROR;
-    }
-
-    if wll::initialize(lib_data).is_err() {
-        return LIBRARY_FUNCTION_ERROR;
-    }
-
+fn start_file_watcher(pause_interval_ms: mint, path: String) -> mint {
     let pause_interval_ms =
-        u64::try_from(unsafe { *args[0].integer }).expect("i64 interval overflows u64");
+        u64::try_from(pause_interval_ms).expect("mint interval overflows u64");
 
-    let path: &CStr = unsafe { CStr::from_ptr(*args[1].utf8string) };
-    let path: PathBuf = match path.to_str() {
-        Ok(s) => PathBuf::from(s),
-        Err(_) => return LIBRARY_FUNCTION_ERROR,
-    };
+    let path = PathBuf::from(path);
 
     // Spawn a new thread, which will run in the background and check for file
     // modifications.
@@ -47,11 +23,7 @@ pub extern "C" fn start_file_watcher(
         file_watch_thread_function(id, pause_interval_ms, &path)
     });
 
-    unsafe {
-        *res.integer = task_id.id();
-    }
-
-    LIBRARY_NO_ERROR
+    task_id.id()
 }
 
 /// This function is called first from the spawned background thread.
