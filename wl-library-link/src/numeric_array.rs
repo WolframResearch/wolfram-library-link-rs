@@ -37,6 +37,7 @@ use crate::sys::MNumericArray_Data_Type::{
 /// Use [`UninitNumericArray`] to construct a [`NumericArray`] without requiring an
 /// intermediate allocation to copy the elements from.
 #[repr(transparent)]
+#[derive(ref_cast::RefCast)]
 pub struct NumericArray<T = ()>(sys::MNumericArray, PhantomData<T>);
 
 /// Represents a [`NumericArray`] which has been allocated, but whose elements have not

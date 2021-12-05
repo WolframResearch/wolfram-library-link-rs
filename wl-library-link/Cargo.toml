@@ -19,6 +19,7 @@ once_cell = "1.8.0"
 backtrace = "^0.3.46"
 cfg-if = "0.1"
 static_assertions = "1.1.0"
+ref-cast = "1.0.6"
 
 [dev-dependencies]
 wl-pattern-match = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-pattern-match.git" }
@@ -31,6 +32,10 @@ nightly = ["wolfram-library-function-macro/nightly"]
 ############
 # Examples #
 ############
+
+[[example]]
+name = "native_data_types"
+crate-type = ["cdylib"]
 
 [[example]]
 name = "raw_wstp_function"

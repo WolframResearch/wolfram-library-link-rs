@@ -33,7 +33,8 @@ Scan[
 		"libnumeric_arrays.dylib",
 		"libraw_librarylink_function.dylib",
 		"libasync_file_watcher_raw.dylib",
-		"libasync_file_watcher.dylib"
+		"libasync_file_watcher.dylib",
+		"libnative_data_types.dylib"
 	}
 ]
 

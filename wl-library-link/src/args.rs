@@ -1,237 +1,432 @@
-use std::ffi::{CStr, CString};
+//! Traits for working with data types that can be passed natively via LibraryLink
+//! [`MArgument`]s.
+
+use std::{
+    cell::RefCell,
+    ffi::{CStr, CString},
+    os::raw::c_char,
+};
+
+use ref_cast::RefCast;
 
 use crate::{
-    sys::{self, mint, MArgument},
+    rtl,
+    sys::{self, mint, mreal, MArgument},
     NumericArray,
 };
 
-/// Unsafe trait used to implement conversion from an [`MArgument`].
-/// See [`from_args()`].
-pub trait FromArg {
+/// Trait implemented for types that may be passed via an [`MArgument`].
+pub trait FromArg<'a> {
     #[allow(missing_docs)]
-    unsafe fn from_arg(arg: MArgument) -> Self;
+    unsafe fn from_arg(arg: &'a MArgument) -> Self;
 }
 
-/// Unsafe trait used to implement conversion from an [`MArgument`].
-/// See [`from_args()`].
-pub trait FromArgs {
-    #[allow(missing_docs)]
-    unsafe fn from_args(args: &[MArgument]) -> Self;
+/// Trait implemented for that that may be returned via an [`MArgument`].
+///
+/// The [`MArgument`] which this trait is used to modify must be the return value of a
+/// LibraryLink function. It is not valid to modify [`MArgument`]s that contain
+/// LibraryLink function arguments.
+pub trait IntoArg {
+    /// Move `self` into `arg`.
+    ///
+    /// # Safety
+    ///
+    /// `arg` must be an uninitialized [`MArgument`] which is used to store the return
+    /// value of a LibraryLink function. The return type of that function must match
+    /// the type of `self.`
+    ///
+    /// This function must only be called immediately before returning from a LibraryLink
+    /// function. Each native LibraryLink function must perform at most one call to this
+    /// method per invocation.
+    //
+    // Private implementation note:
+    //   the "at most one call to this method per invocation" constraint is necessary to
+    //   maintain the safety invariants of `impl IntoArg for CString`.
+    unsafe fn into_arg(self, arg: MArgument);
 }
 
-//======================================
-// from_args()
-//======================================
-
-/// Utility for unwrapping [`MArgument`] arguments of a LibraryLink function.
+/// Trait implemented for any function whose arguments and return type are native
+/// LibraryLink [`MArgument`] types.
 ///
-/// If `T` is a tuple type, the elements of the returned tuple will be taken from
-/// successive elements of `args`.
+/// [`export!`][crate::export] may only be used with functions that implement this trait.
 ///
-/// # Safety
+/// A function implements this trait if all of its arguments implement [`FromArg`] and its
+/// return type implements [`IntoArg`].
 ///
-/// [`from_args()`] will convert [`MArgument`] values into specified `T` type without
-/// performing any validation. If the `args` passed to this function have not been
-/// initialized to valid values for `T`, undefined behavior may occur.
-///
-/// # Examples
-///
-/// ```no_run
-/// use std::os::raw::c_uint;
-/// use wl_library_link::{from_args, NumericArray, sys::{WolframLibraryData, MArgument, mint}};
-///
-/// #[no_mangle]
-/// pub unsafe extern "C" fn func(
-///     _: WolframLibraryData,
-///     argc: mint,
-///     args: *mut MArgument,
-///     res: MArgument
-/// ) -> c_uint {
-///     let (s, int, reals): (String, i64, NumericArray<f64>) = unsafe { from_args(args, argc) };
-///
-///     // ...
-/// #   todo!()
-/// }
-/// ```
-///
-/// defines a LibraryLink function which could be loaded using:
-///
-/// ```wolfram
-/// LibraryFunctionLoad[_, _, {String, Real, LibraryDataType[NumericArray, "Real64"]}, _]
-/// ```
-///
-/// ## Single argument
-///
-/// ```no_run
-/// use std::{os::raw::c_uint, ffi::CString};
-/// use wl_library_link::{from_args, sys::{self, WolframLibraryData, MArgument, mint}};
-///
-/// #[no_mangle]
-/// pub extern "C" fn string_bytes_length(
-///     _: WolframLibraryData,
-///     argc: mint,
-///     args: *mut MArgument,
-///     res: MArgument
-/// ) -> c_uint {
-///     let name: CString = unsafe { from_args(args, argc) };
-///
-///     unsafe {
-///         *res.integer = name.to_bytes().len() as i64;
-///     }
-///
-///     sys::LIBRARY_NO_ERROR
-/// }
-/// ```
-///
-/// defines a LibraryLink function which could be loaded using:
-///
-/// ```wolfram
-/// LibraryFunctionLoad[_, _, {String}, Integer]
-/// ```
-///
-/// ## Two arguments
-///
-/// ```no_run
-/// use std::os::raw::c_uint;
-/// use wl_library_link::{from_args, sys::{self, WolframLibraryData, MArgument, mint}};
-///
-/// #[no_mangle]
-/// pub extern "C" fn sum(
-///     _: WolframLibraryData,
-///     argc: mint,
-///     args: *mut MArgument,
-///     res: MArgument
-/// ) -> c_uint {
-///     let (start, end): (i64, i64) = unsafe { from_args(args, argc) };
-///
-///     unsafe {
-///         *res.integer = (start..end).sum();
-///     }
-///
-///     sys::LIBRARY_NO_ERROR
-/// }
-/// ```
-///
-/// defines a LibraryLink function which could be loaded using:
-///
-/// ```wolfram
-/// LibraryFunctionLoad[_, _, {Integer, Integer}, Integer]
-/// ```
-pub unsafe fn from_args<T: FromArgs>(args: *mut sys::MArgument, arg_count: mint) -> T {
-    let arg_count = match usize::try_from(arg_count) {
-        Ok(count) => count,
-        Err(_) => panic!("from_args: argument count overflows usize"),
-    };
-
-    let args: &[MArgument] = std::slice::from_raw_parts(args, arg_count);
-
-    T::from_args(args)
+/// Functions which pass their arguments and return value using a [`wstp::Link`] do not
+/// implement this trait.
+pub trait NativeFunction<'a> {
+    /// Call the function using the raw LibraryLink [`MArgument`] fields.
+    unsafe fn call(&self, args: &'a [MArgument], ret: MArgument);
 }
 
 //======================================
 // FromArg Impls
 //======================================
 
-impl FromArg for bool {
-    unsafe fn from_arg(arg: MArgument) -> Self {
+impl FromArg<'_> for bool {
+    unsafe fn from_arg(arg: &MArgument) -> Self {
         *arg.boolean != 0
     }
 }
 
-impl FromArg for i64 {
-    unsafe fn from_arg(arg: MArgument) -> Self {
+impl FromArg<'_> for mint {
+    unsafe fn from_arg(arg: &MArgument) -> Self {
         *arg.integer
     }
 }
 
-impl FromArg for f64 {
-    unsafe fn from_arg(arg: MArgument) -> Self {
+impl FromArg<'_> for mreal {
+    unsafe fn from_arg(arg: &MArgument) -> Self {
         *arg.real
     }
 }
 
-impl FromArg for sys::mcomplex {
-    unsafe fn from_arg(arg: MArgument) -> Self {
+impl FromArg<'_> for sys::mcomplex {
+    unsafe fn from_arg(arg: &MArgument) -> Self {
         *arg.cmplex
     }
 }
 
-impl<T> FromArg for NumericArray<T> {
-    unsafe fn from_arg(arg: MArgument) -> Self {
-        NumericArray::from_raw(*arg.numeric)
+//--------------------------------------
+// Strings
+//--------------------------------------
+
+unsafe fn c_str_from_arg<'a>(arg: &'a MArgument) -> &'a CStr {
+    let cstr: *mut i8 = *arg.utf8string;
+    CStr::from_ptr(cstr)
+}
+
+impl<'a> FromArg<'a> for CString {
+    unsafe fn from_arg(arg: &'a MArgument) -> CString {
+        let owned = {
+            let cstr: &'a CStr = c_str_from_arg(arg);
+            CString::from(cstr)
+        };
+
+        // Now that we own our own copy of the string, disown the Kernel's copy.
+        rtl::UTF8String_disown(*arg.utf8string);
+
+        owned
     }
 }
 
-// NOT SAFE: The resulting lifetime is completely unconstrained.
-// impl<'a> FromArg for &'a CStr {
-//     unsafe fn from_arg(arg: MArgument) -> &'a CStr {
-//         let cstr: *mut i8 = *arg.utf8string;
-//         CStr::from_ptr(cstr)
+/// # Panics
+///
+/// This conversion will panic if the [`MArgument::utf8string`] field is not valid UTF-8.
+impl<'a> FromArg<'a> for String {
+    unsafe fn from_arg(arg: &'a MArgument) -> String {
+        let owned = {
+            let cstr: &'a CStr = c_str_from_arg(arg);
+            let str: &'a str = cstr
+                .to_str()
+                .expect("FromArg for &str: string was not valid UTF-8");
+            str.to_owned()
+        };
+
+        // Now that we own our own copy of the string, disown the Kernel's copy.
+        rtl::UTF8String_disown(*arg.utf8string);
+
+        owned
+    }
+}
+
+// TODO: Supported borrowed &CStr and &str's using some kind of wrapper that ensures we
+//       disown the Kernel string.
+
+// /// # Safety
+// ///
+// /// The lifetime of the returned `&CStr` must be the same as the lifetime of `arg`.
+// impl<'a> FromArg<'a> for &'a CStr {
+//     unsafe fn from_arg(arg: &'a MArgument) -> &'a CStr {
+//         c_str_from_arg(arg)
 //     }
 // }
 
-impl FromArg for CString {
-    unsafe fn from_arg(arg: MArgument) -> CString {
-        let cstr: *mut i8 = *arg.utf8string;
-        let cstr = CStr::from_ptr(cstr);
-        CString::from(cstr)
+// /// # Panics
+// ///
+// /// This conversion will panic if the [`MArgument::utf8string`] field is not valid UTF-8.
+// ///
+// /// # Safety
+// ///
+// /// The lifetime of the returned `&str` must be the same as the lifetime of `arg`.
+// impl<'a> FromArg<'a> for &'a str {
+//     unsafe fn from_arg(arg: &'a MArgument) -> &'a str {
+//         let cstr: &'a CStr = FromArg::<'a>::from_arg(arg);
+//         cstr.to_str()
+//             .expect("FromArg for &str: string was not valid UTF-8")
+//     }
+// }
+
+//--------------------------------------
+// NumericArray
+//--------------------------------------
+
+// TODO: Add FromArg for NumericArray which just clones the numeric array? Or disclaims
+//       ownership in another way?
+
+
+/// # Safety
+///
+/// `FromArg for NumericArray<T>` MUST be constrained by `T: NumericArrayType` to prevent
+/// accidental creation of invalid `NumericArray` conversions. Without this constraint,
+/// it would be possible to write code like:
+///
+/// ```
+/// fn and(bools: NumericArray<bool>) -> bool {
+///     // ...
+/// }
+///
+/// // Unsafe!
+/// export![and(_)];
+/// ```
+///
+/// which is not valid because `bool` is not a valid numeric array type.
+impl<'a, T: crate::NumericArrayType> FromArg<'a> for &'a NumericArray<T> {
+    unsafe fn from_arg(arg: &'a MArgument) -> &'a NumericArray<T> {
+        NumericArray::ref_cast(&*arg.numeric)
     }
 }
 
-impl FromArg for String {
-    unsafe fn from_arg(arg: MArgument) -> String {
-        let cstr: *mut i8 = *arg.utf8string;
-        let cstr = CStr::from_ptr(cstr);
-        cstr.to_str()
-            .unwrap_or_else(|_| panic!("MArgument string is not valid UTF-8"))
-            .to_owned()
+impl<'a> FromArg<'a> for &'a NumericArray<()> {
+    unsafe fn from_arg(arg: &'a MArgument) -> &'a NumericArray<()> {
+        NumericArray::ref_cast(&*arg.numeric)
     }
 }
 
 //======================================
-// FromArgs Impls
+// impl IntoArg
 //======================================
 
-impl<A: FromArg> FromArgs for A {
-    unsafe fn from_args(args: &[MArgument]) -> Self {
-        if args.len() != 1 {
-            panic!("from_args: expected 1 argument(s), got {}", args.len());
-        }
+//---------------------
+// Primitive data types
+//---------------------
 
-        A::from_arg(*args.get_unchecked(0))
+impl IntoArg for bool {
+    unsafe fn into_arg(self, arg: MArgument) {
+        let boole: u32 = if self { sys::True } else { sys::False };
+        *arg.boolean = boole as sys::mbool;
     }
 }
 
-macro_rules! tuple_impl {
-    ($length:literal; $($type:ident),*) => {
-        impl<$($type: FromArg),*> FromArgs for ($($type,)*) {
-            unsafe fn from_args(args: &[MArgument]) -> Self {
-                if args.len() != $length {
-                    panic!("from_args: expected {} argument(s), got {}", $length, args.len());
-                }
+impl IntoArg for mint {
+    unsafe fn into_arg(self, arg: MArgument) {
+        *arg.integer = self;
+    }
+}
 
-                let mut index: usize = 0;
+impl IntoArg for mreal {
+    unsafe fn into_arg(self, arg: MArgument) {
+        *arg.real = self;
+    }
+}
 
-                #[allow(unused_assignments)]
-                (
-                    $({
-                        let val = $type::from_arg(*args.get_unchecked(index));
-                        index += 1;
-                        val
-                    },)*
-                )
+impl IntoArg for sys::mcomplex {
+    unsafe fn into_arg(self, arg: MArgument) {
+        *arg.cmplex = self;
+    }
+}
+
+//--------------------------------------------------
+// Convenience conversions for narrow integer sizes.
+//--------------------------------------------------
+
+impl IntoArg for i8 {
+    unsafe fn into_arg(self, arg: MArgument) {
+        *arg.integer = mint::from(self);
+    }
+}
+
+impl IntoArg for i16 {
+    unsafe fn into_arg(self, arg: MArgument) {
+        *arg.integer = mint::from(self);
+    }
+}
+
+impl IntoArg for i32 {
+    unsafe fn into_arg(self, arg: MArgument) {
+        *arg.integer = mint::from(self);
+    }
+}
+
+impl IntoArg for u8 {
+    unsafe fn into_arg(self, arg: MArgument) {
+        *arg.integer = mint::from(self);
+    }
+}
+
+impl IntoArg for u16 {
+    unsafe fn into_arg(self, arg: MArgument) {
+        *arg.integer = mint::from(self);
+    }
+}
+
+// If we're on a 32 bit platform, mint might be an alias for i32. Avoid providing this
+// conversion on those platforms.
+#[cfg(target_pointer_width = "64")]
+impl IntoArg for u32 {
+    unsafe fn into_arg(self, arg: MArgument) {
+        *arg.integer = mint::from(self);
+    }
+}
+
+//--------------------
+// Strings
+//--------------------
+
+thread_local! {
+    /// See [`<CString as IntoArg>::into_arg()`] for information about how this static is
+    /// used.
+    static RETURNED_STRING: RefCell<Option<CString>> = RefCell::new(None);
+}
+
+impl IntoArg for CString {
+    unsafe fn into_arg(self, arg: MArgument) {
+        // Extend the lifetime of `self.as_ptr()` by storing `self` in `RETURNED_STRING`.
+        //
+        // This will keep `raw` valid past the point that the current LibraryLink
+        // function returns, at which point it will be copied by the Kernel and is no
+        // longer used. We'll drop `self` the next time this function is called.
+        //
+        // This implementation limits the maximum number of "leaked" strings to just one.
+        //
+        // For more information on management of string memory when passed via
+        // LibraryLink, see:
+        //
+        // <https://reference.wolfram.com/language/LibraryLink/tutorial/InteractionWithWolframLanguage.html#262826222>
+        let raw: *const c_char = RETURNED_STRING.with(|stored| {
+            // Drop the previously returned string, if any.
+            if let Some(prev) = stored.replace(None) {
+                drop(prev);
+            }
+
+            let raw: *const c_char = self.as_ptr();
+
+            *stored.borrow_mut() = Some(self);
+
+            raw
+        });
+
+        // Return `raw` via this MArgument.
+        *arg.utf8string = raw as *mut c_char;
+    }
+}
+
+impl IntoArg for String {
+    /// # Panics
+    ///
+    /// This function will panic if `self` cannot be converted into a [`CString`].
+    unsafe fn into_arg(self, arg: MArgument) {
+        let cstring = CString::new(self)
+            .expect("IntoArg for String: could not convert String to CString");
+
+        <CString as IntoArg>::into_arg(cstring, arg)
+    }
+}
+
+//--------------------
+// NumericArray's
+//--------------------
+
+impl<T> IntoArg for NumericArray<T> {
+    unsafe fn into_arg(self, arg: MArgument) {
+        *arg.numeric = self.into_raw();
+    }
+}
+
+//======================================
+// impl NativeFunction
+//======================================
+
+/// Implement `NativeFunction` for functions that use raw [`MArgument`]s for their
+/// arguments and return value.
+///
+/// # Example
+///
+/// ```
+/// wll::export![raw_add2(_, _)];
+///
+/// fn raw_add2(args: &[MArgument], ret: MArgument) {
+///     let (x, y): (i64, i64) = unsafe { wll::from_args(args) };
+///
+///     unsafe {
+///         *ret.integer = x + y;
+///     }
+/// }
+/// ```
+///
+/// ```wolfram
+/// LibraryFunctionLoad["...", "raw_add2", {Integer, Integer}, Integer]
+/// ```
+impl<'a: 'b, 'b> NativeFunction<'a> for &dyn Fn(&'b [MArgument], MArgument) {
+    unsafe fn call(&self, args: &'a [MArgument], ret: MArgument) {
+        self(args, ret)
+    }
+}
+
+//--------------------
+// impl NativeFunction
+//--------------------
+
+macro_rules! impl_NativeFunction {
+    ($($type:ident),*) => {
+        impl<'a, $($type: FromArg<'a>,)* R: IntoArg> NativeFunction<'a> for &dyn Fn($($type),*) -> R {
+            unsafe fn call(&self, args: &'a [MArgument], ret: MArgument) {
+                // Re-use the $type name as the local variable names. E.g.
+                //     let A1 = A1::from_arg(..);
+                // This works because types and variable names are different namespaces.
+                #[allow(non_snake_case)]
+                let [$($type,)*] = match args {
+                    [$($type,)*] => [$($type,)*],
+                    _ => panic!(
+                        "LibraryLink function number of arguments ({}) does not match \
+                        number of parameters",
+                        args.len()
+                    ),
+                };
+
+                $(
+                    #[allow(non_snake_case)]
+                    let $type: $type = $type::from_arg($type);
+                )*
+
+                let result: R = self($($type,)*);
+
+                result.into_arg(ret);
             }
         }
-    };
+    }
 }
 
-tuple_impl!( 1; A);
-tuple_impl!( 2; A, B);
-tuple_impl!( 3; A, B, C);
-tuple_impl!( 4; A, B, C, D);
-tuple_impl!( 5; A, B, C, D, E);
-tuple_impl!( 6; A, B, C, D, E, F);
-tuple_impl!( 7; A, B, C, D, E, F, G);
-tuple_impl!( 8; A, B, C, D, E, F, G, H);
-tuple_impl!( 9; A, B, C, D, E, F, G, H, I);
-tuple_impl!(10; A, B, C, D, E, F, G, H, I, J);
+// Handle the zero-arguments case specially.
+impl<'a, R> NativeFunction<'a> for &dyn Fn() -> R
+where
+    R: IntoArg,
+{
+    unsafe fn call(&self, args: &[MArgument], ret: MArgument) {
+        if args.len() != 0 {
+            panic!(
+                "LibraryLink function number of arguments ({}) does not match number of \
+                parameters",
+                args.len()
+            );
+        }
+
+        let result = self();
+
+        result.into_arg(ret);
+    }
+}
+
+impl_NativeFunction!(A1);
+impl_NativeFunction!(A1, A2);
+impl_NativeFunction!(A1, A2, A3);
+impl_NativeFunction!(A1, A2, A3, A4);
+impl_NativeFunction!(A1, A2, A3, A4, A5);
+impl_NativeFunction!(A1, A2, A3, A4, A5, A6);
+impl_NativeFunction!(A1, A2, A3, A4, A5, A6, A7);
+impl_NativeFunction!(A1, A2, A3, A4, A5, A6, A7, A8);
+impl_NativeFunction!(A1, A2, A3, A4, A5, A6, A7, A8, A9);
+impl_NativeFunction!(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10);
+impl_NativeFunction!(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11);
+impl_NativeFunction!(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12);

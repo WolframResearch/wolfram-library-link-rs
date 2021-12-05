@@ -78,7 +78,7 @@ pub use wl_library_link_sys as sys;
 pub use wstp;
 
 pub use self::{
-    args::{from_args, FromArg, FromArgs},
+    args::{FromArg, IntoArg, NativeFunction},
     async_tasks::{spawn_async_task_with_thread, AsyncTask, AsyncTaskObject},
     data_store::DataStore,
     library_data::{get_library_data, initialize, WolframLibraryData},
@@ -285,6 +285,214 @@ impl WolframEngine {
 
         Ok(())
     }
+}
+
+/// Export the specified functions as native LibraryLink functions.
+///
+/// [`NativeFunction`] must be implemented by the functions
+/// exported by this macro.
+///
+/// Functions exported using this macro will automatically:
+///
+/// * Call [`initialize()`] to initialize this library.
+/// * Catch any panics that occur.
+///
+// * Extract the function arguments from the raw [`MArgument`] array.
+// * Store the function return value in the raw [`MArgument`] return value field.
+///
+/// # Syntax
+///
+/// Export a function with a single argument.
+///
+/// ```no_run
+/// export![square(_)];
+/// ```
+///
+/// Export a function using the specified low-level shared library symbol name.
+///
+/// ```
+/// export![square(_) as WL_square];
+/// ```
+///
+/// Export multiple functions with one `export!` invocation. This is purely for convenience.
+///
+/// ```
+/// export![
+///     square(_);
+///     add_two(_, _) as AddTwo;
+/// ];
+/// ```
+///
+// TODO: Remove this feature? If someone wants to export the low-level function, they
+//       should do `pub use square::square as ...` instead of exposing the hidden module
+//       (which is just an implementation detail of `export![]` anyway).
+// Make public the `mod` module that contains the low-level wrapper function.
+//
+// ```
+// export![pub square(_)];
+// ```
+///
+/// # Examples
+///
+/// ### Primitive data types
+///
+/// Export a native function with a single argument:
+///
+/// ```
+/// fn square(x: i64) -> i64 {
+///     x * x
+/// }
+///
+/// export![square(_)]
+/// ```
+///
+/// ```wolfram
+/// LibraryFunctionLoad["...", "square", {Integer}, Integer]
+/// ```
+///
+/// Export a native function with multiple arguments:
+///
+/// ```
+/// fn reverse_string(string: String) -> String {
+///     string.chars().rev().collect()
+/// }
+/// ```
+///
+/// ### Numeric arrays
+///
+/// Export a native function with a [`NumericArray`] argument:
+///
+/// ```
+/// fn total_i64(list: &NumericArray<i64>) -> i64 {
+///     list.as_slice().into_iter().sum()
+/// }
+/// ```
+///
+/// ```wolfram
+/// LibraryFunctionLoad[
+///     "...", "total_i64",
+///     {LibraryDataType[NumericArray, "Integer64"]}
+///     Integer
+/// ]
+/// ```
+///
+///
+// TODO: Add a "Memory Management" section to this comment and discuss "Constant".
+//
+// ```wolfram
+// LibraryFunctionLoad[
+//     "...", "total_i64",
+//     {
+//         {LibraryDataType[NumericArray, "Integer64"], "Constant"}
+//     },
+//     Integer
+// ]
+// ```
+///
+// # Design constraints
+//
+// The current design of this macro is intended to accommodate the following constraints:
+//
+// 1. Support automatic generation of wrapper functions without using procedural macros,
+//    and with minimal code duplication. Procedural macros require external dependencies,
+//    and can significantly increase compile times.
+//
+//      1a. Don't depend on the entire function definition to be contained within the
+//          macro invocation, which leads to unergonomic rightward drift. E.g. don't
+//          require something like:
+//
+//          export![
+//              fn foo(x: i64) { ... }
+//          ]
+//
+//      1b. Don't depend on the entire function declaration to be repeated in the
+//          macro invocation. E.g. don't require:
+//
+//              fn foo(x: i64) -> i64 {...}
+//
+//              export![
+//                  fn foo(x: i64) -> i64;
+//              ]
+//
+// 2. The name of the function in Rust should match the name of the function that appears
+//    in the WL LibraryFunctionLoad call. E.g. needing different `foo` and `foo__wrapper`
+//    named must be avoided.
+//
+// To satisfy constraint 1, it's necessary to depend on the type system rather than
+// clever macro operations. This leads naturally to the creation of the `NativeFunction`
+// trait, which is implemented for all suitable `Fn(..) -> _` types.
+//
+// Constraint 1b is unable to be met completely by the current implementation due to
+// limitations with Rust's coercion from `fn(A, B, ..) -> C` to `Fn(A, B, ..) -> C`. The
+// coercion requires that the number of parameters (`foo(_, _)`) be made explicit, even
+// if their types can be elided. If eliding the number of Fn(..) arguments were permitted,
+// `export![foo]` could work.
+//
+// To satisfy constraint 2, this implementation creates a private module with the same
+// name as the function that is being wrapped. This is required because in Rust (as in
+// many languages), it's illegal for two different functions with the same name to exist
+// within the same module:
+//
+// ```
+// fn foo { ... }
+//
+// #[no_mangle]
+// pub extern "C" fn foo { ... } // Error: conflicts with the other foo()
+// ```
+//
+// This means that the export![] macro cannot simply generate a wrapper function
+// with the same name as the wrapped function, because they would conflict.
+//
+// However, it *is* legal for a module to contain a function and a child module that
+// have the same name. Because `#[no_mangle]` functions are exported from the crate no
+// matter where they appear in the module heirarchy, this offers an effective workaround
+// for the name clash issue, while satisfy constraint 2's requirement that the original
+// function and the wrapper function have the same name:
+//
+// ```
+// fn foo() { ... } // This does not conflict with the `foo` module.
+//
+// mod foo {
+//     #[no_mangle]
+//     pub extern "C" fn foo(..) { ... } // This does not conflict with super::foo().
+// }
+// ```
+#[macro_export]
+macro_rules! export {
+    ($vis:vis $name:ident($($argc:ty),*) as $exported:ident) => {
+        $vis mod $name {
+            #[no_mangle]
+            pub unsafe extern "C" fn $exported(
+                lib: $crate::sys::WolframLibraryData,
+                argc: $crate::sys::mint,
+                args: *mut $crate::sys::MArgument,
+                res: $crate::sys::MArgument,
+            ) -> std::os::raw::c_uint {
+                // The number of `$argc` is required for type inference of the variadic
+                // `&dyn Fn(..) -> _` type to work. See constraint 2a.
+                let func: &dyn Fn($($argc),*) -> _ = &super::$name;
+
+                $crate::macro_utils::call_native_wolfram_library_function(
+                    lib,
+                    args,
+                    argc,
+                    res,
+                    func
+                )
+            }
+        }
+    };
+
+    // Convert export![name(..)] to export![name(..) as name].
+    ($vis:vis $name:ident($($argc:ty),*)) => {
+        $crate::export![$vis $name($($argc),*) as $name];
+    };
+
+    ($($vis:vis $name:ident($($argc:ty),*) $(as $exported:ident)?);* $(;)?) => {
+        $(
+            $crate::export![$vis $name($($argc),*) $(as $exported)?];
+        )*
+    };
 }
 
 // TODO: Allow any type which implements FromExpr in wrapper parameter lists?

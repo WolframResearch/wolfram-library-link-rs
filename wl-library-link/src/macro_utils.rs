@@ -1,4 +1,4 @@
-use std::ffi::CString;
+use std::{ffi::CString, os::raw::c_uint};
 
 use wl_expr::{forms::ToPrettyExpr, Expr, ExprKind};
 use wstp::{self, Link};
@@ -6,7 +6,7 @@ use wstp::{self, Link};
 use crate::{
     catch_panic,
     sys::{self, MArgument, LIBRARY_NO_ERROR},
-    NumericArray, WolframEngine,
+    NativeFunction, NumericArray, WolframEngine,
 };
 
 //======================================
@@ -24,7 +24,7 @@ pub fn call_wstp_wolfram_library_function_expr_list(
     libdata: sys::WolframLibraryData,
     unsafe_link: wstp::sys::WSLINK,
     function: fn(&WolframEngine, Vec<Expr>) -> Expr,
-) -> std::os::raw::c_uint {
+) -> c_uint {
     call_wstp_wolfram_library_function(
         libdata,
         unsafe_link,
@@ -48,7 +48,7 @@ pub fn call_wstp_wolfram_library_function<
     libdata: sys::WolframLibraryData,
     mut unsafe_link: wstp::sys::WSLINK,
     function: F,
-) -> std::os::raw::c_uint {
+) -> c_uint {
     use self::{
         catch_panic::{call_and_catch_panic, CaughtPanic},
         wstp::sys::{WSEndPacket, WSPutString},
@@ -114,7 +114,7 @@ pub fn call_wxf_wolfram_library_function_expr_list(
     wxf_argument: MArgument,
     wxf_result: MArgument,
     function: fn(&WolframEngine, Vec<Expr>) -> Expr,
-) -> std::os::raw::c_uint {
+) -> c_uint {
     call_wxf_wolfram_library_function(
         libdata,
         wxf_argument,
@@ -140,7 +140,7 @@ pub fn call_wxf_wolfram_library_function<
     wxf_argument: MArgument,
     wxf_result: MArgument,
     function: F,
-) -> std::os::raw::c_uint {
+) -> c_uint {
     use self::catch_panic::{call_and_catch_panic, CaughtPanic};
 
     let _ = crate::initialize(libdata);
@@ -190,4 +190,38 @@ fn wxf_numeric_array_from_expr(expr: &Expr) -> NumericArray<u8> {
         .expect("wolfram_library_function: failed to serialize result expression to WXF");
 
     NumericArray::from_slice(result_wxf.as_slice())
+}
+
+//======================================
+// NativeFunction helpers
+//======================================
+
+pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
+    lib_data: sys::WolframLibraryData,
+    args: *mut MArgument,
+    argc: sys::mint,
+    res: MArgument,
+    func: F,
+) -> c_uint {
+    use std::panic::{self, AssertUnwindSafe};
+
+    // Initialize the library.
+    if crate::initialize(lib_data).is_err() {
+        return sys::LIBRARY_FUNCTION_ERROR;
+    }
+
+    let argc = match usize::try_from(argc) {
+        Ok(argc) => argc,
+        Err(_) => return sys::LIBRARY_FUNCTION_ERROR,
+    };
+
+    let args: &[MArgument] = std::slice::from_raw_parts(args, argc);
+
+    if panic::catch_unwind(AssertUnwindSafe(move || func.call(args, res))).is_err() {
+        // TODO: Store the panic into a "LAST_ERROR" static, and provide an accessor to
+        //       get it from WL? E.g. RustLink`GetLastError[<optional func name>].
+        return sys::LIBRARY_FUNCTION_ERROR;
+    };
+
+    sys::LIBRARY_NO_ERROR
 }
