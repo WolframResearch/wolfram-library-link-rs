@@ -19,16 +19,16 @@ fn start_file_watcher(pause_interval_ms: mint, path: String) -> mint {
 
     // Spawn a new thread, which will run in the background and check for file
     // modifications.
-    let task_id = wll::spawn_async_task_with_thread(move |id: AsyncTaskObject| {
-        file_watch_thread_function(id, pause_interval_ms, &path)
+    let task = wll::spawn_async_task_with_thread(move |task: AsyncTaskObject| {
+        file_watch_thread_function(task, pause_interval_ms, &path);
     });
 
-    task_id.id()
+    task.id()
 }
 
 /// This function is called first from the spawned background thread.
 fn file_watch_thread_function(
-    async_object: wll::AsyncTaskObject,
+    task: wll::AsyncTaskObject,
     pause_interval_ms: u64,
     path: &PathBuf,
 ) {
@@ -76,7 +76,7 @@ fn file_watch_thread_function(
     };
 
     loop {
-        if !async_object.is_alive() {
+        if !task.is_alive() {
             break;
         }
 
@@ -86,7 +86,7 @@ fn file_watch_thread_function(
             let mut data = DataStore::new();
             data.add_i64(modification as i64);
 
-            async_object.raise_async_event("change", data);
+            task.raise_async_event("change", data);
         }
 
         // Wait for a bit before polling again for any changes to the file.
