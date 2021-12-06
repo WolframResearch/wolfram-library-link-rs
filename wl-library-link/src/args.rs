@@ -188,9 +188,21 @@ impl<'a, T: crate::NumericArrayType> FromArg<'a> for &'a NumericArray<T> {
     }
 }
 
+impl<'a, T: crate::NumericArrayType> FromArg<'a> for NumericArray<T> {
+    unsafe fn from_arg(arg: &'a MArgument) -> NumericArray<T> {
+        NumericArray::from_raw(*arg.numeric)
+    }
+}
+
 impl<'a> FromArg<'a> for &'a NumericArray<()> {
     unsafe fn from_arg(arg: &'a MArgument) -> &'a NumericArray<()> {
         NumericArray::ref_cast(&*arg.numeric)
+    }
+}
+
+impl<'a> FromArg<'a> for NumericArray<()> {
+    unsafe fn from_arg(arg: &'a MArgument) -> NumericArray<()> {
+        NumericArray::from_raw(*arg.numeric)
     }
 }
 

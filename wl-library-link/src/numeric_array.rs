@@ -422,13 +422,26 @@ impl<T: NumericArrayType> NumericArray<T> {
 
     /// Access the elements stored in this [`NumericArray`] as a mutable flat buffer.
     ///
+    /// If the [`share_count()`][NumericArray::share_count] of this array is >= 1, this
+    /// function will return `None`.
+    pub fn as_slice_mut(&mut self) -> Option<&mut [T]> {
+        if self.share_count() == 0 {
+            // This is not a shared numeric array. We have unique access to it's data.
+            unsafe { Some(self.as_slice_mut_unchecked()) }
+        } else {
+            None
+        }
+    }
+
+    /// Access the elements stored in this [`NumericArray`] as a mutable flat buffer.
+    ///
     /// # Safety
     ///
     /// `NumericArray` is an immutable shared data structure. There is no robust, easy way
     /// to determine whether mutation of a `NumericArray` is safe. Prefer to use
     /// [`UninitNumericArray`] to create and initialize a numeric array value instead of
     /// mutating an existing `NumericArray`.
-    pub unsafe fn as_slice_mut(&mut self) -> &mut [T] {
+    pub unsafe fn as_slice_mut_unchecked(&mut self) -> &mut [T] {
         let ptr: *mut c_void = self.data_ptr();
 
         debug_assert!(!ptr.is_null());
@@ -584,6 +597,15 @@ impl<T> NumericArray<T> {
         let count: sys::mint = unsafe { rtl::MNumericArray_shareCount(raw) };
 
         usize::try_from(count).expect("NumericArray share count mint overflows usize")
+    }
+
+    /// Returns true if `self` and `other` are pointers to the name underlying
+    /// numeric array object.
+    pub fn ptr_eq<T2>(&self, other: &NumericArray<T2>) -> bool {
+        let NumericArray(this, PhantomData) = *self;
+        let NumericArray(other, PhantomData) = *other;
+
+        this == other
     }
 }
 
