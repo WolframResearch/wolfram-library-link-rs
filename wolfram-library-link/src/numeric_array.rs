@@ -3,7 +3,7 @@ use std::fmt;
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 
-use static_assertions::{assert_eq_align, assert_eq_size};
+use static_assertions::{assert_eq_align, assert_eq_size, assert_not_impl_any};
 
 use crate::{rtl, sys};
 
@@ -50,6 +50,10 @@ pub struct NumericArray<T = ()>(sys::MNumericArray, PhantomData<T>);
 /// Use [`as_slice_mut()`][`UninitNumericArray::as_slice_mut()`] to initialize the
 /// elements of this [`UninitNumericArray`].
 pub struct UninitNumericArray<T: NumericArrayType>(sys::MNumericArray, PhantomData<T>);
+
+// Guard against accidental `derive(Copy)` annotations.
+assert_not_impl_any!(NumericArray: Copy);
+assert_not_impl_any!(UninitNumericArray<i64>: Copy);
 
 //======================================
 // Traits
