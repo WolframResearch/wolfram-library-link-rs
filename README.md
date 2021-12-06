@@ -114,122 +114,24 @@ pub fn sum_of_numbers(engine: &WolframEngine, arguments: Vec<Expr>) -> Expr {
 }
 ```
 
-### Writing a LibraryLink ABI compatible function manually
-
-This example makes use of the [`wstp`][wstp] crate to provide a safe wrapper around
-around the WSTP link object, which can be used to read the argument expression and write
-out the return expression.
-
-```rust
-use wl_library_link::{WolframLibraryData, LIBRARY_NO_ERROR, LIBRARY_FUNCTION_ERROR};
-use wstp::{Link, sys::WSLINK};
-
-#[no_mangle]
-pub extern "C" fn wstp_function(
-    _lib: WolframLibraryData,
-    unsafe_link: WSLINK,
-) -> c_uint {
-    let link = unsafe {
-        Link::unchecked_ref_cast_mut(unsafe_link)
-    };
-
-    let expr = match link.get_expr() {
-        Ok(expr) => expr,
-        Err(err) => {
-            let err = Expr! { Failure["WSTP Error", <| "Message" -> 'err |>] };
-            match link.put_expr(&err) {
-                Ok(()) => return LIBRARY_NO_ERROR,
-                Err(_) => return LIBRARY_FUNCTION_ERROR,
-            }
-        },
-    };
-
-    let expr_string = format!("Input: {}", expr.to_string());
-
-    match link.put_expr(&Expr::string(expr_string)) {
-        Ok(()) => LIBRARY_NO_ERROR,
-        Err(_) => LIBRARY_FUNCTION_ERROR,
-    }
-}
-```
-
-Then, in Wolfram:
-
-```wolfram
-function = LibraryFunctionLoad["/path/to/library.dylib", "wstp_function", LinkObject, LinkObject]
-```
-
-Finally, build the library by executing the following commands in the terminal:
-
-```shell
-$ cargo build
-```
-
-The [cargo-paclet][cargo-paclet] command-line utility can be used to automate the process
-of building a Paclet from a Rust library.
-
 ### Creating a library which is usable from Rust and Wolfram
 
 `crate-type = ["rlib", "cdyib"]`
 
-## Using the raw LibraryLink and WSTP APIs
+The [cargo-paclet][cargo-paclet] command-line utility can be used to automate the process
+of building a Paclet from a Rust library.
 
-```rust
-use std::os::raw::{c_int, c_uint};
+# Examples
 
-use wl_library_link::{
-    mint, MArgument, WolframLibraryData, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
-};
-use wstp_sys::{
-    WSGetInteger, WSNewPacket, WSPutInteger, WSTestHead, WSLINK,
-};
+The [./wl-library-link/examples](./wl-library-link/examples) subdirectory contains sample
+programs demonstrating features of the `wl-library-link` API.
 
-#[no_mangle]
-pub unsafe extern "C" fn demo_function(
-    _lib_data: WolframLibraryData,
-    _arg_count: mint,
-    _args: MArgument,
-    res: MArgument,
-) -> c_uint {
-    *res.real = 42.42;
-    0
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn demo_wstp_function(
-    _lib: WolframLibraryData,
-    link: WSLINK,
-) -> c_uint {
-    let mut i1: c_int = 0;
-    let mut i2: c_int = 0;
-    let mut len: c_int = 0;
-
-    if WSTestHead(link, b"List\0".as_ptr() as *const i8, &mut len) == 0 {
-        return LIBRARY_FUNCTION_ERROR;
-    }
-    if len != 2 {
-        return LIBRARY_FUNCTION_ERROR;
-    }
-
-    if WSGetInteger(link, &mut i1) == 0 {
-        return LIBRARY_FUNCTION_ERROR;
-    }
-    if WSGetInteger(link, &mut i2) == 0 {
-        return LIBRARY_FUNCTION_ERROR;
-    }
-    if WSNewPacket(link) == 0 {
-        return LIBRARY_FUNCTION_ERROR;
-    }
-
-    let sum = i1 + i2;
-
-    if WSPutInteger(link, sum) == 0 {
-        return LIBRARY_FUNCTION_ERROR;
-    }
-
-    return LIBRARY_NO_ERROR;
-}
-```
+* [raw_librarylink_function.rs](wl-library-link/examples/raw_librarylink_function.rs)
+  - Demonstrates how to write "raw" LibraryLink functions, using the `extern "C"` ABI
+    and the raw `MArgument` type.
+* [raw_wstp_function.rs](wl-library-link/examples/raw_wstp_function.rs)
+  - Demonstrates how to write "raw" LibraryLink WSTP functions, using the `extern "C"` ABI,
+    raw `WSLINK` type, and low-level WSTP operations.
 
 [wstp]: https://stash.wolfram.com/users/connorg/repos/wstp/browse
 [cargo-paclet]: https://stash.wolfram.com/users/connorg/repos/cargo-paclet/browse

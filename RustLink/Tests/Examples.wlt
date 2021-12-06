@@ -119,6 +119,22 @@ Test[
 
 Test[
 	func = LibraryFunctionLoad[
+		"libraw_wstp_function",
+		"wstp_expr_function",
+		LinkObject,
+		LinkObject
+	];
+
+	func[{1, 2, 3}]
+	,
+	(* FIXME: This output is a bug. Fix the bug and update this test case. *)
+	Failure["WSTP Error", <|
+		"Message" -> "WSTP error: Symbol name `List` has no context"
+	|>]
+]
+
+Test[
+	func = LibraryFunctionLoad[
 		"libbasic_expressions",
 		"echo_arguments_wrapper",
 		LinkObject,

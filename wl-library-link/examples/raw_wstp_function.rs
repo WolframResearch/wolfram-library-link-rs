@@ -123,3 +123,47 @@ pub extern "C" fn demo_wstp_function_callback(
 
     return LIBRARY_NO_ERROR;
 }
+
+/// This example makes use of the [`wstp`][wstp] crate to provide a safe wrapper around
+/// around the WSTP link object, which can be used to read the argument expression and
+/// write out the return expression.
+///
+/// ```wolfram
+/// function = LibraryFunctionLoad[
+///     "raw_wstp_function",
+///     "wstp_expr_function",
+///     LinkObject,
+///     LinkObject
+/// ];
+/// ```
+#[no_mangle]
+pub extern "C" fn wstp_expr_function(
+    _lib: WolframLibraryData,
+    mut unsafe_link: WSLINK,
+) -> c_uint {
+    let link: &mut Link = unsafe { Link::unchecked_ref_cast_mut(&mut unsafe_link) };
+
+    let expr = match link.get_expr() {
+        Ok(expr) => expr,
+        Err(err) => {
+            // Skip reading the argument list packet.
+            if link.raw_get_next().and_then(|_| link.new_packet()).is_err() {
+                return LIBRARY_FUNCTION_ERROR;
+            }
+
+            let err = Expr::string(err.to_string());
+            let err = Expr! { Failure["WSTP Error", <| "Message" -> 'err |>] };
+            match link.put_expr(&err) {
+                Ok(()) => return LIBRARY_NO_ERROR,
+                Err(_) => return LIBRARY_FUNCTION_ERROR,
+            }
+        },
+    };
+
+    let expr_string = format!("Input: {}", expr.to_string());
+
+    match link.put_expr(&Expr::string(expr_string)) {
+        Ok(()) => LIBRARY_NO_ERROR,
+        Err(_) => LIBRARY_FUNCTION_ERROR,
+    }
+}
