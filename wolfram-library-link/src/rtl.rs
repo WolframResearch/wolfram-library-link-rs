@@ -14,6 +14,8 @@ use crate::sys::{
     WSLINK,
 };
 
+// TODO: Include auto-generated doc comment with path to appropriate field.
+//       Mention that these functions are looked-up dynamically using get_library_data().
 macro_rules! rtl_func {
     ($($vis:vis $path:ident : $type:ty,)*) => {
         $(
