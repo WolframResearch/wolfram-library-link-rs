@@ -14,7 +14,7 @@ use crate::{rtl, sys, NumericArray};
 /// # Example
 ///
 /// ```no_run
-/// use wl_library_link::DataStore;
+/// use wolfram_library_link::DataStore;
 ///
 /// let mut data = DataStore::new();
 ///
@@ -50,7 +50,7 @@ impl DataStore {
         usize::try_from(len).expect("DataStore i64 length overflows usize")
     }
 
-    /// Convert this `DataStore` into a raw [`wl_library_link_sys::DataStore`] pointer.
+    /// Convert this `DataStore` into a raw [`wolfram_library_link_sys::DataStore`] pointer.
     pub fn into_raw(self) -> sys::DataStore {
         let DataStore(ds) = self;
 
@@ -133,7 +133,7 @@ impl DataStore {
     /// The `DataStore` value constructed by the following code:
     ///
     /// ```no_run
-    /// use wl_library_link::DataStore;
+    /// use wolfram_library_link::DataStore;
     ///
     /// let mut inner = DataStore::new();
     /// inner.add_i64(0);
@@ -161,7 +161,7 @@ impl DataStore {
     /// # Example
     ///
     /// ```no_run
-    /// use wl_library_link::{DataStore, NumericArray};
+    /// use wolfram_library_link::{DataStore, NumericArray};
     ///
     /// let array: NumericArray<i64> = NumericArray::from_slice(&[1, 2, 3]);
     ///
@@ -281,7 +281,7 @@ impl DataStore {
     /// The `DataStore` value constructed by the following code:
     ///
     /// ```no_run
-    /// use wl_library_link::DataStore;
+    /// use wolfram_library_link::DataStore;
     ///
     /// let mut inner = DataStore::new();
     /// inner.add_i64(0);

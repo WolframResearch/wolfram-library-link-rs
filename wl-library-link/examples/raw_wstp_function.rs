@@ -8,7 +8,7 @@
 use std::os::raw::{c_int, c_uint};
 
 use wl_expr::Expr;
-use wl_library_link::sys::{
+use wolfram_library_link::sys::{
     self as wll_sys, WolframLibraryData, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
 };
 use wstp::{

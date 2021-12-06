@@ -9,7 +9,7 @@ pub(crate) fn gen_arg_mode_expr_list(
     wrapper_function_name: Ident,
 ) -> TokenStream {
     let inner = quote::quote! {
-        ::wl_library_link::macro_utils::call_wstp_wolfram_library_function_expr_list(
+        ::wolfram_library_link::macro_utils::call_wstp_wolfram_library_function_expr_list(
             libdata,
             unsafe_link,
             #function_name
@@ -41,9 +41,9 @@ pub(crate) fn gen_arg_mode_pattern(
 
     let inner = quote::quote! {
         use ::wl_expr::{Expr, forms::{FromExpr, FormError}};
-        use ::wl_library_link::WolframEngine;
+        use ::wolfram_library_link::WolframEngine;
 
-        ::wl_library_link::macro_utils::call_wstp_wolfram_library_function(
+        ::wolfram_library_link::macro_utils::call_wstp_wolfram_library_function(
             libdata,
             unsafe_link,
             |engine: &WolframEngine, argument_expr: Expr| -> Expr {
@@ -83,8 +83,8 @@ fn gen_wstp_function(
 
         #[no_mangle]
         pub extern "C" fn #wrapper_function_name(
-            libdata: ::wl_library_link::sys::WolframLibraryData,
-            unsafe_link: ::wl_library_link::wstp::sys::WSLINK,
+            libdata: ::wolfram_library_link::sys::WolframLibraryData,
+            unsafe_link: ::wolfram_library_link::wstp::sys::WSLINK,
         ) -> std::os::raw::c_uint {
             #inner
         }

@@ -34,19 +34,19 @@ fn main() {
     let c_includes = match std::env::var(ENV_VAR) {
         Ok(path) => PathBuf::from(path),
         Err(err) => panic!(
-            "wl-library-link-sys: could not get environment variable: {}: {}",
+            "wolfram-library-link-sys: could not get environment variable: {}: {}",
             ENV_VAR, err
         ),
     };
     if !c_includes.is_dir() {
         panic!(
-            "wl-library-link-sys: header directory does not exist: {}",
+            "wolfram-library-link-sys: header directory does not exist: {}",
             c_includes.display()
         );
     }
     if !c_includes.is_absolute() {
         panic!(
-            "wl-library-link-sys: expected path to headers to be absolute: {}",
+            "wolfram-library-link-sys: expected path to headers to be absolute: {}",
             c_includes.display()
         )
     }

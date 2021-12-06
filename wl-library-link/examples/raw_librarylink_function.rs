@@ -5,7 +5,7 @@ use std::convert::TryFrom;
 use std::mem::MaybeUninit;
 use std::os::raw::c_uint;
 
-use wl_library_link::{
+use wolfram_library_link::{
     sys::{
         mint, MArgument, MNumericArray, MNumericArray_Data_Type, WolframLibraryData,
         LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
@@ -203,7 +203,7 @@ pub unsafe extern "C" fn demo_wxf_safe_byte_array(
     _args: *mut MArgument,
     res: MArgument,
 ) -> c_uint {
-    if let Err(_) = wl_library_link::initialize(lib_data) {
+    if let Err(_) = wolfram_library_link::initialize(lib_data) {
         return LIBRARY_FUNCTION_ERROR;
     }
 

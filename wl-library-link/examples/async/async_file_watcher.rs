@@ -4,7 +4,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use wl_library_link::{self as wll, sys::mint, AsyncTaskObject, DataStore};
+use wolfram_library_link::{self as wll, sys::mint, AsyncTaskObject, DataStore};
 
 wll::export![start_file_watcher(_, _)];
 

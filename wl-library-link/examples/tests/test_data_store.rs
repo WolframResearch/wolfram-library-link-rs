@@ -1,5 +1,7 @@
 use std::os::raw::c_int;
-use wl_library_link::{self as wll, sys::WolframLibraryData, DataStore, NumericArray};
+use wolfram_library_link::{
+    self as wll, sys::WolframLibraryData, DataStore, NumericArray,
+};
 
 
 #[no_mangle]

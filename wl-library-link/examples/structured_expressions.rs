@@ -4,7 +4,7 @@ use wl_expr::{
     forms::{FormError, FromExpr, List},
     Expr, FromExpr, Number,
 };
-use wl_library_link::{wolfram_library_function, WolframEngine};
+use wolfram_library_link::{wolfram_library_function, WolframEngine};
 
 #[derive(FromExpr)]
 #[pattern(numbers:{___})]

@@ -1,4 +1,4 @@
-# wl-library-link
+# wolfram-library-link
 
 This library offers bindings to Rust code from the Wolfram language.
 
@@ -36,12 +36,12 @@ Next, ensure that your project's `Cargo.toml` is correctly configured to be used
 Wolfram LibraryLink library. This means:
 
   * Setting `crate-type = ["cdylib"]`
-  * Adding `wl-expr` and `wl-library-link` as dependencies
+  * Adding `wl-expr` and `wolfram-library-link` as dependencies
 
 By setting `crate-type` to `cdylib` we tell `cargo` to build a dynamic library, which
 will be loadable using Wolfram [LibraryLink][library-link].
 
-The `wl-expr` and `wl-library-link` dependencies provide, respectively, an `Expr` type,
+The `wl-expr` and `wolfram-library-link` dependencies provide, respectively, an `Expr` type,
 which is a simple Rust representation of a Wolfram expression, and an API for interacting
 with the Wolfram language from Rust.
 
@@ -61,7 +61,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 wl-expr = { git = "ssh://github.com/ConnorGray/wl-expr.git" }
-wl-library-link = { git = "ssh://github.com/ConnorGray/wl-library-link.git" }
+wolfram-library-link = { git = "ssh://github.com/ConnorGray/wl-library-link.git" }
 
 # Support libraries
 wl-pattern-match = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-pattern-match.git" }
@@ -78,7 +78,7 @@ Next, import and use the `#[wolfram_library_function]` macro into your Rust code
 // ### lib.rs
 
 use wl_expr::{Expr, Number, FromExpr, forms::{FromExpr, ToExpr, List, from_expr::FormError}};
-use wl_library_link::WolframEngine;
+use wolfram_library_link::{WolframEngine};
 
 #[derive(FromExpr)]
 #[pattern(numbers:{___})]
@@ -86,7 +86,7 @@ struct Numbers {
     numbers: List<Number>,
 }
 
-#[wl_library_link::wolfram_library_function]
+#[wolfram_library_link::wolfram_library_function]
 pub fn sum_of_numbers(engine: &WolframEngine, arguments: Vec<Expr>) -> Expr {
     let Numbers { numbers } = match Numbers::from_expr(&arguments[0]) {
         Ok(numbers) => numbers,
@@ -123,13 +123,13 @@ of building a Paclet from a Rust library.
 
 # Examples
 
-The [./wl-library-link/examples](./wl-library-link/examples) subdirectory contains sample
-programs demonstrating features of the `wl-library-link` API.
+The [./wolfram-library-link/examples](./wolfram-library-link/examples) subdirectory contains sample
+programs demonstrating features of the `wolfram-library-link` API.
 
-* [raw_librarylink_function.rs](wl-library-link/examples/raw_librarylink_function.rs)
+* [raw_librarylink_function.rs](wolfram-library-link/examples/raw_librarylink_function.rs)
   - Demonstrates how to write "raw" LibraryLink functions, using the `extern "C"` ABI
     and the raw `MArgument` type.
-* [raw_wstp_function.rs](wl-library-link/examples/raw_wstp_function.rs)
+* [raw_wstp_function.rs](wolfram-library-link/examples/raw_wstp_function.rs)
   - Demonstrates how to write "raw" LibraryLink WSTP functions, using the `extern "C"` ABI,
     raw `WSLINK` type, and low-level WSTP operations.
 

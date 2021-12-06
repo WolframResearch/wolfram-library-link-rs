@@ -74,7 +74,7 @@ impl AsyncTaskObject {
     /// *LibraryLink C Function:* [`raiseAsyncEvent`][sys::st_WolframIOLibrary_Functions::raiseAsyncEvent].
     ///
     /// ```no_run
-    /// use wl_library_link::{AsyncTaskObject, DataStore};
+    /// use wolfram_library_link::{AsyncTaskObject, DataStore};
     ///
     /// let task_object: AsyncTaskObject = todo!();
     ///

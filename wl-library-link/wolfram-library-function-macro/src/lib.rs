@@ -134,11 +134,11 @@ fn wolfram_library_function_impl(
     // TODO: Provide a mechanism for silencing these notes; when the user has more than a
     //       couple of `#[wolfram_library_function]` invocations, this quickly makes
     //       the build output quite noisy.
-    // NOTE: One planned feature of wl-library-link is to provide safe wrappers around
+    // NOTE: One planned feature of wolfram-library-link is to provide safe wrappers around
     //       many of the other datatypes provided by C LibraryLink (e.g. SparseArray,
     //       Image, NumericArray's, etc.). This `note:` functionality will, I think, prove
     //       quite useful in those situations, because it will enable the user to specify
-    //       the type of their function exactly using the safe wl-library-link wrapper
+    //       the type of their function exactly using the safe wolfram-library-link wrapper
     //       types, and have the appropriate WL code to load the function generated
     //       automatically. The only thing the user will be required to do is copy and
     //       paste the changed WL whenever they make a change to the functions signature.

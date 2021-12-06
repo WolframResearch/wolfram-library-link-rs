@@ -1,6 +1,6 @@
 use std::ffi::CString;
 
-use wl_library_link::{
+use wolfram_library_link::{
     self as wll,
     sys::{mint, mreal},
     NumericArray, UninitNumericArray,

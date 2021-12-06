@@ -6,7 +6,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use wl_library_link::{
+use wolfram_library_link::{
     self as wll, rtl,
     sys::{self, mint, MArgument, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR},
 };

@@ -1,5 +1,5 @@
 use wl_expr::{forms::Sequence, Expr, Number};
-use wl_library_link::{wolfram_library_function, WolframEngine};
+use wolfram_library_link::{wolfram_library_function, WolframEngine};
 
 #[wolfram_library_function]
 #[pattern(arg1_?NumberQ, arg2_String, rest___)]

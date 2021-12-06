@@ -1,7 +1,7 @@
 //! This example demonstrates how LibraryLink native data types can be used in Rust
 //! functions called via LibraryLink.
 
-use wl_library_link::{self as wll, NumericArray, UninitNumericArray};
+use wolfram_library_link::{self as wll, NumericArray, UninitNumericArray};
 
 //======================================
 // Primitive data types

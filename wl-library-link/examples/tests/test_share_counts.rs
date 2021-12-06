@@ -1,4 +1,4 @@
-use wl_library_link::{self as wll, DataStore, NumericArray};
+use wolfram_library_link::{self as wll, DataStore, NumericArray};
 
 wll::export![
     test_na_automatic_count(_);

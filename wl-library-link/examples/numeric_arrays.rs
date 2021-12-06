@@ -1,4 +1,4 @@
-use wl_library_link::{self as wll, NumericArray, NumericArrayKind};
+use wolfram_library_link::{self as wll, NumericArray, NumericArrayKind};
 
 wll::export![sum_int_numeric_array(_)];
 

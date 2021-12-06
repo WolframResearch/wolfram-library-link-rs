@@ -30,7 +30,7 @@ lazy_static::lazy_static! {
 ///
 /// ```
 /// use std::os::raw::c_int;
-/// use wl_library_link::{sys, initialize};
+/// use wolfram_library_link::{sys, initialize};
 ///
 /// #[no_mangle]
 /// extern "C" fn WolframLibrary_initialize(data: sys::WolframLibraryData) -> c_int {
@@ -324,7 +324,7 @@ macro_rules! unwrap_fields {
 }
 
 impl WolframLibraryData {
-    /// Construct a new `WolframLibraryData` from a [`wl_library_link_sys::WolframLibraryData`].
+    /// Construct a new `WolframLibraryData` from a [`wolfram_library_link_sys::WolframLibraryData`].
     pub fn new(data_ptr: sys::WolframLibraryData) -> Result<Self, ()> {
         if data_ptr.is_null() {
             return Err(());

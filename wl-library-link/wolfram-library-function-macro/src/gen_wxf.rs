@@ -9,7 +9,7 @@ pub(crate) fn gen_arg_mode_expr_list<'a>(
     wrapper_function_name: Ident,
 ) -> TokenStream {
     let inner = quote::quote! {
-        ::wl_library_link::macro_utils::call_wxf_wolfram_library_function_expr_list(
+        ::wolfram_library_link::macro_utils::call_wxf_wolfram_library_function_expr_list(
             libdata,
             wxf_argument,
             wxf_result,
@@ -42,9 +42,9 @@ pub(crate) fn gen_arg_mode_pattern<'a>(
 
     let inner = quote::quote! {
         use ::wl_expr::{Expr, forms::{FromExpr, FormError}};
-        use ::wl_library_link::WolframEngine;
+        use ::wolfram_library_link::WolframEngine;
 
-        ::wl_library_link::macro_utils::call_wxf_wolfram_library_function(
+        ::wolfram_library_link::macro_utils::call_wxf_wolfram_library_function(
             libdata,
             wxf_argument,
             wxf_result,
@@ -85,13 +85,13 @@ fn gen_wxf_function(
 
         #[no_mangle]
         pub extern "C" fn #wrapper_function_name(
-            libdata: ::wl_library_link::sys::WolframLibraryData,
-            argc: ::wl_library_link::sys::mint,
-            args: *mut ::wl_library_link::sys::MArgument,
-            wxf_result: ::wl_library_link::sys::MArgument,
+            libdata: ::wolfram_library_link::sys::WolframLibraryData,
+            argc: ::wolfram_library_link::sys::mint,
+            args: *mut ::wolfram_library_link::sys::MArgument,
+            wxf_result: ::wolfram_library_link::sys::MArgument,
         ) -> std::os::raw::c_uint {
             if argc != 1 {
-                return ::wl_library_link::sys::LIBRARY_FUNCTION_ERROR;
+                return ::wolfram_library_link::sys::LIBRARY_FUNCTION_ERROR;
             }
 
             // Take the first argument, at offset 0 in `args`.

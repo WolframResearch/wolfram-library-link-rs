@@ -26,7 +26,7 @@ use crate::sys::MNumericArray_Data_Type::{
     MNumericArray_Type_Complex_Real64 as COMPLEX_REAL64_TYPE,
 };
 
-/// This type is an ABI-compatible wrapper around [`wl_library_link_sys::MNumericArray`].
+/// This type is an ABI-compatible wrapper around [`wolfram_library_link_sys::MNumericArray`].
 ///
 /// A [`NumericArray`] can contain any type `T` which satisfies the trait
 /// [`NumericArrayType`].
@@ -210,7 +210,7 @@ impl NumericArray {
     /// Implement a function which returns the sum of an integral `NumericArray`
     ///
     /// ```no_run
-    /// use wl_library_link::{NumericArray, NumericArrayKind};
+    /// use wolfram_library_link::{NumericArray, NumericArrayKind};
     ///
     /// fn sum(array: NumericArray) -> i64 {
     ///     match array.kind() {
@@ -280,7 +280,7 @@ impl NumericArray {
     /// integers.
     ///
     /// ```no_run
-    /// use wl_library_link::NumericArray;
+    /// use wolfram_library_link::NumericArray;
     ///
     /// fn bytes(array: &NumericArray) -> &[u8] {
     ///     let byte_array: &NumericArray<u8> = match array.try_kind::<u8>() {
@@ -348,7 +348,7 @@ impl<T: NumericArrayType> NumericArray<T> {
     /// # Example
     ///
     /// ```no_run
-    /// # use wl_library_link::NumericArray;
+    /// # use wolfram_library_link::NumericArray;
     /// let array = NumericArray::from_slice(&[1, 2, 3, 4, 5]);
     /// ```
     ///
@@ -382,7 +382,7 @@ impl<T: NumericArrayType> NumericArray<T> {
     /// a flat buffer.
     ///
     /// ```no_run
-    /// # use wl_library_link::NumericArray;
+    /// # use wolfram_library_link::NumericArray;
     /// let array = NumericArray::from_array(&[2, 2], &[1, 2, 3, 4]);
     /// ```
     pub fn from_array(dimensions: &[usize], data: &[T]) -> NumericArray<T> {
@@ -463,7 +463,7 @@ impl<T> NumericArray<T> {
     /// # Example
     ///
     /// ```no_run
-    /// # use wl_library_link::NumericArray;
+    /// # use wolfram_library_link::NumericArray;
     /// let array: NumericArray<i64> = NumericArray::from_slice(&[1, 2, 3]);
     ///
     /// let array: NumericArray = array.into_generic();
@@ -562,7 +562,7 @@ impl<T> NumericArray<T> {
     /// # Example
     ///
     /// ```no_run
-    /// # use wl_library_link::NumericArray;
+    /// # use wolfram_library_link::NumericArray;
     /// let array = NumericArray::from_array(&[2, 2], &[1, 2, 3, 4]);
     ///
     /// assert_eq!(array.dimensions(), &[2, 2]);
@@ -699,7 +699,7 @@ impl<T: NumericArrayType> UninitNumericArray<T> {
     /// Construct the numeric array `{1, 2, 3, 4, 5}`.
     ///
     /// ```no_run
-    /// use wl_library_link::{NumericArray, UninitNumericArray};
+    /// use wolfram_library_link::{NumericArray, UninitNumericArray};
     ///
     /// // Construct a `1x5` numeric array with elements of type `f64`.
     /// let mut uninit = UninitNumericArray::<f64>::from_dimensions(&[5]);
