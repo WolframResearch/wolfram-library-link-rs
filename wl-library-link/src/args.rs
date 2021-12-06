@@ -12,7 +12,7 @@ use ref_cast::RefCast;
 use crate::{
     rtl,
     sys::{self, mint, mreal, MArgument},
-    NumericArray,
+    DataStore, NumericArray,
 };
 
 /// Trait implemented for types that may be passed via an [`MArgument`].
@@ -331,6 +331,12 @@ impl IntoArg for String {
 impl<T> IntoArg for NumericArray<T> {
     unsafe fn into_arg(self, arg: MArgument) {
         *arg.numeric = self.into_raw();
+    }
+}
+
+impl IntoArg for DataStore {
+    unsafe fn into_arg(self, arg: MArgument) {
+        *arg.tensor = self.into_raw() as *mut _;
     }
 }
 
