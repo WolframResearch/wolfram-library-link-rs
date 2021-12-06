@@ -29,9 +29,9 @@ wl-parse         = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-parse.g
 default = []
 nightly = ["wolfram-library-function-macro/nightly"]
 
-############
-# Examples #
-############
+#=======================================
+# Examples
+#=======================================
 
 [[example]]
 name = "native_data_types"
@@ -46,19 +46,26 @@ name = "raw_librarylink_function"
 crate-type = ["cdylib"]
 
 [[example]]
+name = "numeric_arrays"
+crate-type = ["cdylib"]
+
+#------------
+# Expressions
+#------------
+
+[[example]]
 name = "basic_expressions"
+path = "examples/exprs/basic_expressions.rs"
 crate-type = ["cdylib"]
 
 [[example]]
 name = "structured_expressions"
+path = "examples/exprs/structured_expressions.rs"
 crate-type = ["cdylib"]
 
 [[example]]
 name = "downvalue"
-crate-type = ["cdylib"]
-
-[[example]]
-name = "numeric_arrays"
+path = "examples/exprs/downvalue.rs"
 crate-type = ["cdylib"]
 
 #---------------
