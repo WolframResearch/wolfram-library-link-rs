@@ -25,13 +25,6 @@ pub struct AsyncTaskObject(sys::mint);
 // TODO: Determine if it would be safe for this type to implement Copy/Clone.
 assert_not_impl_any!(AsyncTaskObject: Copy, Clone);
 
-/// See [`spawn_async_task_with_thread()`].
-///
-/// This trait is a workaround used to implement named type aliases with trait bounds.
-pub trait AsyncTask: FnMut(AsyncTaskObject) + Send + 'static + panic::UnwindSafe {}
-
-/// Blanket impl of [`AsyncTask`] for suitable closures.
-impl<T: FnMut(AsyncTaskObject) + Send + 'static + panic::UnwindSafe> AsyncTask for T {}
 
 //======================================
 // Impls
@@ -94,7 +87,12 @@ impl AsyncTaskObject {
 }
 
 /// Spawn a new Wolfram Language asynchronous task.
-pub fn spawn_async_task_with_thread<F: AsyncTask>(task: F) -> AsyncTaskObject {
+pub fn spawn_async_task_with_thread<F>(task: F) -> AsyncTaskObject
+where
+    // Note: Ensure that the bound on async_task_thread_trampoline() is kept up-to-date
+    //       with this bound.
+    F: FnMut(AsyncTaskObject) + Send + 'static + panic::UnwindSafe,
+{
     // FIXME: This box is being leaked. Where is an appropriate place to drop it?
     let boxed_closure = Box::into_raw(Box::new(task));
 
@@ -109,10 +107,12 @@ pub fn spawn_async_task_with_thread<F: AsyncTask>(task: F) -> AsyncTaskObject {
     AsyncTaskObject(task_id)
 }
 
-unsafe extern "C" fn async_task_thread_trampoline<F: AsyncTask>(
+unsafe extern "C" fn async_task_thread_trampoline<F>(
     async_object_id: sys::mint,
     boxed_closure: *mut c_void,
-) {
+) where
+    F: FnMut(AsyncTaskObject) + Send + 'static + panic::UnwindSafe,
+{
     let boxed_closure: &mut F = &mut *(boxed_closure as *mut F);
 
     // static_assertions::assert_impl_all!(F: panic::UnwindSafe);
