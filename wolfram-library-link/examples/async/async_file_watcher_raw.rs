@@ -66,7 +66,7 @@ pub extern "C" fn start_file_watcher(
     LIBRARY_NO_ERROR
 }
 
-/// This function is called first from the spawned background thread.
+/// This function is called from the spawned background thread.
 extern "C" fn file_watch_thread_function(async_object_id: mint, task_arg: *mut c_void) {
     let task_arg = task_arg as *mut FileWatcherArgs;
     let task_arg: &FileWatcherArgs = unsafe { &*task_arg };

@@ -79,7 +79,7 @@ pub use wstp;
 
 pub use self::{
     args::{FromArg, IntoArg, NativeFunction},
-    async_tasks::{spawn_async_task_with_thread, AsyncTaskObject},
+    async_tasks::AsyncTaskObject,
     data_store::DataStore,
     library_data::{get_library_data, initialize, WolframLibraryData},
     numeric_array::{

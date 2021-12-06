@@ -19,16 +19,16 @@ fn start_file_watcher(pause_interval_ms: mint, path: String) -> mint {
 
     // Spawn a new thread, which will run in the background and check for file
     // modifications.
-    let task = wll::spawn_async_task_with_thread(move |task: AsyncTaskObject| {
+    let task = AsyncTaskObject::spawn_with_thread(move |task: AsyncTaskObject| {
         file_watch_thread_function(task, pause_interval_ms, &path);
     });
 
     task.id()
 }
 
-/// This function is called first from the spawned background thread.
+/// This function is called from the spawned background thread.
 fn file_watch_thread_function(
-    task: wll::AsyncTaskObject,
+    task: AsyncTaskObject,
     pause_interval_ms: u64,
     path: &PathBuf,
 ) {
