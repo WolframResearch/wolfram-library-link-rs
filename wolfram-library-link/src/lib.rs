@@ -177,7 +177,6 @@ pub struct WolframEngine {
     //       one the LibraryLink wrapper was originally invoked from?
     AbortQ: unsafe extern "C" fn() -> mint,
     getWSLINK: unsafe extern "C" fn(sys::WolframLibraryData) -> WSLINK,
-    processWSLINK: unsafe extern "C" fn(WSLINK) -> i32,
 }
 
 impl WolframEngine {
@@ -195,7 +194,6 @@ impl WolframEngine {
 
             AbortQ: lib.AbortQ.expect("AbortQ callback is NULL"),
             getWSLINK: lib.getWSLINK.expect("getWSLINK callback is NULL"),
-            processWSLINK: lib.processWSLINK.expect("processWSLINK callback is NULL"),
         }
     }
 
@@ -242,7 +240,7 @@ impl WolframEngine {
             .put_expr(&Expr! { EvaluatePacket['expr] })
             .map_err(|e| e.to_string())?;
 
-        let _: () = self.process_wstp_link(&link)?;
+        let _: () = process_wstp_link(&link)?;
 
         let return_packet: Expr = link.get_expr().map_err(|e| e.to_string())?;
 
@@ -268,23 +266,23 @@ impl WolframEngine {
             Link::unchecked_new(unsafe_link as *mut _)
         }
     }
+}
 
-    fn process_wstp_link(&self, link: &Link) -> Result<(), String> {
-        let raw_link = unsafe { link.raw_link() };
+fn process_wstp_link(link: &Link) -> Result<(), String> {
+    let raw_link = unsafe { link.raw_link() };
 
-        // Process the packet on the link.
-        let code: i32 = unsafe { (self.processWSLINK)(raw_link as *mut _) };
+    // Process the packet on the link.
+    let code: i32 = unsafe { rtl::processWSLINK(raw_link as *mut _) };
 
-        if code == 0 {
-            let error_message = link
-                .error_message()
-                .unwrap_or_else(|| "unknown error occurred on WSTP Link".into());
+    if code == 0 {
+        let error_message = link
+            .error_message()
+            .unwrap_or_else(|| "unknown error occurred on WSTP Link".into());
 
-            return Err(error_message);
-        }
-
-        Ok(())
+        return Err(error_message);
     }
+
+    Ok(())
 }
 
 /// Export the specified functions as native LibraryLink functions.
