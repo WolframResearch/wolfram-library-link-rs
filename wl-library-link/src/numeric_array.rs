@@ -405,6 +405,41 @@ impl<T: NumericArrayType> NumericArray<T> {
 
         Ok(uninit.init_from_slice(data))
     }
+
+    /// Access the elements stored in this [`NumericArray`] as a flat buffer.
+    pub fn as_slice(&self) -> &[T] {
+        let ptr: *mut c_void = self.data_ptr();
+
+        debug_assert!(!ptr.is_null());
+
+        // Assert that `ptr` is aligned to `T`.
+        debug_assert!(ptr as usize % std::mem::size_of::<T>() == 0);
+
+        let ptr = ptr as *const T;
+
+        unsafe { std::slice::from_raw_parts(ptr, self.flattened_length()) }
+    }
+
+    /// Access the elements stored in this [`NumericArray`] as a mutable flat buffer.
+    ///
+    /// # Safety
+    ///
+    /// `NumericArray` is an immutable shared data structure. There is no robust, easy way
+    /// to determine whether mutation of a `NumericArray` is safe. Prefer to use
+    /// [`UninitNumericArray`] to create and initialize a numeric array value instead of
+    /// mutating an existing `NumericArray`.
+    pub unsafe fn as_slice_mut(&mut self) -> &mut [T] {
+        let ptr: *mut c_void = self.data_ptr();
+
+        debug_assert!(!ptr.is_null());
+
+        // Assert that `ptr` is aligned to `T`.
+        debug_assert!(ptr as usize % std::mem::size_of::<T>() == 0);
+
+        let ptr = ptr as *mut T;
+
+        std::slice::from_raw_parts_mut(ptr, self.flattened_length())
+    }
 }
 
 impl<T> NumericArray<T> {
@@ -461,41 +496,6 @@ impl<T> NumericArray<T> {
         let NumericArray(numeric_array, _) = *self;
 
         unsafe { data_ptr(numeric_array) }
-    }
-
-    /// Access the elements stored in this [`NumericArray`] as a flat buffer.
-    pub fn as_slice(&self) -> &[T] {
-        let ptr: *mut c_void = self.data_ptr();
-
-        debug_assert!(!ptr.is_null());
-
-        // Assert that `ptr` is aligned to `T`.
-        debug_assert!(ptr as usize % std::mem::size_of::<T>() == 0);
-
-        let ptr = ptr as *const T;
-
-        unsafe { std::slice::from_raw_parts(ptr, self.flattened_length()) }
-    }
-
-    /// Access the elements stored in this [`NumericArray`] as a mutable flat buffer.
-    ///
-    /// # Safety
-    ///
-    /// `NumericArray` is an immutable shared data structure. There is no robust, easy way
-    /// to determine whether mutation of a `NumericArray` is safe. Prefer to use
-    /// [`UninitNumericArray`] to create and initialize a numeric array value instead of
-    /// mutating an existing `NumericArray`.
-    pub unsafe fn as_slice_mut(&mut self) -> &mut [T] {
-        let ptr: *mut c_void = self.data_ptr();
-
-        debug_assert!(!ptr.is_null());
-
-        // Assert that `ptr` is aligned to `T`.
-        debug_assert!(ptr as usize % std::mem::size_of::<T>() == 0);
-
-        let ptr = ptr as *mut T;
-
-        std::slice::from_raw_parts_mut(ptr, self.flattened_length())
     }
 
     #[allow(missing_docs)]
