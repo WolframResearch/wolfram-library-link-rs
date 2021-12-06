@@ -22,6 +22,7 @@ wll::export![
     test_named_numeric_array_data_store();
     test_nested_data_store();
     test_iterated_nested_data_store();
+    test_data_store_arg(_);
 ];
 
 fn test_empty_data_store() -> DataStore {
@@ -106,4 +107,12 @@ fn test_iterated_nested_data_store() -> DataStore {
     }
 
     store
+}
+
+//======================================
+// DataStore arguments
+//======================================
+
+fn test_data_store_arg(ds: DataStore) -> i64 {
+    ds.len() as i64
 }

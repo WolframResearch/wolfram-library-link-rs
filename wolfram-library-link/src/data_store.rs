@@ -50,6 +50,11 @@ impl DataStore {
         usize::try_from(len).expect("DataStore i64 length overflows usize")
     }
 
+    /// Construct a `DataStore` from a raw [`wolfram_library_link_sys::DataStore`] pointer.
+    pub unsafe fn from_raw(raw: sys::DataStore) -> Self {
+        DataStore(raw)
+    }
+
     /// Convert this `DataStore` into a raw [`wolfram_library_link_sys::DataStore`] pointer.
     pub fn into_raw(self) -> sys::DataStore {
         let DataStore(ds) = self;

@@ -206,6 +206,12 @@ impl<'a> FromArg<'a> for NumericArray<()> {
     }
 }
 
+impl FromArg<'_> for DataStore {
+    unsafe fn from_arg(arg: &MArgument) -> DataStore {
+        DataStore::from_raw(*arg.tensor as sys::DataStore)
+    }
+}
+
 //======================================
 // impl IntoArg
 //======================================

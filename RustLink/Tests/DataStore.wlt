@@ -138,3 +138,20 @@ Test[
 		]
 	]
 ]
+
+(*====================================*)
+(* DataStore arguments                *)
+(*====================================*)
+
+Test[
+	LibraryFunctionLoad[
+		"liblibrary_tests",
+		"test_data_store_arg",
+		{"DataStore"},
+		Integer
+	][
+		Developer`DataStore["a", "b", "c"]
+	]
+	,
+	3
+]
