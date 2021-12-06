@@ -26,6 +26,8 @@ use crate::sys::MNumericArray_Data_Type::{
     MNumericArray_Type_Complex_Real64 as COMPLEX_REAL64_TYPE,
 };
 
+/// Native Wolfram [`NumericArray`][ref/NumericArray].
+///
 /// This type is an ABI-compatible wrapper around [`wolfram_library_link_sys::MNumericArray`].
 ///
 /// A [`NumericArray`] can contain any type `T` which satisfies the trait
@@ -36,6 +38,8 @@ use crate::sys::MNumericArray_Data_Type::{
 ///
 /// Use [`UninitNumericArray`] to construct a [`NumericArray`] without requiring an
 /// intermediate allocation to copy the elements from.
+///
+/// [ref/NumericArray]: https://reference.wolfram.com/language/ref/NumericArray.html
 #[repr(transparent)]
 #[derive(ref_cast::RefCast)]
 pub struct NumericArray<T = ()>(sys::MNumericArray, PhantomData<T>);
