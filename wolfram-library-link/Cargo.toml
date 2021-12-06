@@ -7,7 +7,7 @@ publish = false
 
 [dependencies]
 wolfram-library-function-macro = { path = "./wolfram-library-function-macro" }
-wolfram-library-link-sys       = { path = "../wl-library-link-sys" }
+wolfram-library-link-sys       = { path = "../wolfram-library-link-sys" }
 
 wstp                = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wstp.git" }
 wl-expr             = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr.git" }

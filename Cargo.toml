@@ -1,6 +1,6 @@
 [workspace]
 
 members = [
-    "wl-library-link",
-    "wl-library-link-sys"
+    "wolfram-library-link",
+    "wolfram-library-link-sys"
 ]
