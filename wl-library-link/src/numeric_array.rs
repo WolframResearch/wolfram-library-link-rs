@@ -422,6 +422,10 @@ impl<T> NumericArray<T> {
     /// ```
     pub fn into_generic(self) -> NumericArray {
         let NumericArray(na, PhantomData) = self;
+
+        // Don't run Drop on `self`; ownership of this value is being given to the caller.
+        std::mem::forget(self);
+
         NumericArray(na, PhantomData)
     }
 
@@ -568,6 +572,19 @@ impl<T> NumericArray<T> {
 
         unsafe { std::slice::from_raw_parts(dims, rank) }
     }
+
+    /// Returns the share count of this `NumericArray`.
+    ///
+    /// If this `NumericArray` is not shared, the share count is 0.
+    ///
+    /// *LibraryLink C API Documentation:* [`MNumericArray_shareCount`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MNumericArray_shareCount.html)
+    pub fn share_count(&self) -> usize {
+        let NumericArray(raw, PhantomData) = *self;
+
+        let count: sys::mint = unsafe { rtl::MNumericArray_shareCount(raw) };
+
+        usize::try_from(count).expect("NumericArray share count mint overflows usize")
+    }
 }
 
 unsafe fn data_ptr(numeric_array: sys::MNumericArray) -> *mut c_void {
@@ -702,6 +719,9 @@ impl<T: NumericArrayType> UninitNumericArray<T> {
     pub unsafe fn assume_init(self) -> NumericArray<T> {
         let UninitNumericArray(expr, PhantomData) = self;
 
+        // Don't run Drop on `self`; ownership of this value is being given to the caller.
+        std::mem::forget(self);
+
         NumericArray(expr, PhantomData)
     }
 }
@@ -726,8 +746,24 @@ fn copy_from_slice_uninit<T>(src: &[T], dest: &mut [MaybeUninit<T>]) {
 }
 
 //======================================
-// Formatting Impls
+// Trait Impls
 //======================================
+
+impl<T> Drop for NumericArray<T> {
+    fn drop(&mut self) {
+        if self.share_count() > 0 {
+            // This is a "Shared" numeric array, so we should decrement the reference
+            // count.
+            let NumericArray(raw, PhantomData) = *self;
+            unsafe { rtl::MNumericArray_disown(raw) }
+        } else {
+            // This is a "Manual" numeric array (or one created within Rust), so we should
+            // free its memory directly.
+            let NumericArray(raw, PhantomData) = *self;
+            unsafe { rtl::MNumericArray_free(raw) }
+        }
+    }
+}
 
 impl<T> fmt::Debug for NumericArray<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
