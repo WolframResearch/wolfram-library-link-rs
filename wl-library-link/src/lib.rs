@@ -296,6 +296,8 @@ impl WolframEngine {
 ///
 /// * Call [`initialize()`] to initialize this library.
 /// * Catch any panics that occur.
+///   - If a panic does occur, the function will return
+///     [`LIBRARY_FUNCTION_ERROR`][crate::sys::LIBRARY_FUNCTION_ERROR].
 ///
 // * Extract the function arguments from the raw [`MArgument`] array.
 // * Store the function return value in the raw [`MArgument`] return value field.
@@ -389,6 +391,54 @@ impl WolframEngine {
 // ]
 // ```
 ///
+/// # Parameter types
+///
+/// The following table describes the relationship between Rust types that implement
+/// [`FromArg`] and the compatible Wolfram LibraryLink function parameter type(s).
+///
+/// <h4 style="border-bottom: none; margin-bottom: 4px"> ⚠️ Warning! ⚠️ </h4>
+///
+/// Calling a LibraryLink function from the Wolfram Language that was loaded using the
+/// wrong parameter type may lead to undefined behavior! Ensure that the function
+/// parameter type declared in your Wolfram Language code matches the Rust function
+/// parameter type.
+///
+/// Rust parameter type                | Wolfram library function parameter type
+/// -----------------------------------|---------------------------------------
+/// [`bool`]                           | `"Boolean"`
+/// [`mint`]                           | `Integer`
+/// [`mreal`][crate::sys::mreal]       | `Real`
+/// [`mcomplex`][crate::sys::mcomplex] | `Complex`
+/// [`String`]                         | `String`
+/// [`CString`][std::ffi::CString]     | `String`
+/// [`&NumericArray<T>`][NumericArray] | a. `LibraryDataType[NumericArray, `[`"..."`][ref/NumericArray]`]`[^1] <br/> b. `{LibraryDataType[NumericArray, "..."], "Constant"}`[^1]
+/// [`NumericArray<T>`]                | a. `{LibraryDataType[NumericArray, "..."], "Manual"}`[^1] <br/> b. `{LibraryDataType[NumericArray, "..."], "Shared"}`[^1]
+/// [`DataStore`]                      | `"DataStore"`
+///
+/// # Return types
+///
+/// The following table describes the relationship between Rust types that implement
+/// [`IntoArg`] and the compatible Wolfram LibraryLink function return type.
+///
+/// Rust return type                   | Wolfram library function return type
+/// -----------------------------------|---------------------------------------
+/// [`bool`]                           | `"Boolean"`
+/// [`mint`]                           | `Integer`
+/// [`mreal`][crate::sys::mreal]       | `Real`
+/// [`i8`], [`i16`], [`i32`]           | `Integer`
+/// [`u8`], [`u16`], [`u32`]           | `Integer`
+/// [`f32`]                            | `Real`
+/// [`mcomplex`][crate::sys::mcomplex] | `Complex`
+/// [`String`]                         | `String`
+/// [`NumericArray<T>`]                | `LibraryDataType[NumericArray, `[`"..."`][ref/NumericArray][^1]`]`
+/// [`DataStore`]                      | `"DataStore"`
+///
+/// [^1]: The Details and Options section of the Wolfram Language
+///       [`NumericArray` reference page][ref/NumericArray] lists the available element
+///       types.
+///
+/// [ref/NumericArray]: https://reference.wolfram.com/language/ref/NumericArray.html
+
 // # Design constraints
 //
 // The current design of this macro is intended to accommodate the following constraints:

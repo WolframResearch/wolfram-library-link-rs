@@ -23,7 +23,7 @@ pub trait FromArg<'a> {
 
 /// Trait implemented for that that may be returned via an [`MArgument`].
 ///
-/// The [`MArgument`] which this trait is used to modify must be the return value of a
+/// The [`MArgument`] that this trait is used to modify must be the return value of a
 /// LibraryLink function. It is not valid to modify [`MArgument`]s that contain
 /// LibraryLink function arguments.
 pub trait IntoArg {
@@ -31,7 +31,7 @@ pub trait IntoArg {
     ///
     /// # Safety
     ///
-    /// `arg` must be an uninitialized [`MArgument`] which is used to store the return
+    /// `arg` must be an uninitialized [`MArgument`] that is used to store the return
     /// value of a LibraryLink function. The return type of that function must match
     /// the type of `self.`
     ///
@@ -45,15 +45,15 @@ pub trait IntoArg {
     unsafe fn into_arg(self, arg: MArgument);
 }
 
-/// Trait implemented for any function whose arguments and return type are native
+/// Trait implemented for any function whose parameters and return type are native
 /// LibraryLink [`MArgument`] types.
 ///
 /// [`export!`][crate::export] may only be used with functions that implement this trait.
 ///
-/// A function implements this trait if all of its arguments implement [`FromArg`] and its
-/// return type implements [`IntoArg`].
+/// A function implements this trait if all of its parameters implement [`FromArg`] and
+/// its return type implements [`IntoArg`].
 ///
-/// Functions which pass their arguments and return value using a [`wstp::Link`] do not
+/// Functions that pass their arguments and return value using a [`wstp::Link`] do not
 /// implement this trait.
 pub trait NativeFunction<'a> {
     /// Call the function using the raw LibraryLink [`MArgument`] fields.
