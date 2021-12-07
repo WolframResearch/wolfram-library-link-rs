@@ -26,6 +26,8 @@ use crate::sys::MNumericArray_Data_Type::{
     MNumericArray_Type_Complex_Real64 as COMPLEX_REAL64_TYPE,
 };
 
+use crate::sys::MNumericArray_Convert_Method::*;
+
 /// Native Wolfram [`NumericArray`][ref/NumericArray].
 ///
 /// This type is an ABI-compatible wrapper around [`wolfram_library_link_sys::MNumericArray`].
@@ -164,6 +166,23 @@ pub enum NumericArrayDataType {
 
     ComplexReal32 = COMPLEX_REAL32_TYPE as u32,
     ComplexReal64 = COMPLEX_REAL64_TYPE as u32,
+}
+
+/// Conversion method used by [`NumericArray::convert_to()`].
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[repr(u32)]
+#[allow(missing_docs)]
+pub enum NumericArrayConvertMethod {
+    Cast = MNumericArray_Convert_Cast,
+    Check = MNumericArray_Convert_Check,
+    Coerce = MNumericArray_Convert_Coerce,
+    Round = MNumericArray_Convert_Round,
+    Scale = MNumericArray_Convert_Scale,
+    ClipAndCast = MNumericArray_Convert_Clip_Cast,
+    ClipAndCheck = MNumericArray_Convert_Clip_Check,
+    ClipAndCoerce = MNumericArray_Convert_Clip_Coerce,
+    ClipAndRound = MNumericArray_Convert_Clip_Round,
+    ClipAndScale = MNumericArray_Convert_Clip_Scale,
 }
 
 /// Data array borrowed from a [`NumericArray`].
@@ -615,6 +634,35 @@ impl<T> NumericArray<T> {
 
         this == other
     }
+
+    /// *LibraryLink C API Documentation:* [`MNumericArray_convertType`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MNumericArray_convertType.html)
+    // TODO: When can this return an error? ClipAndCheck and the tolerance is not sufficient?
+    // TODO: Return a better error than `errcode_t`.
+    pub fn convert_to<T2: NumericArrayType>(
+        &self,
+        method: NumericArrayConvertMethod,
+        tolerance: sys::mreal,
+    ) -> Result<NumericArray<T2>, sys::errcode_t> {
+        let NumericArray(self_raw, PhantomData) = *self;
+
+        let mut new_raw: sys::MNumericArray = std::ptr::null_mut();
+
+        let err_code: sys::errcode_t = unsafe {
+            rtl::MNumericArray_convertType(
+                &mut new_raw,
+                self_raw,
+                T2::TYPE.as_raw(),
+                method.as_raw(),
+                tolerance,
+            )
+        };
+
+        if err_code != 0 || new_raw.is_null() {
+            return Err(err_code);
+        }
+
+        Ok(unsafe { NumericArray::<T2>::from_raw(new_raw) })
+    }
 }
 
 unsafe fn data_ptr(numeric_array: sys::MNumericArray) -> *mut c_void {
@@ -657,7 +705,6 @@ impl<T: NumericArrayType> UninitNumericArray<T> {
     ) -> Result<UninitNumericArray<T>, ()> {
         assert!(!dimensions.is_empty());
 
-        let kind: NumericArrayDataType = <T as NumericArrayType>::TYPE;
         let rank = dimensions.len();
         debug_assert!(rank > 0);
 
@@ -665,7 +712,7 @@ impl<T: NumericArrayType> UninitNumericArray<T> {
             let mut numeric_array: sys::MNumericArray = std::ptr::null_mut();
 
             let err_code: sys::errcode_t = rtl::MNumericArray_new(
-                kind as u32,
+                <T as NumericArrayType>::TYPE.as_raw(),
                 i64::try_from(rank).expect("usize overflows i64"),
                 dimensions.as_ptr() as *mut sys::mint,
                 &mut numeric_array,
@@ -772,6 +819,20 @@ fn copy_from_slice_uninit<T>(src: &[T], dest: &mut [MaybeUninit<T>]) {
             dest.as_mut_ptr() as *mut T,
             dest.len(),
         )
+    }
+}
+
+impl NumericArrayDataType {
+    #[allow(missing_docs)]
+    pub fn as_raw(self) -> sys::numericarray_data_t {
+        self as u32
+    }
+}
+
+impl NumericArrayConvertMethod {
+    #[allow(missing_docs)]
+    pub fn as_raw(self) -> sys::numericarray_convert_method_t {
+        self as u32
     }
 }
 

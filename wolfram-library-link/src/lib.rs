@@ -87,8 +87,8 @@ pub use self::{
     data_store::DataStore,
     library_data::{get_library_data, initialize, WolframLibraryData},
     numeric_array::{
-        NumericArray, NumericArrayDataType, NumericArrayKind, NumericArrayType,
-        UninitNumericArray,
+        NumericArray, NumericArrayConvertMethod, NumericArrayDataType, NumericArrayKind,
+        NumericArrayType, UninitNumericArray,
     },
 };
 

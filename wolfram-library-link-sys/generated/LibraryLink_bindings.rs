@@ -1876,28 +1876,20 @@ pub mod MNumericArray_Data_Type {
     pub const MNumericArray_Type_Complex_Real16: Type = 14;
 }
 pub use self::MNumericArray_Data_Type::Type as numericarray_data_t;
-pub const MNumericArray_Convert_Method_MNumericArray_Convert_Check:
-    MNumericArray_Convert_Method = 1;
-pub const MNumericArray_Convert_Method_MNumericArray_Convert_Clip_Check:
-    MNumericArray_Convert_Method = 2;
-pub const MNumericArray_Convert_Method_MNumericArray_Convert_Coerce:
-    MNumericArray_Convert_Method = 3;
-pub const MNumericArray_Convert_Method_MNumericArray_Convert_Clip_Coerce:
-    MNumericArray_Convert_Method = 4;
-pub const MNumericArray_Convert_Method_MNumericArray_Convert_Round:
-    MNumericArray_Convert_Method = 5;
-pub const MNumericArray_Convert_Method_MNumericArray_Convert_Clip_Round:
-    MNumericArray_Convert_Method = 6;
-pub const MNumericArray_Convert_Method_MNumericArray_Convert_Scale:
-    MNumericArray_Convert_Method = 7;
-pub const MNumericArray_Convert_Method_MNumericArray_Convert_Clip_Scale:
-    MNumericArray_Convert_Method = 8;
-pub const MNumericArray_Convert_Method_MNumericArray_Convert_Cast:
-    MNumericArray_Convert_Method = 9;
-pub const MNumericArray_Convert_Method_MNumericArray_Convert_Clip_Cast:
-    MNumericArray_Convert_Method = 10;
-pub type MNumericArray_Convert_Method = u32;
-pub use self::MNumericArray_Convert_Method as numericarray_convert_method_t;
+pub mod MNumericArray_Convert_Method {
+    pub type Type = u32;
+    pub const MNumericArray_Convert_Check: Type = 1;
+    pub const MNumericArray_Convert_Clip_Check: Type = 2;
+    pub const MNumericArray_Convert_Coerce: Type = 3;
+    pub const MNumericArray_Convert_Clip_Coerce: Type = 4;
+    pub const MNumericArray_Convert_Round: Type = 5;
+    pub const MNumericArray_Convert_Clip_Round: Type = 6;
+    pub const MNumericArray_Convert_Scale: Type = 7;
+    pub const MNumericArray_Convert_Clip_Scale: Type = 8;
+    pub const MNumericArray_Convert_Cast: Type = 9;
+    pub const MNumericArray_Convert_Clip_Cast: Type = 10;
+}
+pub use self::MNumericArray_Convert_Method::Type as numericarray_convert_method_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct st_WolframNumericArrayLibrary_Functions {
