@@ -27,6 +27,9 @@ macro_rules! rtl_func {
     };
 
     ($group:ident => [$($vis:vis $path:ident : $type:ty,)*]) => {
+        // NOTE: That these fields are even an Option is likely just bindgen being
+        //       conservative with function pointers possibly being null.
+        // TODO: Investigate making bindgen treat these as non-null fields?
         $(
             #[allow(missing_docs, non_upper_case_globals)]
             $vis static $path: Lazy<$type> = Lazy::new(

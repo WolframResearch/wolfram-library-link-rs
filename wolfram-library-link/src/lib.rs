@@ -68,9 +68,13 @@ mod numeric_array;
 pub mod rtl;
 
 
+use std::sync::Mutex;
+
+use once_cell::sync::Lazy;
+
 use wl_expr::{Expr, ExprKind};
 use wl_symbol_table as sym;
-use wolfram_library_link_sys::{mint, WSLINK};
+use wolfram_library_link_sys::mint;
 use wstp::Link;
 
 
@@ -171,12 +175,9 @@ const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 /// Callbacks to the Wolfram Engine.
 #[allow(non_snake_case)]
 pub struct WolframEngine {
-    wl_lib: sys::WolframLibraryData,
-
     // TODO: Is this function thread safe? Can it be called from a thread other than the
     //       one the LibraryLink wrapper was originally invoked from?
     AbortQ: unsafe extern "C" fn() -> mint,
-    getWSLINK: unsafe extern "C" fn(sys::WolframLibraryData) -> WSLINK,
 }
 
 impl WolframEngine {
@@ -190,10 +191,7 @@ impl WolframEngine {
         // TODO: Investigate making bindgen treat these as non-null fields?
         let lib = *libdata;
         WolframEngine {
-            wl_lib: libdata,
-
             AbortQ: lib.AbortQ.expect("AbortQ callback is NULL"),
-            getWSLINK: lib.getWSLINK.expect("getWSLINK callback is NULL"),
         }
     }
 
@@ -233,42 +231,34 @@ impl WolframEngine {
     /// Attempt to evaluate `expr`, returning an error if a WSTP transport error occurred
     /// or evaluation failed.
     pub fn try_evaluate(&self, expr: &Expr) -> Result<Expr, String> {
-        let mut link = self.get_wstp_link();
+        with_link(|link: &mut Link| {
+            // Send an EvaluatePacket['expr].
+            let _: () = link
+                .put_expr(&Expr! { EvaluatePacket['expr] })
+                .map_err(|e| e.to_string())?;
 
-        // Send an EvaluatePacket['expr].
-        let _: () = link
-            .put_expr(&Expr! { EvaluatePacket['expr] })
-            .map_err(|e| e.to_string())?;
+            let _: () = process_wstp_link(link)?;
 
-        let _: () = process_wstp_link(&link)?;
+            let return_packet: Expr = link.get_expr().map_err(|e| e.to_string())?;
 
-        let return_packet: Expr = link.get_expr().map_err(|e| e.to_string())?;
+            let returned_expr = match return_packet.kind() {
+                ExprKind::Normal(normal) => {
+                    debug_assert!(normal.has_head(&*sym::ReturnPacket));
+                    debug_assert!(normal.contents.len() == 1);
+                    normal.contents[0].clone()
+                },
+                _ => return Err(format!(
+                    "WolframEngine::try_evaluate: returned expression was not ReturnPacket: {}",
+                    return_packet
+                )),
+            };
 
-        let returned_expr = match return_packet.kind() {
-            ExprKind::Normal(normal) => {
-                debug_assert!(normal.has_head(&*sym::ReturnPacket));
-                debug_assert!(normal.contents.len() == 1);
-                normal.contents[0].clone()
-            },
-            _ => return Err(format!(
-                "WolframEngine::try_evaluate: returned expression was not ReturnPacket: {}",
-                return_packet
-            )),
-        };
-
-        Ok(returned_expr)
-    }
-
-    fn get_wstp_link(&self) -> Link {
-        unsafe {
-            let unsafe_link = (self.getWSLINK)(self.wl_lib);
-            // Go from *mut MLINK -> *mut WSLINK
-            Link::unchecked_new(unsafe_link as *mut _)
-        }
+            Ok(returned_expr)
+        })
     }
 }
 
-fn process_wstp_link(link: &Link) -> Result<(), String> {
+fn process_wstp_link(link: &mut Link) -> Result<(), String> {
     let raw_link = unsafe { link.raw_link() };
 
     // Process the packet on the link.
@@ -283,6 +273,26 @@ fn process_wstp_link(link: &Link) -> Result<(), String> {
     }
 
     Ok(())
+}
+
+/// Enforce exclusive access to the link returned by `getWSLINK()`.
+fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
+    static LOCK: Lazy<Mutex<()>> = Lazy::new(|| Default::default());
+
+    let _guard = LOCK.lock().expect("failed to acquire LINK lock");
+
+    let lib = get_library_data().raw_library_data;
+
+    let unsafe_link: sys::WSLINK = unsafe { rtl::getWSLINK(lib) };
+    let mut unsafe_link: wstp::sys::WSLINK = unsafe_link as wstp::sys::WSLINK;
+
+    // Safety:
+    //      By using LOCK to ensure exclusive access to the `getWSLINK()` value within
+    //      safe code, we can be confident that this `&mut Link` will not alias with
+    //      other references to the underling link object.
+    let link = unsafe { Link::unchecked_ref_cast_mut(&mut unsafe_link) };
+
+    f(link)
 }
 
 /// Export the specified functions as native LibraryLink functions.

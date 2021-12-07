@@ -77,6 +77,8 @@ pub fn get_library_data() -> WolframLibraryData {
 #[derive(Copy, Clone)]
 #[allow(missing_docs)]
 pub struct WolframLibraryData {
+    pub raw_library_data: sys::WolframLibraryData,
+
     pub UTF8String_disown: unsafe extern "C" fn(arg1: *mut ::std::os::raw::c_char),
 
     pub MTensor_new: unsafe extern "C" fn(
@@ -308,8 +310,9 @@ pub struct WolframLibraryData {
 unsafe impl Send for WolframLibraryData {}
 
 macro_rules! unwrap_fields {
-    ($data:expr, [ $($field:ident),+ ]) => {{
+    ($raw:expr, $data:expr, [ $($field:ident),+ ]) => {{
         WolframLibraryData {
+            raw_library_data: $raw,
             VersionNumber: $data.VersionNumber,
             runtimeData: $data.runtimeData,
             compileLibraryFunctions: $data.compileLibraryFunctions,
@@ -332,7 +335,7 @@ impl WolframLibraryData {
 
         let data: sys::st_WolframLibraryData = unsafe { *data_ptr };
 
-        Ok(unwrap_fields!(data, [
+        Ok(unwrap_fields!(data_ptr, data, [
             UTF8String_disown,
             MTensor_new,
             MTensor_free,
