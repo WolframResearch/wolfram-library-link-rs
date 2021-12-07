@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use once_cell::sync::OnceCell;
 
 use crate::sys::{
     self, mbool, mcomplex, mint, mreal, st_WolframCompileLibrary_Functions,
@@ -8,9 +8,7 @@ use crate::sys::{
     MOutputStream, MTensor, WSENV, WSLINK,
 };
 
-lazy_static::lazy_static! {
-    static ref LIBRARY_DATA: Mutex<Option<WolframLibraryData>> = Mutex::new(None);
-}
+static LIBRARY_DATA: OnceCell<WolframLibraryData> = OnceCell::new();
 
 /// Initialize static data for the current Wolfram library.
 ///
@@ -43,11 +41,9 @@ lazy_static::lazy_static! {
 ///
 /// [lib-init]: https://reference.wolfram.com/language/LibraryLink/tutorial/LibraryStructure.html#280210622
 pub fn initialize(data: sys::WolframLibraryData) -> Result<(), ()> {
-    let data = WolframLibraryData::new(data)?;
+    let library_data = WolframLibraryData::new(data)?;
 
-    let mut static_data = LIBRARY_DATA.lock().map_err(|_| ())?;
-
-    *static_data = Some(data);
+    let _: Result<(), WolframLibraryData> = LIBRARY_DATA.set(library_data);
 
     Ok(())
 }
@@ -57,18 +53,11 @@ pub fn initialize(data: sys::WolframLibraryData) -> Result<(), ()> {
 /// Prefer to use the lazy function bindings from the [`rtl`][crate::rtl] module instead
 /// of accessing the fields of [`WolframLibraryData`] directly.
 pub fn get_library_data() -> WolframLibraryData {
-    let static_data = LIBRARY_DATA
-        .lock()
-        .expect("failed to acquire lock on global Wolfram LIBRARY_DATA");
-
-    let data = *static_data;
-
-    // Avoid poisoning the lock if the library is not yet initialized.
-    drop(static_data);
+    let data: Option<&_> = LIBRARY_DATA.get();
 
     // TODO: Include a comment here mentioning that the library could/should provide a
     //       WolframLibrary_initialize() function which calls initialize_library_data()?
-    data.expect(
+    *data.expect(
         "get_library_data: global Wolfram LIBRARY_DATA static is not initialized.",
     )
 }
