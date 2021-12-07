@@ -521,14 +521,14 @@ impl<T> NumericArray<T> {
 
     #[allow(missing_docs)]
     pub fn data_type(&self) -> NumericArrayDataType {
-        let value: u32 = u32::try_from(self.tensor_property_type())
-            .expect("NumericArray tensor property type value overflows u32");
+        let value: sys::numericarray_data_t = self.data_type_raw();
 
         NumericArrayDataType::try_from(value)
             .expect("NumericArray tensor property type is value is not a known NumericArrayDataType variant")
     }
 
-    fn tensor_property_type(&self) -> u32 {
+    /// *LibraryLink C API Documentation:* [`MNumericArray_getType`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MNumericArray_getType.html)
+    pub fn data_type_raw(&self) -> sys::numericarray_data_t {
         let NumericArray(numeric_array, _) = *self;
 
         unsafe { rtl::MNumericArray_getType(numeric_array) }
