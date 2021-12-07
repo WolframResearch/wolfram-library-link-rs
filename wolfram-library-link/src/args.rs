@@ -172,13 +172,17 @@ impl<'a> FromArg<'a> for String {
 /// accidental creation of invalid `NumericArray` conversions. Without this constraint,
 /// it would be possible to write code like:
 ///
-/// ```
+/// ```compile_fail
+/// # mod scope {
+/// # use wolfram_library_link::{export, NumericArray};
 /// fn and(bools: NumericArray<bool>) -> bool {
 ///     // ...
+/// #   todo!()
 /// }
 ///
 /// // Unsafe!
 /// export![and(_)];
+/// # }
 /// ```
 ///
 /// which is not valid because `bool` is not a valid numeric array type.
@@ -368,15 +372,20 @@ impl IntoArg for DataStore {
 /// # Example
 ///
 /// ```
+/// # mod scope {
+/// use wolfram_library_link::{self as wll, sys::MArgument, FromArg};
+///
 /// wll::export![raw_add2(_, _)];
 ///
 /// fn raw_add2(args: &[MArgument], ret: MArgument) {
-///     let (x, y): (i64, i64) = unsafe { wll::from_args(args) };
+///     let x = unsafe { i64::from_arg(&args[0]) };
+///     let y = unsafe { i64::from_arg(&args[1]) };
 ///
 ///     unsafe {
 ///         *ret.integer = x + y;
 ///     }
 /// }
+/// # }
 /// ```
 ///
 /// ```wolfram

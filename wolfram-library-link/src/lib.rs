@@ -294,23 +294,36 @@ fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
 ///
 /// Export a function with a single argument.
 ///
-/// ```no_run
+/// ```
+/// # mod scope {
+/// # use wolfram_library_link::export;
+/// # fn square(x: i64) -> i64 { x }
 /// export![square(_)];
+/// # }
 /// ```
 ///
 /// Export a function using the specified low-level shared library symbol name.
 ///
 /// ```
+/// # mod scope {
+/// # use wolfram_library_link::export;
+/// # fn square(x: i64) -> i64 { x }
 /// export![square(_) as WL_square];
+/// # }
 /// ```
 ///
 /// Export multiple functions with one `export!` invocation. This is purely for convenience.
 ///
 /// ```
+/// # mod scope {
+/// # use wolfram_library_link::export;
+/// # fn square(x: i64) -> i64 { x }
+/// # fn add_two(a: i64, b: i64) -> i64 { a + b }
 /// export![
 ///     square(_);
 ///     add_two(_, _) as AddTwo;
 /// ];
+/// # }
 /// ```
 ///
 // TODO: Remove this feature? If someone wants to export the low-level function, they
@@ -329,11 +342,14 @@ fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
 /// Export a native function with a single argument:
 ///
 /// ```
+/// # mod scope {
+/// # use wolfram_library_link::{export, NumericArray};
 /// fn square(x: i64) -> i64 {
 ///     x * x
 /// }
 ///
-/// export![square(_)]
+/// export![square(_)];
+/// # }
 /// ```
 ///
 /// ```wolfram
@@ -353,9 +369,15 @@ fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
 /// Export a native function with a [`NumericArray`] argument:
 ///
 /// ```
+/// # mod scope {
+/// # use wolfram_library_link::{export, NumericArray};
+///
 /// fn total_i64(list: &NumericArray<i64>) -> i64 {
 ///     list.as_slice().into_iter().sum()
 /// }
+///
+/// export![total_i64(_)];
+/// # }
 /// ```
 ///
 /// ```wolfram
