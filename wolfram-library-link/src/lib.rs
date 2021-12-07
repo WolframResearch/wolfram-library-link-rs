@@ -438,6 +438,7 @@ fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
 ///
 /// Rust return type                   | Wolfram library function return type
 /// -----------------------------------|---------------------------------------
+/// [`()`][`unit`]                     | `"Void"`
 /// [`bool`]                           | `"Boolean"`
 /// [`mint`]                           | `Integer`
 /// [`mreal`][crate::sys::mreal]       | `Real`

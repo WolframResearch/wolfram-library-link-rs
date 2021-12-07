@@ -12,6 +12,7 @@ use wolfram_library_link::{
 
 wll::export![
     test_no_args();
+    test_ret_void();
     test_mint(_);
     test_raw_mint(_, _);
     test_mint_mint(_, _);
@@ -26,6 +27,10 @@ wll::export![
 
 fn test_no_args() -> i64 {
     4
+}
+
+fn test_ret_void() {
+    // Do nothing.
 }
 
 //------------

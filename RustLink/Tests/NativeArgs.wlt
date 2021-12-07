@@ -14,6 +14,17 @@ Test[
 Test[
 	LibraryFunctionLoad[
 		"liblibrary_tests",
+		"test_ret_void",
+		{},
+		"Void"
+	][]
+	,
+	Null
+]
+
+Test[
+	LibraryFunctionLoad[
+		"liblibrary_tests",
 		"test_mint",
 		{Integer},
 		Integer

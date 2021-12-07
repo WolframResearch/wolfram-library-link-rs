@@ -220,6 +220,12 @@ impl FromArg<'_> for DataStore {
 // impl IntoArg
 //======================================
 
+impl IntoArg for () {
+    unsafe fn into_arg(self, _arg: MArgument) {
+        // Do nothing.
+    }
+}
+
 //---------------------
 // Primitive data types
 //---------------------
