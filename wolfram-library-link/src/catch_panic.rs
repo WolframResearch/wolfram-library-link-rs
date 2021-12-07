@@ -6,15 +6,13 @@ use std::thread::{self, ThreadId};
 use std::time::Instant;
 
 use backtrace::Backtrace;
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 
 use wl_expr::{forms::ToPrettyExpr, Expr, Symbol};
 use wl_symbol_table as sym;
 
-lazy_static! {
-    static ref CAUGHT_PANICS: Mutex<HashMap<ThreadId, (Instant, CaughtPanic)>> =
-        Mutex::new(HashMap::new());
-}
+static CAUGHT_PANICS: Lazy<Mutex<HashMap<ThreadId, (Instant, CaughtPanic)>>> =
+    Lazy::new(|| Default::default());
 
 /// Information from a caught panic.
 ///
