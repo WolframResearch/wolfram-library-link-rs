@@ -1,4 +1,4 @@
-#!/usr/bin/env wolframscript
+#!/usr/bin/env wolframscript -local /Applications/Wolfram/Mathematica-12.3.0.app/Contents/MacOS/WolframKernel
 (* ::Package:: *)
 
 (* ::Title:: *)
