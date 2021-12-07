@@ -6,7 +6,7 @@ use wstp::{self, Link};
 use crate::{
     catch_panic,
     sys::{self, MArgument, LIBRARY_NO_ERROR},
-    NativeFunction, NumericArray, WolframEngine,
+    NativeFunction, NumericArray,
 };
 
 //======================================
@@ -23,18 +23,18 @@ use crate::{
 pub fn call_wstp_wolfram_library_function_expr_list(
     libdata: sys::WolframLibraryData,
     unsafe_link: wstp::sys::WSLINK,
-    function: fn(&WolframEngine, Vec<Expr>) -> Expr,
+    function: fn(Vec<Expr>) -> Expr,
 ) -> c_uint {
     call_wstp_wolfram_library_function(
         libdata,
         unsafe_link,
-        |engine: &WolframEngine, argument_expr: Expr| -> Expr {
+        |argument_expr: Expr| -> Expr {
             let arguments = match argument_expr.to_kind() {
                 ExprKind::Normal(normal) => normal.contents,
                 _ => panic!("WSTP argument expression was non-Normal"),
             };
 
-            function(engine, arguments)
+            function(arguments)
         },
     )
 }
@@ -43,7 +43,7 @@ pub fn call_wstp_wolfram_library_function_expr_list(
 ///
 /// [wlf]: attr.wolfram_library_function.html
 pub fn call_wstp_wolfram_library_function<
-    F: FnOnce(&WolframEngine, Expr) -> Expr + std::panic::UnwindSafe,
+    F: FnOnce(Expr) -> Expr + std::panic::UnwindSafe,
 >(
     libdata: sys::WolframLibraryData,
     mut unsafe_link: wstp::sys::WSLINK,
@@ -54,11 +54,10 @@ pub fn call_wstp_wolfram_library_function<
         wstp::sys::{WSEndPacket, WSPutString},
     };
 
+    let _ = crate::initialize(libdata);
+
     let result: Result<(), CaughtPanic> = unsafe {
         call_and_catch_panic(move || {
-            // Contruct the engine
-            let engine = WolframEngine::from_library_data(libdata);
-
             let link = Link::unchecked_ref_cast_mut(&mut unsafe_link);
 
             let arguments: Expr = match link.get_expr() {
@@ -78,7 +77,7 @@ pub fn call_wstp_wolfram_library_function<
                 },
             };
 
-            let result: Expr = function(&engine, arguments);
+            let result: Expr = function(arguments);
 
             link.put_expr(&result).expect(
                 "LibraryFunction result expression could not be written to WSTP link",
@@ -113,19 +112,19 @@ pub fn call_wxf_wolfram_library_function_expr_list(
     libdata: sys::WolframLibraryData,
     wxf_argument: MArgument,
     wxf_result: MArgument,
-    function: fn(&WolframEngine, Vec<Expr>) -> Expr,
+    function: fn(Vec<Expr>) -> Expr,
 ) -> c_uint {
     call_wxf_wolfram_library_function(
         libdata,
         wxf_argument,
         wxf_result,
-        |engine: &WolframEngine, argument_expr: Expr| -> Expr {
+        |argument_expr: Expr| -> Expr {
             let arguments = match argument_expr.to_kind() {
                 ExprKind::Normal(normal) => normal.contents,
                 _ => panic!("WXF argument expression was non-Normal"),
             };
 
-            function(engine, arguments)
+            function(arguments)
         },
     )
 }
@@ -134,7 +133,7 @@ pub fn call_wxf_wolfram_library_function_expr_list(
 ///
 /// [wlf]: attr.wolfram_library_function.html
 pub fn call_wxf_wolfram_library_function<
-    F: FnOnce(&WolframEngine, Expr) -> Expr + std::panic::UnwindSafe,
+    F: FnOnce(Expr) -> Expr + std::panic::UnwindSafe,
 >(
     libdata: sys::WolframLibraryData,
     wxf_argument: MArgument,
@@ -147,9 +146,6 @@ pub fn call_wxf_wolfram_library_function<
 
     let result: Result<(), CaughtPanic> = unsafe {
         call_and_catch_panic(|| {
-            // Contruct the engine
-            let engine = WolframEngine::from_library_data(libdata);
-
             let argument_numeric_array = NumericArray::from_raw(*wxf_argument.numeric)
                 .try_into_kind::<u8>()
                 .expect(
@@ -160,7 +156,7 @@ pub fn call_wxf_wolfram_library_function<
                 "wolfram_library_function: failed to deserialize argument WXF data",
             );
 
-            let result: Expr = function(&engine, arguments);
+            let result: Expr = function(arguments);
 
             *wxf_result.numeric = wxf_numeric_array_from_expr(&result).into_raw();
         })

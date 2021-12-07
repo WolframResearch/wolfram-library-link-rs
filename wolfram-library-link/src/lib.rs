@@ -7,10 +7,10 @@
 //!
 //! ```
 //! use wl_expr::Expr;
-//! use wolfram_library_link::{self as wll, wolfram_library_function, WolframEngine};
+//! use wolfram_library_link::{self as wll, wolfram_library_function};
 //!
 //! #[wolfram_library_function]
-//! pub fn say_hello(engine: &WolframEngine, args: Vec<Expr>) -> Expr {
+//! pub fn say_hello(args: Vec<Expr>) -> Expr {
 //!     for arg in args {
 //!         wll::evaluate(&Expr! { Print["Hello ", 'arg, "!"] });
 //!     }
@@ -103,10 +103,10 @@ pub use self::{
 ///
 /// ```
 /// use wl_expr::Expr;
-/// use wolfram_library_link::{self as wll, WolframEngine, wolfram_library_function};
+/// use wolfram_library_link::{self as wll, wolfram_library_function};
 ///
 /// #[wolfram_library_function]
-/// pub fn say_hello(engine: &WolframEngine, args: Vec<Expr>) -> Expr {
+/// pub fn say_hello(args: Vec<Expr>) -> Expr {
 ///     for arg in args {
 ///         wll::evaluate(&Expr! { Print["Hello ", 'arg] });
 ///     }
@@ -139,10 +139,10 @@ pub use self::{
 ///
 /// ```
 /// # use wl_expr::Expr;
-/// # use wolfram_library_link::{WolframEngine, wolfram_library_function};
+/// # use wolfram_library_link::wolfram_library_function;
 /// #
 /// #[wolfram_library_function(name = "WL_greet")]
-/// pub fn say_hello(engine: &WolframEngine, args: Vec<Expr>) -> Expr {
+/// pub fn say_hello(args: Vec<Expr>) -> Expr {
 ///     // ...
 /// #   Expr::null()
 /// }
@@ -169,20 +169,8 @@ pub use wolfram_library_function_macro::wolfram_library_function;
 const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 
 //======================================
-// WolframEngine
+// Callbacks to the Wolfram Kernel
 //======================================
-
-/// Callbacks to the Wolfram Engine.
-#[allow(non_snake_case)]
-pub struct WolframEngine {}
-
-impl WolframEngine {
-    /// Initialize a `WolframEngine` from the callbacks in a [`WolframLibraryData`]
-    /// object.
-    unsafe fn from_library_data(_: sys::WolframLibraryData) -> Self {
-        WolframEngine {}
-    }
-}
 
 /// Evaluate `expr` by calling back into the Wolfram Kernel.
 ///
@@ -192,8 +180,7 @@ pub fn evaluate(expr: &Expr) -> Expr {
     match try_evaluate(expr) {
         Ok(returned) => returned,
         Err(msg) => panic!(
-            "WolframEngine::evaluate: evaluation of expression failed: {}: \
-            \n\texpression: {}",
+            "evaluate(): evaluation of expression failed: {}: \n\texpression: {}",
             msg, expr
         ),
     }
@@ -213,16 +200,18 @@ pub fn try_evaluate(expr: &Expr) -> Result<Expr, String> {
         let return_packet: Expr = link.get_expr().map_err(|e| e.to_string())?;
 
         let returned_expr = match return_packet.kind() {
-                ExprKind::Normal(normal) => {
-                    debug_assert!(normal.has_head(&*sym::ReturnPacket));
-                    debug_assert!(normal.contents.len() == 1);
-                    normal.contents[0].clone()
-                },
-                _ => return Err(format!(
-                    "WolframEngine::try_evaluate: returned expression was not ReturnPacket: {}",
+            ExprKind::Normal(normal) => {
+                debug_assert!(normal.has_head(&*sym::ReturnPacket));
+                debug_assert!(normal.contents.len() == 1);
+                normal.contents[0].clone()
+            },
+            _ => {
+                return Err(format!(
+                    "try_evaluate(): returned expression was not ReturnPacket: {}",
                     return_packet
-                )),
-            };
+                ))
+            },
+        };
 
         Ok(returned_expr)
     })

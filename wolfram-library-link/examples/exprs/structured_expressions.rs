@@ -4,7 +4,7 @@ use wl_expr::{
     forms::{FormError, FromExpr, List},
     Expr, FromExpr, Number,
 };
-use wolfram_library_link::{self as wll, wolfram_library_function, WolframEngine};
+use wolfram_library_link::{self as wll, wolfram_library_function};
 
 #[derive(FromExpr)]
 #[pattern(numbers:{___})]
@@ -23,7 +23,7 @@ struct Numbers {
 /// ]
 /// ```
 #[wolfram_library_function]
-pub fn sum_of_numbers(engine: &WolframEngine, arguments: Vec<Expr>) -> Expr {
+pub fn sum_of_numbers(arguments: Vec<Expr>) -> Expr {
     let Numbers { numbers } = match Numbers::from_expr(&arguments[0]) {
         Ok(numbers) => numbers,
         Err(err) => {

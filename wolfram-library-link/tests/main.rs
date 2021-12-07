@@ -1,4 +1,4 @@
-use wolfram_library_link::{wolfram_library_function, WolframEngine};
+use wolfram_library_link::wolfram_library_function;
 
 use wl_expr::Expr;
 
@@ -8,11 +8,11 @@ use wl_expr::Expr;
 // }
 
 #[wolfram_library_function]
-pub fn wrapped_one(_: &WolframEngine, _: Vec<Expr>) -> Expr {
+pub fn wrapped_one(_: Vec<Expr>) -> Expr {
     Expr::string("success")
 }
 
 #[wolfram_library_function(protocol = "WXF")]
-pub fn wxf_function(_: &WolframEngine, _: Vec<Expr>) -> Expr {
+pub fn wxf_function(_: Vec<Expr>) -> Expr {
     Expr::string("success")
 }

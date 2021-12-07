@@ -37,8 +37,6 @@ fn parse_pattern_parameters(sig: &syn::Signature) -> Result<Vec<(Ident, syn::Typ
     let parameters = sig
         .inputs
         .iter()
-        // Skip the &WolframEngine parameter
-        .skip(1)
         .map(|arg| {
             let typed = match arg {
                 // `&self`
@@ -226,6 +224,7 @@ fn validate_parameters(
     // Check that the first parameter is `&WolframEngine`
     //
 
+    /*
     let first_param =
         match &inputs[0] {
             // `self` OR `&self`
@@ -235,6 +234,7 @@ fn validate_parameters(
             )),
             syn::FnArg::Typed(pat_type) => pat_type,
         };
+    */
 
     match args_mode {
         ArgumentsMode::ExprList => (),
@@ -245,13 +245,14 @@ fn validate_parameters(
     // Check that there are 2 parameters, and that the 2nd one is `Vec<Expr>`.
     //
 
-    if inputs.len() != 2 {
+    if inputs.len() != 1 {
         return Err(Error::new(
             parens.span,
-            "Wolfram library function must have 2 parameters",
+            "Wolfram library function must have 1 parameter",
         ));
     }
 
+    /*
     if !first_param.attrs.is_empty() {
         return Err(Error::new(
             first_param.attrs[0].span(),
@@ -306,6 +307,7 @@ fn validate_parameters(
             ))
         },
     }
+    */
 
     //
     // TODO?: Check that the second parameter is `Vec<Expr>`

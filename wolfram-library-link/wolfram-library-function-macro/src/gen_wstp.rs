@@ -41,12 +41,11 @@ pub(crate) fn gen_arg_mode_pattern(
 
     let inner = quote::quote! {
         use ::wl_expr::{Expr, forms::{FromExpr, FormError}};
-        use ::wolfram_library_link::WolframEngine;
 
         ::wolfram_library_link::macro_utils::call_wstp_wolfram_library_function(
             libdata,
             unsafe_link,
-            |engine: &WolframEngine, argument_expr: Expr| -> Expr {
+            |argument_expr: Expr| -> Expr {
                 #[derive(wl_expr::FromExpr)]
                 #[pattern({ #pattern })]
                 #[allow(non_camel_case_types)]
@@ -65,7 +64,7 @@ pub(crate) fn gen_arg_mode_pattern(
                     },
                 };
 
-                #function_name(engine, #( args.#parameter_names ),*)
+                #function_name(#( args.#parameter_names ),*)
             }
         )
     };

@@ -1,5 +1,5 @@
 use wl_expr::Expr;
-use wolfram_library_link::{self as wll, wolfram_library_function, WolframEngine};
+use wolfram_library_link::{self as wll, wolfram_library_function};
 
 /// This function is loaded by evaluating:
 ///
@@ -12,7 +12,7 @@ use wolfram_library_link::{self as wll, wolfram_library_function, WolframEngine}
 /// ]
 /// ```
 #[wolfram_library_function]
-pub fn echo_arguments(engine: &WolframEngine, args: Vec<Expr>) -> Expr {
+pub fn echo_arguments(args: Vec<Expr>) -> Expr {
     let arg_count = args.len();
 
     for arg in args {
