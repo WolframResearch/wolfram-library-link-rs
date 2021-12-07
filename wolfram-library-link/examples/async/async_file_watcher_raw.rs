@@ -32,7 +32,7 @@ pub extern "C" fn start_file_watcher(
         return LIBRARY_FUNCTION_ERROR;
     }
 
-    if wll::initialize(lib_data).is_err() {
+    if unsafe { wll::initialize(lib_data) }.is_err() {
         return LIBRARY_FUNCTION_ERROR;
     }
 

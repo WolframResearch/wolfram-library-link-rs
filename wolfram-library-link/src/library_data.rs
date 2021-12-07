@@ -1,3 +1,5 @@
+use std::thread;
+
 use once_cell::sync::OnceCell;
 
 use crate::sys::{
@@ -8,7 +10,20 @@ use crate::sys::{
     MOutputStream, MTensor, WSENV, WSLINK,
 };
 
-static LIBRARY_DATA: OnceCell<WolframLibraryData> = OnceCell::new();
+#[derive(Copy, Clone)]
+struct Data {
+    /// The `ThreadId` of the Wolfram Kernel's main thread.
+    ///
+    /// The main evaluation loop of the Wolfram Kernel is largely a single-threaded
+    /// program, and it's functions are not all necessarily designed to be used from
+    /// multiple threads at once. This value, used in [`assert_main_thread()`], is used to
+    /// ensure that the safe API's provided by `wolfram-library-link` are only called from
+    /// the main Kernel thread.
+    main_thread_id: thread::ThreadId,
+    library_data: WolframLibraryData,
+}
+
+static LIBRARY_DATA: OnceCell<Data> = OnceCell::new();
 
 /// Initialize static data for the current Wolfram library.
 ///
@@ -32,7 +47,7 @@ static LIBRARY_DATA: OnceCell<WolframLibraryData> = OnceCell::new();
 ///
 /// #[no_mangle]
 /// extern "C" fn WolframLibrary_initialize(data: sys::WolframLibraryData) -> c_int {
-///     match initialize(data) {
+///     match unsafe { initialize(data) } {
 ///         Ok(()) => return 0,
 ///         Err(()) => return 1,
 ///     }
@@ -40,10 +55,22 @@ static LIBRARY_DATA: OnceCell<WolframLibraryData> = OnceCell::new();
 /// ```
 ///
 /// [lib-init]: https://reference.wolfram.com/language/LibraryLink/tutorial/LibraryStructure.html#280210622
-pub fn initialize(data: sys::WolframLibraryData) -> Result<(), ()> {
+///
+/// # Safety
+///
+/// The following conditions must be met for a call to this function to be valid:
+///
+/// * `data` must be a valid and fully initialized [`sys::WolframLibraryData`] instance
+///   created by the Wolfram Kernel and passed into the current LibraryLink function.
+/// * The call to `initialize()` must happen from the main Kernel thread. This is true for
+///   all LibraryLink functions called directly by the Kernel.
+pub unsafe fn initialize(data: sys::WolframLibraryData) -> Result<(), ()> {
     let library_data = WolframLibraryData::new(data)?;
 
-    let _: Result<(), WolframLibraryData> = LIBRARY_DATA.set(library_data);
+    let _: Result<(), Data> = LIBRARY_DATA.set(Data {
+        main_thread_id: thread::current().id(),
+        library_data,
+    });
 
     Ok(())
 }
@@ -57,9 +84,38 @@ pub fn get_library_data() -> WolframLibraryData {
 
     // TODO: Include a comment here mentioning that the library could/should provide a
     //       WolframLibrary_initialize() function which calls initialize_library_data()?
-    *data.expect(
+    data.expect(
         "get_library_data: global Wolfram LIBRARY_DATA static is not initialized.",
     )
+    .library_data
+}
+
+pub(crate) fn is_main_thread() -> bool {
+    let data = LIBRARY_DATA
+        .get()
+        .expect("global LIBRARY_DATA static is not initialized");
+
+    data.main_thread_id == thread::current().id()
+}
+
+/// Assert that the current thread is the main Kernel thread.
+///
+/// # Panics
+///
+/// This function will panic if the current thread is not the main Kernel thread.
+///
+/// Use this function to enforce that callbacks into the Kernel happen from the
+/// main thread.
+#[track_caller]
+pub(crate) fn assert_main_thread() {
+    let loc = std::panic::Location::caller();
+
+    assert!(
+        is_main_thread(),
+        "error: attempted to call back into the Wolfram Kernel from a non-main thread at {}:{}",
+        loc.file(),
+        loc.line()
+    );
 }
 
 #[allow(non_snake_case)]
@@ -297,6 +353,7 @@ pub struct WolframLibraryData {
 /// it is safe to call all of the functions listed in this structure from that thread.
 /// Each function is marked unsafe, and has independent safety considerations.
 unsafe impl Send for WolframLibraryData {}
+unsafe impl Sync for WolframLibraryData {}
 
 macro_rules! unwrap_fields {
     ($raw:expr, $data:expr, [ $($field:ident),+ ]) => {{

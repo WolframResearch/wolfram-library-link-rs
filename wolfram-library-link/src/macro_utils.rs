@@ -54,7 +54,7 @@ pub fn call_wstp_wolfram_library_function<
         wstp::sys::{WSEndPacket, WSPutString},
     };
 
-    let _ = crate::initialize(libdata);
+    let _ = unsafe { crate::initialize(libdata) };
 
     let result: Result<(), CaughtPanic> = unsafe {
         call_and_catch_panic(move || {
@@ -142,7 +142,7 @@ pub fn call_wxf_wolfram_library_function<
 ) -> c_uint {
     use self::catch_panic::{call_and_catch_panic, CaughtPanic};
 
-    let _ = crate::initialize(libdata);
+    let _ = unsafe { crate::initialize(libdata) };
 
     let result: Result<(), CaughtPanic> = unsafe {
         call_and_catch_panic(|| {

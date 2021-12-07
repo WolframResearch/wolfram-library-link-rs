@@ -92,6 +92,8 @@ pub use self::{
     },
 };
 
+pub(crate) use self::library_data::assert_main_thread;
+
 /// Attribute to generate a [LibraryLink][library-link]-compatible wrapper around a Rust
 /// function.
 ///
@@ -239,6 +241,8 @@ pub fn aborted() -> bool {
 }
 
 fn process_wstp_link(link: &mut Link) -> Result<(), String> {
+    assert_main_thread();
+
     let raw_link = unsafe { link.raw_link() };
 
     // Process the packet on the link.
@@ -257,6 +261,8 @@ fn process_wstp_link(link: &mut Link) -> Result<(), String> {
 
 /// Enforce exclusive access to the link returned by `getWSLINK()`.
 fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
+    assert_main_thread();
+
     static LOCK: Lazy<Mutex<()>> = Lazy::new(|| Default::default());
 
     let _guard = LOCK.lock().expect("failed to acquire LINK lock");
