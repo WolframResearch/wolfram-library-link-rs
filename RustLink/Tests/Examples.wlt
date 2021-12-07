@@ -171,6 +171,25 @@ Test[
 
 Test[
 	func = LibraryFunctionLoad[
+		"libnumeric_arrays",
+		"sum_real_numeric_array",
+		{NumericArray},
+		Real
+	];
+
+	{
+		func[NumericArray[Range[1, 10, 1/81], "Real32"]],
+		func[NumericArray[Range[1, 10, 1/81], "Real64"]]
+	}
+	,
+	{
+		4015.0,
+		4015.0
+	}
+]
+
+Test[
+	func = LibraryFunctionLoad[
 		"libraw_librarylink_function",
 		"demo_wxf_byte_array",
 		{},

@@ -1,6 +1,9 @@
 use wolfram_library_link::{self as wll, NumericArray, NumericArrayKind};
 
-wll::export![sum_int_numeric_array(_)];
+wll::export![
+    sum_int_numeric_array(_);
+    sum_real_numeric_array(_);
+];
 
 /// This function is loaded by evaluating:
 ///
@@ -33,6 +36,21 @@ fn sum_int_numeric_array(na: &NumericArray) -> i64 {
         | NumericArrayKind::Real64(_)
         | NumericArrayKind::ComplexReal64(_) => panic!(
             "sum_int_numeric_array cannot handle non-integer data type: {:?}",
+            na.data_type()
+        ),
+    };
+
+    sum
+}
+
+fn sum_real_numeric_array(na: &NumericArray) -> f64 {
+    let sum: f64 = match na.kind() {
+        NumericArrayKind::Real32(na) => {
+            na.as_slice().into_iter().copied().map(f64::from).sum()
+        },
+        NumericArrayKind::Real64(na) => na.as_slice().into_iter().copied().sum(),
+        _ => panic!(
+            "sum_real_numeric_array cannot handle non-real data type: {:?}",
             na.data_type()
         ),
     };
