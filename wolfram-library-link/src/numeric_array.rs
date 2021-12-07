@@ -779,6 +779,23 @@ fn copy_from_slice_uninit<T>(src: &[T], dest: &mut [MaybeUninit<T>]) {
 // Trait Impls
 //======================================
 
+impl<T> Clone for NumericArray<T> {
+    fn clone(&self) -> NumericArray<T> {
+        let NumericArray(raw, PhantomData) = *self;
+
+        unsafe {
+            let mut new: sys::MNumericArray = std::ptr::null_mut();
+            let err_code: sys::errcode_t = rtl::MNumericArray_clone(raw, &mut new);
+
+            if err_code != 0 || new.is_null() {
+                panic!("NumericArray clone failed with error code: {}", err_code);
+            }
+
+            NumericArray::<T>::from_raw(new)
+        }
+    }
+}
+
 impl<T> Drop for NumericArray<T> {
     fn drop(&mut self) {
         if self.share_count() > 0 {

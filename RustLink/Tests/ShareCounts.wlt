@@ -120,3 +120,25 @@ Test[
     *)
     Developer`DataStore[True, 2, False]
 ]
+
+(* Test cloning a NumericArray *)
+Test[
+    LibraryFunctionLoad[
+        "liblibrary_tests",
+        "test_na_clone",
+        {},
+        "Boolean"
+    ][]
+]
+
+(* Test cloning a "Shared" NumericArray *)
+Test[
+    LibraryFunctionLoad[
+        "liblibrary_tests",
+        "test_na_shared_clone",
+        {
+            {LibraryDataType[NumericArray, "Integer64"], "Shared"}
+        },
+        "Boolean"
+    ][$NA]
+]
