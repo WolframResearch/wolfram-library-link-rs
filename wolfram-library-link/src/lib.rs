@@ -7,12 +7,12 @@
 //!
 //! ```
 //! use wl_expr::Expr;
-//! use wolfram_library_link::{wolfram_library_function, WolframEngine};
+//! use wolfram_library_link::{self as wll, wolfram_library_function, WolframEngine};
 //!
 //! #[wolfram_library_function]
 //! pub fn say_hello(engine: &WolframEngine, args: Vec<Expr>) -> Expr {
 //!     for arg in args {
-//!         engine.evaluate(&Expr! { Print["Hello ", 'arg, "!"] });
+//!         wll::evaluate(&Expr! { Print["Hello ", 'arg, "!"] });
 //!     }
 //!
 //!     Expr::null()
@@ -103,12 +103,12 @@ pub use self::{
 ///
 /// ```
 /// use wl_expr::Expr;
-/// use wolfram_library_link::{WolframEngine, wolfram_library_function};
+/// use wolfram_library_link::{self as wll, WolframEngine, wolfram_library_function};
 ///
 /// #[wolfram_library_function]
 /// pub fn say_hello(engine: &WolframEngine, args: Vec<Expr>) -> Expr {
 ///     for arg in args {
-///         engine.evaluate(&Expr! { Print["Hello ", 'arg] });
+///         wll::evaluate(&Expr! { Print["Hello ", 'arg] });
 ///     }
 ///
 ///     Expr::null()
@@ -174,74 +174,45 @@ const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 
 /// Callbacks to the Wolfram Engine.
 #[allow(non_snake_case)]
-pub struct WolframEngine {
-    // TODO: Is this function thread safe? Can it be called from a thread other than the
-    //       one the LibraryLink wrapper was originally invoked from?
-    AbortQ: unsafe extern "C" fn() -> mint,
-}
+pub struct WolframEngine {}
 
 impl WolframEngine {
     /// Initialize a `WolframEngine` from the callbacks in a [`WolframLibraryData`]
     /// object.
-    unsafe fn from_library_data(libdata: sys::WolframLibraryData) -> Self {
-        // TODO(!): Use the library version to verify this is still correct?
-        // TODO(!): Audit this
-        // NOTE: That these fields are even an Option is likely just bindgen being
-        //       conservative with function pointers possibly being null.
-        // TODO: Investigate making bindgen treat these as non-null fields?
-        let lib = *libdata;
-        WolframEngine {
-            AbortQ: lib.AbortQ.expect("AbortQ callback is NULL"),
-        }
+    unsafe fn from_library_data(_: sys::WolframLibraryData) -> Self {
+        WolframEngine {}
     }
+}
 
-    /// Returns `true` if the user has requested that the current evaluation be aborted.
-    ///
-    /// Programs should finish what they are doing and return control of this thread to
-    /// to the kernel as quickly as possible. They should not exit the process or
-    /// otherwise terminate execution, simply return up the call stack.
-    ///
-    /// Within Rust code reached through a `#[wolfram_library_function]` wrapper,
-    /// `panic!()` can be used to quickly unwind the call stack to the appropriate place.
-    /// Note that this will not work if the current library is built with
-    /// `panic = "abort"`. See the [`panic`][panic-option] profile configuration option
-    /// for more information.
-    ///
-    /// [panic-option]: https://doc.rust-lang.org/cargo/reference/profiles.html#panic
-    pub fn aborted(&self) -> bool {
-        let val: mint = unsafe { (self.AbortQ)() };
-        val == 1
+/// Evaluate `expr` by calling back into the Wolfram Kernel.
+///
+/// TODO: Specify and document what happens if the evaluation of `expr` triggers a
+///       kernel abort (such as a `Throw[]` in the code).
+pub fn evaluate(expr: &Expr) -> Expr {
+    match try_evaluate(expr) {
+        Ok(returned) => returned,
+        Err(msg) => panic!(
+            "WolframEngine::evaluate: evaluation of expression failed: {}: \
+            \n\texpression: {}",
+            msg, expr
+        ),
     }
+}
 
-    /// Evaluate `expr` by calling back into the Wolfram Kernel.
-    ///
-    /// TODO: Specify and document what happens if the evaluation of `expr` triggers a
-    ///       kernel abort (such as a `Throw[]` in the code).
-    pub fn evaluate(&self, expr: &Expr) -> Expr {
-        match self.try_evaluate(expr) {
-            Ok(returned) => returned,
-            Err(msg) => panic!(
-                "WolframEngine::evaluate: evaluation of expression failed: \
-                {}: \n\texpression: {}",
-                msg, expr
-            ),
-        }
-    }
+/// Attempt to evaluate `expr`, returning an error if a WSTP transport error occurred
+/// or evaluation failed.
+pub fn try_evaluate(expr: &Expr) -> Result<Expr, String> {
+    with_link(|link: &mut Link| {
+        // Send an EvaluatePacket['expr].
+        let _: () = link
+            .put_expr(&Expr! { EvaluatePacket['expr] })
+            .map_err(|e| e.to_string())?;
 
-    /// Attempt to evaluate `expr`, returning an error if a WSTP transport error occurred
-    /// or evaluation failed.
-    pub fn try_evaluate(&self, expr: &Expr) -> Result<Expr, String> {
-        with_link(|link: &mut Link| {
-            // Send an EvaluatePacket['expr].
-            let _: () = link
-                .put_expr(&Expr! { EvaluatePacket['expr] })
-                .map_err(|e| e.to_string())?;
+        let _: () = process_wstp_link(link)?;
 
-            let _: () = process_wstp_link(link)?;
+        let return_packet: Expr = link.get_expr().map_err(|e| e.to_string())?;
 
-            let return_packet: Expr = link.get_expr().map_err(|e| e.to_string())?;
-
-            let returned_expr = match return_packet.kind() {
+        let returned_expr = match return_packet.kind() {
                 ExprKind::Normal(normal) => {
                     debug_assert!(normal.has_head(&*sym::ReturnPacket));
                     debug_assert!(normal.contents.len() == 1);
@@ -253,9 +224,29 @@ impl WolframEngine {
                 )),
             };
 
-            Ok(returned_expr)
-        })
-    }
+        Ok(returned_expr)
+    })
+}
+
+/// Returns `true` if the user has requested that the current evaluation be aborted.
+///
+/// Programs should finish what they are doing and return control of this thread to
+/// to the kernel as quickly as possible. They should not exit the process or
+/// otherwise terminate execution, simply return up the call stack.
+///
+/// Within Rust code reached through a `#[wolfram_library_function]` wrapper,
+/// `panic!()` can be used to quickly unwind the call stack to the appropriate place.
+/// Note that this will not work if the current library is built with
+/// `panic = "abort"`. See the [`panic`][panic-option] profile configuration option
+/// for more information.
+///
+/// [panic-option]: https://doc.rust-lang.org/cargo/reference/profiles.html#panic
+pub fn aborted() -> bool {
+    // TODO: Is this function thread safe? Can it be called from a thread other than the
+    //       one the LibraryLink wrapper was originally invoked from?
+    let val: mint = unsafe { rtl::AbortQ() };
+    // TODO: What values can `val` be?
+    val == 1
 }
 
 fn process_wstp_link(link: &mut Link) -> Result<(), String> {

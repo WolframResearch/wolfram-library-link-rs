@@ -4,7 +4,7 @@ use wl_expr::{
     forms::{FormError, FromExpr, List},
     Expr, FromExpr, Number,
 };
-use wolfram_library_link::{wolfram_library_function, WolframEngine};
+use wolfram_library_link::{self as wll, wolfram_library_function, WolframEngine};
 
 #[derive(FromExpr)]
 #[pattern(numbers:{___})]
@@ -40,7 +40,7 @@ pub fn sum_of_numbers(engine: &WolframEngine, arguments: Vec<Expr>) -> Expr {
     let mut sum: f64 = 0.0;
 
     for number in numbers {
-        engine.evaluate(&Expr! { Echo['number] });
+        wll::evaluate(&Expr! { Echo['number] });
 
         match number {
             Number::Integer(int) => sum += int as f64,

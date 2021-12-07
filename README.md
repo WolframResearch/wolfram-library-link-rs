@@ -78,7 +78,7 @@ Next, import and use the `#[wolfram_library_function]` macro into your Rust code
 // ### lib.rs
 
 use wl_expr::{Expr, Number, FromExpr, forms::{FromExpr, ToExpr, List, from_expr::FormError}};
-use wolfram_library_link::{WolframEngine};
+use wolfram_library_link::{self as wll, WolframEngine};
 
 #[derive(FromExpr)]
 #[pattern(numbers:{___})]
@@ -102,7 +102,7 @@ pub fn sum_of_numbers(engine: &WolframEngine, arguments: Vec<Expr>) -> Expr {
     let mut sum: f64 = 0.0;
 
     for number in numbers {
-        engine.evaluate(&Expr! { Echo['number] });
+        wll::evaluate(&Expr! { Echo['number] });
 
         match number {
             Number::Integer(int) => sum += int as f64,
