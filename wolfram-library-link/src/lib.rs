@@ -1,22 +1,47 @@
 //! A safe and convenient wrapper around Wolfram [LibraryLink][library-link-guide].
 //!
-//! LibraryLink is framework for writing C/Rust programs that can be
-//! [loaded][library-function-load] by the Wolfram Language.
+//! Wolfram LibraryLink is framework for authoring dynamic libraries that can be
+//! [dynamically loaded][library-function-load] by the [Wolfram Language][WL]. This crate
+//! provides idiomatic Rust bindings around the lower-level LibraryLink C interface.
 //!
-//! The primary interface provided by this library is [`#[wolfram_library_function]`][wlf]:
+//! This library provides functionality for:
+//!
+//! * Calling Rust functions from the Wolfram Language.
+//! * Passing data efficiently to and from the Wolfram Language using native data types
+//!   like [`NumericArray`] and [`Image`].
+//! * Passing arbitrary expressions to and from the Wolfram Language using
+//!   [`Expr`][struct@wl_expr::Expr] and the [`#[wolfram_library_function]`][wlf] macro.
+//! * Asynchronous events handled by the Wolfram Language, generated using a background
+//!   thread spawned via [`AsyncTaskObject`].
+//!
+//! #### Related Links
+//!
+//! * [*Wolfram LibraryLink User Guide*](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
+//!
+//! # Examples
+//!
+//! Writing a Rust function that can be called from the Wolfram Language is as easy as
+//! writing:
 //!
 //! ```
-//! use wl_expr::Expr;
-//! use wolfram_library_link::{self as wll, wolfram_library_function};
+//! # mod scope {
+//! use wolfram_library_link::export;
 //!
-//! #[wolfram_library_function]
-//! pub fn say_hello(args: Vec<Expr>) -> Expr {
-//!     for arg in args {
-//!         wll::evaluate(&Expr! { Print["Hello ", 'arg, "!"] });
-//!     }
+//! export![square(_)];
 //!
-//!     Expr::null()
+//! fn square(x: i64) -> i64 {
+//!     x * x
 //! }
+//! # }
+//! ```
+//!
+//! [[building your dynamic library]], and loading the function into the Wolfram Language
+//! using [`LibraryFunctionLoad`][library-function-load]:
+//!
+//! ```wolfram
+//! func = LibraryFunctionLoad["library_name", "square", {Integer}, Integer];
+//!
+//! func[5]   (* Returns 25 *)
 //! ```
 //!
 //! ## Show backtrace when a panic occurs
@@ -36,6 +61,7 @@
 //! Note that the error message may include more information if the `"nightly"`
 //! [feature][cargo-features] of `wolfram-library-link` is enabled.
 //!
+//! [WL]: https://wolfram.com/language
 //! [wlf]: attr.wolfram_library_function.html
 //! [library-link-guide]: https://reference.wolfram.com/language/guide/LibraryLink.html
 //! [library-function-load]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
