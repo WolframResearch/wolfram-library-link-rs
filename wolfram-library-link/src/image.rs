@@ -1,4 +1,6 @@
-use std::{ffi::c_void, os::raw::c_int};
+use std::{ffi::c_void, marker::PhantomData, os::raw::c_int};
+
+use static_assertions::assert_type_eq_all;
 
 use crate::{
     rtl,
@@ -12,8 +14,7 @@ use crate::{
 /// Use [`UninitImage::new_2d()`] to construct a new 2-dimensional image.
 ///
 /// [ref/Image]: https://reference.wolfram.com/language/ref/Image.html
-pub struct Image(sys::MImage);
-
+pub struct Image<T = ()>(sys::MImage, PhantomData<T>);
 
 /// Represents an allocated [`Image`] whose image data has not yet been initialized.
 pub struct UninitImage(sys::MImage);
@@ -44,11 +45,228 @@ pub enum ColorSpace {
     XYZ = MImage_CS_XYZ,
 }
 
+/// Position of a pixel position in an [`Image`].
+#[derive(Copy, Clone)]
+pub enum Pixel {
+    /// Index in a 2-dimensional image.
+    ///
+    /// Fields are `[row, column]`.
+    D2([usize; 2]),
+    /// Index in a 3-dimensional image.
+    ///
+    /// Fields are `[slice, row, column]`.
+    D3([usize; 3]),
+}
+
+impl Pixel {
+    /// Construct a pixel position from a slice of indices.
+    ///
+    /// # Panics
+    ///
+    /// `pos` must contain exactly 2 or 3 elements, respectively indicating a 2-dimensional
+    /// or 3-dimensional position. This function will panic if another length is found.
+    pub fn from_slice(pos: &[usize]) -> Self {
+        match *pos {
+            [row, column] => Pixel::D2([row, column]),
+            [slice, row, column] => Pixel::D3([slice, row, column]),
+            _ => panic!(
+                "Pixel::from_slice: index should have 2 or 3 elements; got {} elements",
+                pos.len()
+            ),
+        }
+    }
+
+    fn as_slice(&self) -> &[usize] {
+        match self {
+            Pixel::D2(array) => array,
+            Pixel::D3(array) => array,
+        }
+    }
+}
+
+//======================================
+// Traits
+//======================================
+
+/// Trait implemented for types that can *logically* be stored in an [`Image`].
+///
+/// The `STORAGE` associated type represents the data that is *physically* stored in the
+/// [`Image`] buffer.
+///
+/// The following types can be used in an image:
+///
+/// * [`bool`]
+/// * [`u8`], [`u16`]
+/// * [`f32`], [`f64`]
+///
+/// # Safety
+///
+/// This trait is already implemented for all types that can legally be stored in an
+/// [`Image`] implementing this trait for other types may lead to undefined behavior.
+pub unsafe trait ImageData: Copy {
+    /// The type of the data that is *physically* stored in the [`Image`] buffer.
+    ///
+    /// In practice, this type is equal to `Self` for every logicaly type except `bool`,
+    /// which represents a bitmapped image that logically stores a single bit of boolean
+    /// data, but physically allocate one byte for each pixel/channel.
+    type STORAGE: Copy;
+
+    #[allow(missing_docs)]
+    unsafe fn get_raw(
+        image: &Image<Self>,
+        pos: *const mint,
+        channel: mint,
+    ) -> (Self, c_int);
+
+    // TODO: This has the same restrictions as NumericArray::as_slice_mut(), based on
+    //       the share_count().
+    // fn set(image: &mut Image, pos: &[usize], value: Self);
+}
+
+//--------------------------------------
+// ImageData Impls
+//--------------------------------------
+
+assert_type_eq_all!(i8, sys::raw_t_bit);
+assert_type_eq_all!(u8, sys::raw_t_ubit8);
+assert_type_eq_all!(u16, sys::raw_t_ubit16);
+assert_type_eq_all!(f32, sys::raw_t_real32);
+assert_type_eq_all!(f64, sys::raw_t_real64);
+
+unsafe impl ImageData for bool {
+    type STORAGE = i8; // sys::raw_t_bit
+
+    unsafe fn get_raw(
+        image: &Image<Self>,
+        pos: *const mint,
+        channel: mint,
+    ) -> (Self, c_int) {
+        let mut value: i8 = 0;
+
+        let err_code: c_int =
+            rtl::MImage_getBit(image.as_raw(), pos as *mut mint, channel, &mut value);
+
+        // FIXME: Is this meant to be non-negative vs negative, or zero vs non-zero?
+        //        This currently assumes zero vs non-zero.
+        let boole: bool = value != 0;
+
+        (boole, err_code)
+    }
+}
+
+unsafe impl ImageData for u8 {
+    type STORAGE = Self; // sys::raw_t_ubit8
+
+    unsafe fn get_raw(
+        image: &Image<Self>,
+        pos: *const mint,
+        channel: mint,
+    ) -> (Self, c_int) {
+        let mut value: u8 = 0;
+
+        let err_code: c_int =
+            rtl::MImage_getByte(image.as_raw(), pos as *mut mint, channel, &mut value);
+
+        (value, err_code)
+    }
+}
+
+unsafe impl ImageData for u16 {
+    type STORAGE = Self; // sys::raw_t_ubit16
+
+    unsafe fn get_raw(
+        image: &Image<Self>,
+        pos: *const mint,
+        channel: mint,
+    ) -> (Self, c_int) {
+        let mut value: u16 = 0;
+
+        let err_code: c_int =
+            rtl::MImage_getBit16(image.as_raw(), pos as *mut mint, channel, &mut value);
+
+        (value, err_code)
+    }
+}
+
+unsafe impl ImageData for f32 {
+    type STORAGE = Self; // sys::raw_t_real32
+
+    unsafe fn get_raw(
+        image: &Image<Self>,
+        pos: *const mint,
+        channel: mint,
+    ) -> (Self, c_int) {
+        let mut value: f32 = 0.0;
+
+        let err_code: c_int =
+            rtl::MImage_getReal32(image.as_raw(), pos as *mut mint, channel, &mut value);
+
+        (value, err_code)
+    }
+}
+
+unsafe impl ImageData for f64 {
+    type STORAGE = Self; // sys::raw_t_real64
+
+    unsafe fn get_raw(
+        image: &Image<Self>,
+        pos: *const mint,
+        channel: mint,
+    ) -> (Self, c_int) {
+        let mut value: f64 = 0.0;
+
+        let err_code: c_int =
+            rtl::MImage_getReal(image.as_raw(), pos as *mut mint, channel, &mut value);
+
+        (value, err_code)
+    }
+}
+
 //======================================
 // Impls
 //======================================
 
-impl Image {
+impl<T: ImageData> Image<T> {
+    /// Access the data in this [`Image`] as a flat buffer.
+    ///
+    /// The returned slice will have a length equal to
+    /// [`flattened_length()`][Image::flattened_length].
+    pub fn as_slice(&self) -> &[T::STORAGE] {
+        let raw: *mut c_void = unsafe { self.raw_data() };
+        let len: usize = self.flattened_length();
+
+        // Safety: The documentation for `MImage_getRawData` states that the number of
+        //         elements is equal to the value obtained by `MImage_getFlattenedLength`.
+        unsafe { std::slice::from_raw_parts(raw as *mut T::STORAGE, len) }
+    }
+
+    /// Get the value of the specified pixel and channel.
+    pub fn get(&self, pixel: Pixel, channel: usize) -> Option<T> {
+        let pixel_pos: &[usize] = pixel.as_slice();
+
+        // This is necessary for the `unsafe` call to be valid, otherwise the raw pixel
+        // getter function may read an uninitialized value if this is a 3D image but we
+        // only provided a 2D index.
+        assert_eq!(pixel_pos.len(), self.rank());
+
+        let (value, err_code): (T, c_int) = unsafe {
+            <T as ImageData>::get_raw(
+                self,
+                pixel_pos.as_ptr() as *mut mint,
+                channel as mint,
+            )
+        };
+
+        if err_code != 0 {
+            // TODO: Return the error code?
+            return None;
+        }
+
+        Some(value)
+    }
+}
+
+impl<T> Image<T> {
     //
     // Properties
     //
@@ -157,8 +375,8 @@ impl Image {
     //
 
     /// Construct an `Image` from a raw [`MImage`][sys::MImage].
-    pub unsafe fn from_raw(raw: sys::MImage) -> Image {
-        Image(raw)
+    pub unsafe fn from_raw(raw: sys::MImage) -> Image<T> {
+        Image(raw, PhantomData)
     }
 
     /// Extract the raw [`MImage`][sys::MImage] instance from this `Image`.

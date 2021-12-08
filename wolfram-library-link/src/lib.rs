@@ -86,7 +86,7 @@ pub use self::{
     args::{FromArg, IntoArg, NativeFunction},
     async_tasks::AsyncTaskObject,
     data_store::DataStore,
-    image::{ColorSpace, Image, ImageType, UninitImage},
+    image::{ColorSpace, Image, ImageData, ImageType, Pixel, UninitImage},
     library_data::{get_library_data, initialize, WolframLibraryData},
     numeric_array::{
         NumericArray, NumericArrayConvertMethod, NumericArrayDataType, NumericArrayKind,
