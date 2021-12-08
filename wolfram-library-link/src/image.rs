@@ -7,13 +7,15 @@ use crate::{
     sys::{self, mbool, mint, MImage_CS_Type::*, MImage_Data_Type::*},
 };
 
-/// Native Wolfram [`Image`][ref/Image]<sub>WL</sub>.
+/// Native Wolfram [`Image`][ref/Image]<sub>WL</sub> or
+/// [`Image3D`][ref/Image3D]<sub>WL</sub>.
 ///
 // TODO: This represents a 2-dimensional image.
 ///
 /// Use [`UninitImage::new_2d()`] to construct a new 2-dimensional image.
 ///
 /// [ref/Image]: https://reference.wolfram.com/language/ref/Image.html
+/// [ref/Image3D]: https://reference.wolfram.com/language/ref/Image3D.html
 pub struct Image<T = ()>(sys::MImage, PhantomData<T>);
 
 /// Represents an allocated [`Image`] whose image data has not yet been initialized.

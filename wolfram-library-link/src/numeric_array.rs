@@ -46,8 +46,7 @@ use crate::sys::MNumericArray_Convert_Method::*;
 #[derive(ref_cast::RefCast)]
 pub struct NumericArray<T = ()>(sys::MNumericArray, PhantomData<T>);
 
-/// Represents a [`NumericArray`] which has been allocated, but whose elements have not
-/// yet been initialized.
+/// Represents an allocated [`NumericArray`] whose elements have not yet been initialized.
 ///
 /// Use [`as_slice_mut()`][`UninitNumericArray::as_slice_mut()`] to initialize the
 /// elements of this [`UninitNumericArray`].
