@@ -59,54 +59,42 @@ impl Image {
     ///
     /// *LibraryLink C API Documentation:* [`MImage_getFlattenedLength`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_getFlattenedLength.html)
     pub fn flattened_length(&self) -> usize {
-        let Image(raw) = *self;
-
-        let len: sys::mint = unsafe { rtl::MImage_getFlattenedLength(raw) };
+        let len: sys::mint = unsafe { rtl::MImage_getFlattenedLength(self.as_raw()) };
 
         usize::try_from(len).expect("Image flattened length overflows usize")
     }
 
     /// *LibraryLink C API Documentation:* [`MImage_getChannels`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_getChannels.html)
     pub fn channels(&self) -> usize {
-        let Image(raw) = *self;
-
-        let channels: sys::mint = unsafe { rtl::MImage_getChannels(raw) };
+        let channels: sys::mint = unsafe { rtl::MImage_getChannels(self.as_raw()) };
 
         usize::try_from(channels).expect("Image channels count overflows usize")
     }
 
     /// *LibraryLink C API Documentation:* [`MImage_getRank`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_getRank.html)
     pub fn rank(&self) -> usize {
-        let Image(raw) = *self;
-
-        let rank: sys::mint = unsafe { rtl::MImage_getRank(raw) };
+        let rank: sys::mint = unsafe { rtl::MImage_getRank(self.as_raw()) };
 
         usize::try_from(rank).expect("Image rank overflows usize")
     }
 
     /// *LibraryLink C API Documentation:* [`MImage_getRowCount`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_getRowCount.html)
     pub fn row_count(&self) -> usize {
-        let Image(raw) = *self;
-
-        let count: sys::mint = unsafe { rtl::MImage_getRowCount(raw) };
+        let count: sys::mint = unsafe { rtl::MImage_getRowCount(self.as_raw()) };
 
         usize::try_from(count).expect("Image row count overflows usize")
     }
 
     /// *LibraryLink C API Documentation:* [`MImage_getColumnCount`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_getColumnCount.html)
     pub fn column_count(&self) -> usize {
-        let Image(raw) = *self;
-
-        let count: sys::mint = unsafe { rtl::MImage_getColumnCount(raw) };
+        let count: sys::mint = unsafe { rtl::MImage_getColumnCount(self.as_raw()) };
 
         usize::try_from(count).expect("Image column count overflows usize")
     }
 
     /// *LibraryLink C API Documentation:* [`MImage_getSliceCount`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_getSliceCount.html)
     pub fn slice_count(&self) -> usize {
-        let Image(raw) = *self;
-
-        let count: sys::mint = unsafe { rtl::MImage_getSliceCount(raw) };
+        let count: sys::mint = unsafe { rtl::MImage_getSliceCount(self.as_raw()) };
 
         usize::try_from(count).expect("Image slice count overflows usize")
     }
@@ -121,9 +109,7 @@ impl Image {
 
     /// *LibraryLink C API Documentation:* [`MImage_getColorSpace`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_getColorSpace.html)
     pub fn color_space_raw(&self) -> sys::colorspace_t {
-        let Image(raw) = *self;
-
-        unsafe { rtl::MImage_getColorSpace(raw) }
+        unsafe { rtl::MImage_getColorSpace(self.as_raw()) }
     }
 
     /// Get the data type of this image.
@@ -134,25 +120,19 @@ impl Image {
 
     /// *LibraryLink C API Documentation:* [`MImage_getDataType`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_getDataType.html)
     pub fn data_type_raw(&self) -> sys::imagedata_t {
-        let Image(raw) = *self;
-
-        unsafe { rtl::MImage_getDataType(raw) }
+        unsafe { rtl::MImage_getDataType(self.as_raw()) }
     }
 
     /// *LibraryLink C API Documentation:* [`MImage_alphaChannelQ`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_alphaChannelQ.html)
     pub fn has_alpha_channel(&self) -> bool {
-        let Image(raw) = *self;
-
-        let boole: mbool = unsafe { rtl::MImage_alphaChannelQ(raw) };
+        let boole: mbool = unsafe { rtl::MImage_alphaChannelQ(self.as_raw()) };
 
         crate::bool_from_mbool(boole)
     }
 
     /// *LibraryLink C API Documentation:* [`MImage_interleavedQ`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_interleavedQ.html)
     pub fn is_interleaved(&self) -> bool {
-        let Image(raw) = *self;
-
-        let boole: mbool = unsafe { rtl::MImage_interleavedQ(raw) };
+        let boole: mbool = unsafe { rtl::MImage_interleavedQ(self.as_raw()) };
 
         crate::bool_from_mbool(boole)
     }
@@ -167,9 +147,7 @@ impl Image {
     ///
     /// *LibraryLink C API Documentation:* [`MImage_shareCount`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_shareCount.html)
     pub fn share_count(&self) -> usize {
-        let Image(raw) = *self;
-
-        let count: sys::mint = unsafe { rtl::MImage_shareCount(raw) };
+        let count: sys::mint = unsafe { rtl::MImage_shareCount(self.as_raw()) };
 
         usize::try_from(count).expect("Image share count mint overflows usize")
     }
@@ -185,7 +163,7 @@ impl Image {
 
     /// Extract the raw [`MImage`][sys::MImage] instance from this `Image`.
     pub unsafe fn into_raw(self) -> sys::MImage {
-        let Image(raw) = self;
+        let raw = self.as_raw();
 
         // Don't run Drop on `self`; ownership of this value is being given to the
         // caller.
@@ -194,11 +172,17 @@ impl Image {
         raw
     }
 
+    #[allow(missing_docs)]
+    #[inline]
+    pub unsafe fn as_raw(&self) -> sys::MImage {
+        let Image(raw, PhantomData) = *self;
+
+        raw
+    }
+
     /// *LibraryLink C API Documentation:* [`MImage_getRawData`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_getRawData.html)
     pub unsafe fn raw_data(&self) -> *mut c_void {
-        let Image(raw) = *self;
-
-        rtl::MImage_getRawData(raw)
+        rtl::MImage_getRawData(self.as_raw())
     }
 }
 
