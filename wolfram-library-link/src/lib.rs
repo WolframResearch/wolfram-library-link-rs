@@ -427,6 +427,8 @@ fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
 /// [`mcomplex`][crate::sys::mcomplex] | `Complex`
 /// [`String`]                         | `String`
 /// [`CString`][std::ffi::CString]     | `String`
+/// [`&NumericArray`][NumericArray]    | a. `LibraryDataType[NumericArray]` <br/> b. `{LibraryDataType[NumericArray], "Constant"}`[^1]
+/// [`NumericArray`]                   | a. `{LibraryDataType[NumericArray], "Manual"}`[^1] <br/> b. `{LibraryDataType[NumericArray], "Shared"}`[^1]
 /// [`&NumericArray<T>`][NumericArray] | a. `LibraryDataType[NumericArray, `[`"..."`][ref/NumericArray]`]`[^1] <br/> b. `{LibraryDataType[NumericArray, "..."], "Constant"}`[^1]
 /// [`NumericArray<T>`]                | a. `{LibraryDataType[NumericArray, "..."], "Manual"}`[^1] <br/> b. `{LibraryDataType[NumericArray, "..."], "Shared"}`[^1]
 /// [`DataStore`]                      | `"DataStore"`
@@ -447,6 +449,7 @@ fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
 /// [`f32`]                            | `Real`
 /// [`mcomplex`][crate::sys::mcomplex] | `Complex`
 /// [`String`]                         | `String`
+/// [`NumericArray`]                   | `LibraryDataType[NumericArray]`
 /// [`NumericArray<T>`]                | `LibraryDataType[NumericArray, `[`"..."`][ref/NumericArray][^1]`]`
 /// [`DataStore`]                      | `"DataStore"`
 ///
