@@ -28,7 +28,7 @@ use crate::sys::MNumericArray_Data_Type::{
 
 use crate::sys::MNumericArray_Convert_Method::*;
 
-/// Native Wolfram [`NumericArray`][ref/NumericArray].
+/// Native Wolfram [`NumericArray`][ref/NumericArray]<sub>WL</sub>.
 ///
 /// This type is an ABI-compatible wrapper around [`wolfram_library_link_sys::MNumericArray`].
 ///

@@ -1,6 +1,6 @@
 //! A safe and convenient wrapper around Wolfram [LibraryLink][library-link-guide].
 //!
-//! LibraryLink is framework for writing C/Rust programs which can be
+//! LibraryLink is framework for writing C/Rust programs that can be
 //! [loaded][library-function-load] by the Wolfram Language.
 //!
 //! The primary interface provided by this library is [`#[wolfram_library_function]`][wlf]:
