@@ -2778,6 +2778,657 @@ fn bindgen_test_layout_st_WolframIOLibrary_Functions() {
     );
 }
 pub type WolframIOLibrary_Functions = *mut st_WolframIOLibrary_Functions;
+pub type raw_t_bit = ::std::os::raw::c_schar;
+pub type raw_t_ubit8 = ::std::os::raw::c_uchar;
+pub type raw_t_ubit16 = ::std::os::raw::c_ushort;
+pub type raw_t_real32 = f32;
+pub type raw_t_real64 = f64;
+pub mod MImage_Data_Type {
+    pub type Type = i32;
+    pub const MImage_Type_Undef: Type = -1;
+    pub const MImage_Type_Bit: Type = 0;
+    pub const MImage_Type_Bit8: Type = 1;
+    pub const MImage_Type_Bit16: Type = 2;
+    pub const MImage_Type_Real32: Type = 3;
+    pub const MImage_Type_Real: Type = 4;
+}
+pub use self::MImage_Data_Type::Type as imagedata_t;
+pub mod MImage_CS_Type {
+    pub type Type = i32;
+    pub const MImage_CS_Undef: Type = -1;
+    pub const MImage_CS_Gray: Type = 0;
+    pub const MImage_CS_RGB: Type = 1;
+    pub const MImage_CS_HSB: Type = 2;
+    pub const MImage_CS_CMYK: Type = 3;
+    pub const MImage_CS_XYZ: Type = 4;
+    pub const MImage_CS_LUV: Type = 5;
+    pub const MImage_CS_LAB: Type = 6;
+    pub const MImage_CS_LCH: Type = 7;
+    pub const MImage_CS_Automatic: Type = 8;
+}
+pub use self::MImage_CS_Type::Type as colorspace_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct st_WolframImageLibrary_Functions {
+    #[doc = " width"]
+    pub MImage_new2D: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: mint,
+            arg2: mint,
+            arg3: mint,
+            arg4: imagedata_t,
+            arg5: colorspace_t,
+            arg6: mbool,
+            arg7: *mut MImage,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " slices"]
+    pub MImage_new3D: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: mint,
+            arg2: mint,
+            arg3: mint,
+            arg4: mint,
+            arg5: imagedata_t,
+            arg6: colorspace_t,
+            arg7: mbool,
+            arg8: *mut MImage,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub MImage_clone: ::std::option::Option<
+        unsafe extern "C" fn(arg1: MImage, arg2: *mut MImage) -> ::std::os::raw::c_int,
+    >,
+    pub MImage_free: ::std::option::Option<unsafe extern "C" fn(arg1: MImage)>,
+    pub MImage_disown: ::std::option::Option<unsafe extern "C" fn(arg1: MImage)>,
+    pub MImage_disownAll: ::std::option::Option<unsafe extern "C" fn(arg1: MImage)>,
+    pub MImage_shareCount:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> mint>,
+    pub MImage_getDataType:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> imagedata_t>,
+    pub MImage_getRowCount:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> mint>,
+    pub MImage_getColumnCount:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> mint>,
+    pub MImage_getSliceCount:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> mint>,
+    pub MImage_getRank: ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> mint>,
+    pub MImage_getChannels:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> mint>,
+    pub MImage_alphaChannelQ:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> mbool>,
+    pub MImage_interleavedQ:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> mbool>,
+    pub MImage_getColorSpace:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> colorspace_t>,
+    pub MImage_getFlattenedLength:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> mint>,
+    #[doc = " image"]
+    pub MImage_getBit: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MImage,
+            arg2: *mut mint,
+            arg3: mint,
+            arg4: *mut raw_t_bit,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " image"]
+    pub MImage_getByte: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MImage,
+            arg2: *mut mint,
+            arg3: mint,
+            arg4: *mut raw_t_ubit8,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " image"]
+    pub MImage_getBit16: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MImage,
+            arg2: *mut mint,
+            arg3: mint,
+            arg4: *mut raw_t_ubit16,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " image"]
+    pub MImage_getReal32: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MImage,
+            arg2: *mut mint,
+            arg3: mint,
+            arg4: *mut raw_t_real32,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " image"]
+    pub MImage_getReal: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MImage,
+            arg2: *mut mint,
+            arg3: mint,
+            arg4: *mut raw_t_real64,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " image"]
+    pub MImage_setBit: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MImage,
+            arg2: *mut mint,
+            arg3: mint,
+            arg4: raw_t_bit,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " image"]
+    pub MImage_setByte: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MImage,
+            arg2: *mut mint,
+            arg3: mint,
+            arg4: raw_t_ubit8,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " image"]
+    pub MImage_setBit16: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MImage,
+            arg2: *mut mint,
+            arg3: mint,
+            arg4: raw_t_ubit16,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " image"]
+    pub MImage_setReal32: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MImage,
+            arg2: *mut mint,
+            arg3: mint,
+            arg4: raw_t_real32,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " image"]
+    pub MImage_setReal: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MImage,
+            arg2: *mut mint,
+            arg3: mint,
+            arg4: raw_t_real64,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub MImage_getRawData: ::std::option::Option<
+        unsafe extern "C" fn(arg1: MImage) -> *mut ::std::os::raw::c_void,
+    >,
+    pub MImage_getBitData:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_bit>,
+    pub MImage_getByteData:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_ubit8>,
+    pub MImage_getBit16Data:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_ubit16>,
+    pub MImage_getReal32Data:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_real32>,
+    pub MImage_getRealData:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_real64>,
+    #[doc = " type"]
+    pub MImage_convertType: ::std::option::Option<
+        unsafe extern "C" fn(arg1: MImage, arg2: imagedata_t, arg3: mbool) -> MImage,
+    >,
+}
+#[test]
+fn bindgen_test_layout_st_WolframImageLibrary_Functions() {
+    assert_eq!(
+        ::std::mem::size_of::<st_WolframImageLibrary_Functions>(),
+        272usize,
+        concat!("Size of: ", stringify!(st_WolframImageLibrary_Functions))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<st_WolframImageLibrary_Functions>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(st_WolframImageLibrary_Functions)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_new2D
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_new2D)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_new3D
+                as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_new3D)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_clone
+                as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_clone)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_free
+                as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_free)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_disown
+                as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_disown)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_disownAll
+                as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_disownAll)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_shareCount
+                as *const _ as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_shareCount)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_getDataType as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getDataType)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_getRowCount as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getRowCount)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_getColumnCount as *const _ as usize
+        },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getColumnCount)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_getSliceCount as *const _ as usize
+        },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getSliceCount)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_getRank
+                as *const _ as usize
+        },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getRank)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_getChannels as *const _ as usize
+        },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getChannels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_alphaChannelQ as *const _ as usize
+        },
+        104usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_alphaChannelQ)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_interleavedQ as *const _ as usize
+        },
+        112usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_interleavedQ)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_getColorSpace as *const _ as usize
+        },
+        120usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getColorSpace)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_getFlattenedLength as *const _ as usize
+        },
+        128usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getFlattenedLength)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_getBit
+                as *const _ as usize
+        },
+        136usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getBit)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_getByte
+                as *const _ as usize
+        },
+        144usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getByte)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_getBit16
+                as *const _ as usize
+        },
+        152usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getBit16)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_getReal32
+                as *const _ as usize
+        },
+        160usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getReal32)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_getReal
+                as *const _ as usize
+        },
+        168usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getReal)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_setBit
+                as *const _ as usize
+        },
+        176usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_setBit)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_setByte
+                as *const _ as usize
+        },
+        184usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_setByte)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_setBit16
+                as *const _ as usize
+        },
+        192usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_setBit16)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_setReal32
+                as *const _ as usize
+        },
+        200usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_setReal32)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_setReal
+                as *const _ as usize
+        },
+        208usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_setReal)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_getRawData
+                as *const _ as usize
+        },
+        216usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getRawData)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>())).MImage_getBitData
+                as *const _ as usize
+        },
+        224usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getBitData)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_getByteData as *const _ as usize
+        },
+        232usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getByteData)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_getBit16Data as *const _ as usize
+        },
+        240usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getBit16Data)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_getReal32Data as *const _ as usize
+        },
+        248usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getReal32Data)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_getRealData as *const _ as usize
+        },
+        256usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_getRealData)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframImageLibrary_Functions>()))
+                .MImage_convertType as *const _ as usize
+        },
+        264usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframImageLibrary_Functions),
+            "::",
+            stringify!(MImage_convertType)
+        )
+    );
+}
+pub type WolframImageLibrary_Functions = *mut st_WolframImageLibrary_Functions;
 pub type __builtin_va_list = [__va_list_tag; 1usize];
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2862,11 +3513,6 @@ pub struct st_WolframCompileLibrary_Functions {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct st_WolframSparseLibrary_Functions {
-    pub _address: u8,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct st_WolframImageLibrary_Functions {
     pub _address: u8,
 }
 #[repr(C)]

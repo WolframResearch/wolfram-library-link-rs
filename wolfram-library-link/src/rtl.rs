@@ -3,15 +3,16 @@
 //! Attempting to call these bindings will result in a panic if
 //! [`initialize()`][crate::initialize] has not been called.
 
-use std::ffi::c_void;
+use std::{ffi::c_void, os::raw::c_int};
 
 use once_cell::sync::Lazy;
 
 use crate::sys::{
-    self, errcode_t, mbool, mcomplex, mint, mreal, numericarray_convert_method_t,
-    numericarray_data_t, type_t, DataStore, DataStoreNode, MArgument, MImage,
-    MInputStream, MNumericArray, MOutputStream, MRawArray, MSparseArray, MTensor, WSENV,
-    WSLINK,
+    self, colorspace_t, errcode_t, imagedata_t, mbool, mcomplex, mint, mreal,
+    numericarray_convert_method_t, numericarray_data_t, raw_t_bit, raw_t_real32,
+    raw_t_real64, raw_t_ubit16, raw_t_ubit8, type_t, DataStore, DataStoreNode, MArgument,
+    MImage, MInputStream, MNumericArray, MOutputStream, MRawArray, MSparseArray, MTensor,
+    WSENV, WSLINK,
 };
 
 // TODO: Include auto-generated doc comment with path to appropriate field.
@@ -388,8 +389,49 @@ rtl_func![
     ]
 ];
 
+//======================================
+// Image Library
+//======================================
+
+rtl_func![
+    imageLibraryFunctions => [
+        pub MImage_new2D: unsafe extern "C" fn(arg1: mint, arg2: mint, arg3: mint, arg4: imagedata_t, arg5: colorspace_t, arg6: mbool, arg7: *mut MImage) -> c_int,
+        pub MImage_new3D: unsafe extern "C" fn(arg1: mint, arg2: mint, arg3: mint, arg4: mint, arg5: imagedata_t, arg6: colorspace_t, arg7: mbool, arg8: *mut MImage) -> c_int,
+        pub MImage_clone: unsafe extern "C" fn(arg1: MImage, arg2: *mut MImage) -> c_int,
+        pub MImage_free: unsafe extern "C" fn(arg1: MImage),
+        pub MImage_disown: unsafe extern "C" fn(arg1: MImage),
+        pub MImage_disownAll: unsafe extern "C" fn(arg1: MImage),
+        pub MImage_shareCount: unsafe extern "C" fn(arg1: MImage) -> mint,
+        pub MImage_getDataType: unsafe extern "C" fn(arg1: MImage) -> imagedata_t,
+        pub MImage_getRowCount: unsafe extern "C" fn(arg1: MImage) -> mint,
+        pub MImage_getColumnCount: unsafe extern "C" fn(arg1: MImage) -> mint,
+        pub MImage_getSliceCount: unsafe extern "C" fn(arg1: MImage) -> mint,
+        pub MImage_getRank: unsafe extern "C" fn(arg1: MImage) -> mint,
+        pub MImage_getChannels: unsafe extern "C" fn(arg1: MImage) -> mint,
+        pub MImage_alphaChannelQ: unsafe extern "C" fn(arg1: MImage) -> mbool,
+        pub MImage_interleavedQ: unsafe extern "C" fn(arg1: MImage) -> mbool,
+        pub MImage_getColorSpace: unsafe extern "C" fn(arg1: MImage) -> colorspace_t,
+        pub MImage_getFlattenedLength: unsafe extern "C" fn(arg1: MImage) -> mint,
+        pub MImage_getBit: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_bit) -> c_int,
+        pub MImage_getByte: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_ubit8) -> c_int,
+        pub MImage_getBit16: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_ubit16) -> c_int,
+        pub MImage_getReal32: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_real32) -> c_int,
+        pub MImage_getReal: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_real64) -> c_int,
+        pub MImage_setBit: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_bit) -> c_int,
+        pub MImage_setByte: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_ubit8) -> c_int,
+        pub MImage_setBit16: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_ubit16) -> c_int,
+        pub MImage_setReal32: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_real32) -> c_int,
+        pub MImage_setReal: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_real64) -> c_int,
+        pub MImage_getRawData: unsafe extern "C" fn(arg1: MImage) -> *mut c_void,
+        pub MImage_getBitData: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_bit,
+        pub MImage_getByteData: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_ubit8,
+        pub MImage_getBit16Data: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_ubit16,
+        pub MImage_getReal32Data: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_real32,
+        pub MImage_getRealData: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_real64,
+        pub MImage_convertType: unsafe extern "C" fn(arg1: MImage, arg2: imagedata_t, arg3: mbool) -> MImage,
+    ]
+];
+
 // pub compileLibraryFunctions: *mut st_WolframCompileLibrary_Functions,
 // pub sparseLibraryFunctions: *mut st_WolframSparseLibrary_Functions,
-// pub imageLibraryFunctions: *mut st_WolframImageLibrary_Functions,
 // pub rawarrayLibraryFunctions: *mut st_WolframRawArrayLibrary_Functions,
-// pub numericarrayLibraryFunctions: *mut st_WolframNumericArrayLibrary_Functions,
