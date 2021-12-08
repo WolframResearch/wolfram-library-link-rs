@@ -686,7 +686,7 @@ unsafe fn flattened_length(numeric_array: sys::MNumericArray) -> usize {
 //======================================
 
 impl<T: NumericArrayType> UninitNumericArray<T> {
-    /// Construct a new uninitialized NumericArray with the specified dimensions.
+    /// Construct a new uninitialized `NumericArray` with the specified dimensions.
     ///
     /// # Panics
     ///
