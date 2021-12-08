@@ -90,6 +90,9 @@ impl Pixel {
 // Traits
 //======================================
 
+#[allow(missing_docs)]
+type Getter<T> = unsafe extern "C" fn(sys::MImage, *mut mint, mint, *mut T) -> c_int;
+
 /// Trait implemented for types that can *logically* be stored in an [`Image`].
 ///
 /// The `STORAGE` associated type represents the data that is *physically* stored in the
@@ -105,7 +108,7 @@ impl Pixel {
 ///
 /// This trait is already implemented for all types that can legally be stored in an
 /// [`Image`] implementing this trait for other types may lead to undefined behavior.
-pub unsafe trait ImageData: Copy {
+pub unsafe trait ImageData: Copy + Default {
     /// The type of the data that is *physically* stored in the [`Image`] buffer.
     ///
     /// In practice, this type is equal to `Self` for every logicaly type except `bool`,
@@ -114,11 +117,7 @@ pub unsafe trait ImageData: Copy {
     type STORAGE: Copy;
 
     #[allow(missing_docs)]
-    unsafe fn get_raw(
-        image: &Image<Self>,
-        pos: *const mint,
-        channel: mint,
-    ) -> (Self, c_int);
+    fn getter() -> Getter<Self>;
 
     // TODO: This has the same restrictions as NumericArray::as_slice_mut(), based on
     //       the share_count().
@@ -138,89 +137,61 @@ assert_type_eq_all!(f64, sys::raw_t_real64);
 unsafe impl ImageData for bool {
     type STORAGE = i8; // sys::raw_t_bit
 
-    unsafe fn get_raw(
-        image: &Image<Self>,
-        pos: *const mint,
-        channel: mint,
-    ) -> (Self, c_int) {
-        let mut value: i8 = 0;
+    fn getter() -> Getter<Self> {
+        extern "C" fn bool_getter(
+            image: sys::MImage,
+            pos: *mut mint,
+            channel: mint,
+            value: *mut bool,
+        ) -> c_int {
+            let mut storage: <bool as ImageData>::STORAGE = 0;
 
-        let err_code: c_int =
-            rtl::MImage_getBit(image.as_raw(), pos as *mut mint, channel, &mut value);
+            let err_code =
+                unsafe { rtl::MImage_getBit(image, pos, channel, &mut storage) };
 
-        // FIXME: Is this meant to be non-negative vs negative, or zero vs non-zero?
-        //        This currently assumes zero vs non-zero.
-        let boole: bool = value != 0;
+            if err_code == 0 {
+                // FIXME: Is this meant to be non-negative vs negative, or zero vs non-zero?
+                //        This currently assumes zero vs non-zero.
+                let boole: bool = storage != 0;
+                unsafe { *value = boole };
+            }
 
-        (boole, err_code)
+            err_code
+        }
+
+        bool_getter
     }
 }
 
 unsafe impl ImageData for u8 {
     type STORAGE = Self; // sys::raw_t_ubit8
 
-    unsafe fn get_raw(
-        image: &Image<Self>,
-        pos: *const mint,
-        channel: mint,
-    ) -> (Self, c_int) {
-        let mut value: u8 = 0;
-
-        let err_code: c_int =
-            rtl::MImage_getByte(image.as_raw(), pos as *mut mint, channel, &mut value);
-
-        (value, err_code)
+    fn getter() -> Getter<Self> {
+        *rtl::MImage_getByte
     }
 }
 
 unsafe impl ImageData for u16 {
     type STORAGE = Self; // sys::raw_t_ubit16
 
-    unsafe fn get_raw(
-        image: &Image<Self>,
-        pos: *const mint,
-        channel: mint,
-    ) -> (Self, c_int) {
-        let mut value: u16 = 0;
-
-        let err_code: c_int =
-            rtl::MImage_getBit16(image.as_raw(), pos as *mut mint, channel, &mut value);
-
-        (value, err_code)
+    fn getter() -> Getter<Self> {
+        *rtl::MImage_getBit16
     }
 }
 
 unsafe impl ImageData for f32 {
     type STORAGE = Self; // sys::raw_t_real32
 
-    unsafe fn get_raw(
-        image: &Image<Self>,
-        pos: *const mint,
-        channel: mint,
-    ) -> (Self, c_int) {
-        let mut value: f32 = 0.0;
-
-        let err_code: c_int =
-            rtl::MImage_getReal32(image.as_raw(), pos as *mut mint, channel, &mut value);
-
-        (value, err_code)
+    fn getter() -> Getter<Self> {
+        *rtl::MImage_getReal32
     }
 }
 
 unsafe impl ImageData for f64 {
     type STORAGE = Self; // sys::raw_t_real64
 
-    unsafe fn get_raw(
-        image: &Image<Self>,
-        pos: *const mint,
-        channel: mint,
-    ) -> (Self, c_int) {
-        let mut value: f64 = 0.0;
-
-        let err_code: c_int =
-            rtl::MImage_getReal(image.as_raw(), pos as *mut mint, channel, &mut value);
-
-        (value, err_code)
+    fn getter() -> Getter<Self> {
+        *rtl::MImage_getReal
     }
 }
 
@@ -251,11 +222,16 @@ impl<T: ImageData> Image<T> {
         // only provided a 2D index.
         assert_eq!(pixel_pos.len(), self.rank());
 
-        let (value, err_code): (T, c_int) = unsafe {
-            <T as ImageData>::get_raw(
-                self,
+        let getter: unsafe extern "C" fn(_, _, _, _) -> c_int = T::getter();
+
+        let mut value: T = T::default();
+
+        let err_code: c_int = unsafe {
+            getter(
+                self.as_raw(),
                 pixel_pos.as_ptr() as *mut mint,
                 channel as mint,
+                &mut value,
             )
         };
 
