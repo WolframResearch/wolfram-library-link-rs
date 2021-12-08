@@ -33,6 +33,15 @@ static LIBRARY_DATA: OnceCell<Data> = OnceCell::new();
 /// This function initializes the lazy Wolfram Runtime Library bindings in the
 /// [`rtl`][`crate::rtl`] module.
 ///
+/// # Safety
+///
+/// The following conditions must be met for a call to this function to be valid:
+///
+/// * `data` must be a valid and fully initialized [`sys::WolframLibraryData`] instance
+///   created by the Wolfram Kernel and passed into the current LibraryLink function.
+/// * The call to `initialize()` must happen from the main Kernel thread. This is true for
+///   all LibraryLink functions called directly by the Kernel.
+///
 /// # Example
 ///
 /// When a dynamic library is loaded by the Wolfram Language (for example, via
@@ -55,15 +64,6 @@ static LIBRARY_DATA: OnceCell<Data> = OnceCell::new();
 /// ```
 ///
 /// [lib-init]: https://reference.wolfram.com/language/LibraryLink/tutorial/LibraryStructure.html#280210622
-///
-/// # Safety
-///
-/// The following conditions must be met for a call to this function to be valid:
-///
-/// * `data` must be a valid and fully initialized [`sys::WolframLibraryData`] instance
-///   created by the Wolfram Kernel and passed into the current LibraryLink function.
-/// * The call to `initialize()` must happen from the main Kernel thread. This is true for
-///   all LibraryLink functions called directly by the Kernel.
 pub unsafe fn initialize(data: sys::WolframLibraryData) -> Result<(), ()> {
     let library_data = WolframLibraryData::new(data)?;
 
