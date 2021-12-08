@@ -1,4 +1,4 @@
-use std::os::raw::c_int;
+use std::{ffi::c_void, os::raw::c_int};
 
 use crate::{
     rtl,
@@ -64,6 +64,24 @@ impl Image {
         let len: sys::mint = unsafe { rtl::MImage_getFlattenedLength(raw) };
 
         usize::try_from(len).expect("Image flattened length overflows usize")
+    }
+
+    /// *LibraryLink C API Documentation:* [`MImage_getChannels`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_getChannels.html)
+    pub fn channels(&self) -> usize {
+        let Image(raw) = *self;
+
+        let channels: sys::mint = unsafe { rtl::MImage_getChannels(raw) };
+
+        usize::try_from(channels).expect("Image channels count overflows usize")
+    }
+
+    /// *LibraryLink C API Documentation:* [`MImage_getRank`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_getRank.html)
+    pub fn rank(&self) -> usize {
+        let Image(raw) = *self;
+
+        let rank: sys::mint = unsafe { rtl::MImage_getRank(raw) };
+
+        usize::try_from(rank).expect("Image rank overflows usize")
     }
 
     /// *LibraryLink C API Documentation:* [`MImage_getRowCount`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_getRowCount.html)
@@ -174,6 +192,13 @@ impl Image {
         std::mem::forget(self);
 
         raw
+    }
+
+    /// *LibraryLink C API Documentation:* [`MImage_getRawData`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MImage_getRawData.html)
+    pub unsafe fn raw_data(&self) -> *mut c_void {
+        let Image(raw) = *self;
+
+        rtl::MImage_getRawData(raw)
     }
 }
 
