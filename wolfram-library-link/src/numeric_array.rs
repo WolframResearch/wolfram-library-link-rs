@@ -617,6 +617,10 @@ impl<T> NumericArray<T> {
     ///
     /// If this `NumericArray` is not shared, the share count is 0.
     ///
+    /// If this `NumericArray` was passed into the current library "by reference" due to
+    /// use of the `Automatic` or `"Constant"` memory management strategy, that reference
+    /// is not reflected in the `share_count()`.
+    ///
     /// *LibraryLink C API Documentation:* [`MNumericArray_shareCount`](https://reference.wolfram.com/language/LibraryLink/ref/callback/MNumericArray_shareCount.html)
     pub fn share_count(&self) -> usize {
         let NumericArray(raw, PhantomData) = *self;
