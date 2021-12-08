@@ -74,18 +74,18 @@ impl AsyncTaskObject {
     ///
     /// *LibraryLink C Function:* [`asynchronousTaskAliveQ`][sys::st_WolframIOLibrary_Functions::asynchronousTaskAliveQ].
     pub fn is_alive(&self) -> bool {
-        let is_alive: i32 = unsafe { rtl::asynchronousTaskAliveQ(self.id()) };
+        let is_alive: sys::mbool = unsafe { rtl::asynchronousTaskAliveQ(self.id()) };
 
-        is_alive != 0
+        crate::bool_from_mbool(is_alive)
     }
 
     /// Returns whether this async task has been started.
     ///
     /// *LibraryLink C Function:* [`asynchronousTaskStartedQ`][sys::st_WolframIOLibrary_Functions::asynchronousTaskStartedQ].
     pub fn is_started(&self) -> bool {
-        let is_started: i32 = unsafe { rtl::asynchronousTaskStartedQ(self.id()) };
+        let is_started: sys::mbool = unsafe { rtl::asynchronousTaskStartedQ(self.id()) };
 
-        is_started != 0
+        crate::bool_from_mbool(is_started)
     }
 
     /// Raise a new named asynchronous event associated with the current async task.

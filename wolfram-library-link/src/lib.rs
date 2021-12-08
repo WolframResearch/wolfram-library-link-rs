@@ -281,6 +281,11 @@ fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
     f(link)
 }
 
+#[inline]
+fn bool_from_mbool(boole: sys::mbool) -> bool {
+    boole != 0
+}
+
 /// Export the specified functions as native LibraryLink functions.
 ///
 /// [`NativeFunction`] must be implemented by the functions

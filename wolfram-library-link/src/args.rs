@@ -66,7 +66,7 @@ pub trait NativeFunction<'a> {
 
 impl FromArg<'_> for bool {
     unsafe fn from_arg(arg: &MArgument) -> Self {
-        *arg.boolean != 0
+        crate::bool_from_mbool(*arg.boolean)
     }
 }
 
