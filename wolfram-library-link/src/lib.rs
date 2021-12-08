@@ -55,6 +55,7 @@ mod async_tasks;
 #[doc(hidden)]
 pub mod catch_panic;
 mod data_store;
+mod image;
 mod library_data;
 /// This module is *semver exempt*. This is not intended to be part of the public API of
 /// wolfram-library-link.
@@ -85,6 +86,7 @@ pub use self::{
     args::{FromArg, IntoArg, NativeFunction},
     async_tasks::AsyncTaskObject,
     data_store::DataStore,
+    image::{ColorSpace, Image, ImageType, UninitImage},
     library_data::{get_library_data, initialize, WolframLibraryData},
     numeric_array::{
         NumericArray, NumericArrayConvertMethod, NumericArrayDataType, NumericArrayKind,
