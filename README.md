@@ -123,8 +123,8 @@ of building a Paclet from a Rust library.
 
 # Examples
 
-The [./wolfram-library-link/examples](./wolfram-library-link/examples) subdirectory contains sample
-programs demonstrating features of the `wolfram-library-link` API.
+The [./wolfram-library-link/examples](./wolfram-library-link/examples) subdirectory
+contains sample programs demonstrating features of the `wolfram-library-link` API.
 
 * [raw_librarylink_function.rs](wolfram-library-link/examples/raw_librarylink_function.rs)
   - Demonstrates how to write "raw" LibraryLink functions, using the `extern "C"` ABI
@@ -132,6 +132,12 @@ programs demonstrating features of the `wolfram-library-link` API.
 * [raw_wstp_function.rs](wolfram-library-link/examples/raw_wstp_function.rs)
   - Demonstrates how to write "raw" LibraryLink WSTP functions, using the `extern "C"` ABI,
     raw `WSLINK` type, and low-level WSTP operations.
+
+In addition to the polished high-level examples, the
+[wolfram-library-link/examples/tests/](wolfram-library-link/examples/tests/) directory
+contains test code for a more exhaustive range of functionality and behavior, and may be a
+useful additional reference. The [RustLink/Tests/](./RustLink/Tests/) directory contains
+the Wolfram Language unit testing logic that loads and calls the test functions.
 
 [wstp]: https://stash.wolfram.com/users/connorg/repos/wstp/browse
 [cargo-paclet]: https://stash.wolfram.com/users/connorg/repos/cargo-paclet/browse
