@@ -12,7 +12,7 @@ use ref_cast::RefCast;
 use crate::{
     rtl,
     sys::{self, mint, mreal, MArgument},
-    DataStore, NumericArray,
+    DataStore, Image, NumericArray,
 };
 
 /// Trait implemented for types that may be passed via an [`MArgument`].
@@ -210,6 +210,26 @@ impl<'a> FromArg<'a> for NumericArray<()> {
     }
 }
 
+//--------------------------------------
+// Image
+//--------------------------------------
+
+impl<'a, T: crate::ImageData> FromArg<'a> for &'a Image<T> {
+    unsafe fn from_arg(arg: &'a MArgument) -> &'a Image<T> {
+        Image::ref_cast(&*arg.image)
+    }
+}
+
+impl<'a, T: crate::ImageData> FromArg<'a> for Image<T> {
+    unsafe fn from_arg(arg: &'a MArgument) -> Image<T> {
+        Image::from_raw(*arg.image)
+    }
+}
+
+//--------------------------------------
+// DataStore
+//--------------------------------------
+
 impl FromArg<'_> for DataStore {
     unsafe fn from_arg(arg: &MArgument) -> DataStore {
         DataStore::from_raw(*arg.tensor as sys::DataStore)
@@ -352,13 +372,19 @@ impl IntoArg for String {
     }
 }
 
-//--------------------
-// NumericArray's
-//--------------------
+//---------------------------------------
+// NumericArray, Image, DataStore
+//---------------------------------------
 
 impl<T> IntoArg for NumericArray<T> {
     unsafe fn into_arg(self, arg: MArgument) {
         *arg.numeric = self.into_raw();
+    }
+}
+
+impl<T> IntoArg for Image<T> {
+    unsafe fn into_arg(self, arg: MArgument) {
+        *arg.image = self.into_raw();
     }
 }
 

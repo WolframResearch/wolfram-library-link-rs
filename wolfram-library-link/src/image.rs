@@ -16,10 +16,12 @@ use crate::{
 ///
 /// [ref/Image]: https://reference.wolfram.com/language/ref/Image.html
 /// [ref/Image3D]: https://reference.wolfram.com/language/ref/Image3D.html
+#[derive(ref_cast::RefCast)]
+#[repr(transparent)]
 pub struct Image<T = ()>(sys::MImage, PhantomData<T>);
 
 /// Represents an allocated [`Image`] whose image data has not yet been initialized.
-pub struct UninitImage(sys::MImage);
+pub struct UninitImage<T: ImageData>(sys::MImage, PhantomData<T>);
 
 /// Type of data stored in an [`Image`].
 #[repr(i32)]
@@ -92,6 +94,7 @@ impl Pixel {
 
 #[allow(missing_docs)]
 type Getter<T> = unsafe extern "C" fn(sys::MImage, *mut mint, mint, *mut T) -> c_int;
+type Setter<T> = unsafe extern "C" fn(sys::MImage, *mut mint, mint, T) -> c_int;
 
 /// Trait implemented for types that can *logically* be stored in an [`Image`].
 ///
@@ -116,8 +119,14 @@ pub unsafe trait ImageData: Copy + Default {
     /// data, but physically allocate one byte for each pixel/channel.
     type STORAGE: Copy;
 
+    /// The [`ImageType`] variant represented by `Self`.
+    const TYPE: ImageType;
+
     #[allow(missing_docs)]
     fn getter() -> Getter<Self>;
+
+    #[allow(missing_docs)]
+    fn setter() -> Setter<Self>;
 
     // TODO: This has the same restrictions as NumericArray::as_slice_mut(), based on
     //       the share_count().
@@ -136,6 +145,7 @@ assert_type_eq_all!(f64, sys::raw_t_real64);
 
 unsafe impl ImageData for bool {
     type STORAGE = i8; // sys::raw_t_bit
+    const TYPE: ImageType = ImageType::Bit;
 
     fn getter() -> Getter<Self> {
         extern "C" fn bool_getter(
@@ -161,37 +171,70 @@ unsafe impl ImageData for bool {
 
         bool_getter
     }
+
+    fn setter() -> Setter<Self> {
+        extern "C" fn bool_setter(
+            image: sys::MImage,
+            pos: *mut mint,
+            channel: mint,
+            value: bool,
+        ) -> c_int {
+            unsafe { rtl::MImage_setBit(image, pos, channel, i8::from(value)) }
+        }
+
+        bool_setter
+    }
 }
 
 unsafe impl ImageData for u8 {
     type STORAGE = Self; // sys::raw_t_ubit8
+    const TYPE: ImageType = ImageType::Bit8;
 
     fn getter() -> Getter<Self> {
         *rtl::MImage_getByte
+    }
+
+    fn setter() -> Setter<Self> {
+        *rtl::MImage_setByte
     }
 }
 
 unsafe impl ImageData for u16 {
     type STORAGE = Self; // sys::raw_t_ubit16
+    const TYPE: ImageType = ImageType::Bit16;
 
     fn getter() -> Getter<Self> {
         *rtl::MImage_getBit16
+    }
+
+    fn setter() -> Setter<Self> {
+        *rtl::MImage_setBit16
     }
 }
 
 unsafe impl ImageData for f32 {
     type STORAGE = Self; // sys::raw_t_real32
+    const TYPE: ImageType = ImageType::Real32;
 
     fn getter() -> Getter<Self> {
         *rtl::MImage_getReal32
+    }
+
+    fn setter() -> Setter<Self> {
+        *rtl::MImage_setReal32
     }
 }
 
 unsafe impl ImageData for f64 {
     type STORAGE = Self; // sys::raw_t_real64
+    const TYPE: ImageType = ImageType::Real64;
 
     fn getter() -> Getter<Self> {
         *rtl::MImage_getReal
+    }
+
+    fn setter() -> Setter<Self> {
+        *rtl::MImage_setReal
     }
 }
 
@@ -382,7 +425,7 @@ impl<T> Image<T> {
     }
 }
 
-impl UninitImage {
+impl<T: ImageData> UninitImage<T> {
     /// Construct a new uninitialized `Image` with the specified properties.
     ///
     /// # Panics
@@ -392,11 +435,10 @@ impl UninitImage {
         width: usize,
         height: usize,
         channels: usize,
-        ty: ImageType,
         space: ColorSpace,
         interleaving: bool,
-    ) -> UninitImage {
-        UninitImage::try_new_2d(width, height, channels, ty, space, interleaving)
+    ) -> UninitImage<T> {
+        UninitImage::try_new_2d(width, height, channels, space, interleaving)
             .expect("UninitImage::new_2d: failed to create image")
     }
 
@@ -406,10 +448,9 @@ impl UninitImage {
         width: usize,
         height: usize,
         channels: usize,
-        ty: ImageType,
         space: ColorSpace,
         interleaving: bool,
-    ) -> Result<UninitImage, i64> {
+    ) -> Result<UninitImage<T>, i64> {
         let width = mint::try_from(width).expect("image width overflows `mint`");
         let height = mint::try_from(height).expect("image height overflows `mint`");
         let channels =
@@ -422,7 +463,7 @@ impl UninitImage {
                 width,
                 height,
                 channels,
-                ty.as_raw(),
+                T::TYPE.as_raw(),
                 space.as_raw(),
                 mbool::from(interleaving),
                 &mut new_raw,
@@ -433,12 +474,71 @@ impl UninitImage {
             return Err(i64::from(err_code));
         }
 
-        Ok(UninitImage(new_raw))
+        Ok(UninitImage(new_raw, PhantomData))
+    }
+
+    /// Efficiently set every pixel value in this image to zero.
+    ///
+    /// This fully initializes this image, albeit to a black image.
+    pub fn zero(&mut self) {
+        let UninitImage(raw, PhantomData) = *self;
+
+        let data_ptr: *mut c_void = unsafe { rtl::MImage_getRawData(raw) };
+        let data_ptr = data_ptr as *mut T::STORAGE;
+        let len: mint = unsafe { rtl::MImage_getFlattenedLength(raw) };
+        let len =
+            usize::try_from(len).expect("UninitImage flattened length overflows usize");
+
+        unsafe { std::ptr::write_bytes(data_ptr, 0, len) }
+    }
+
+    /// Set the value of the specified pixel and channel.
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the underlying call to [`ImageData::setter()`] fails.
+    /// This can happen if the specified `pixel` or `channel` does not exist.
+    pub fn set(&mut self, pixel: Pixel, channel: usize, value: T) {
+        let pixel_pos: &[usize] = pixel.as_slice();
+
+        let rank = unsafe { rtl::MImage_getRank(self.0) };
+
+        // Assert that we have two indices if this is a 2D image, and three indices if
+        // this is a 3D image.
+        assert_eq!(pixel_pos.len(), rank as usize);
+
+        let setter: unsafe extern "C" fn(_, _, _, T) -> c_int = T::setter();
+
+        let err_code: c_int = unsafe {
+            setter(
+                self.0,
+                pixel_pos.as_ptr() as *mut mint,
+                channel as mint,
+                value,
+            )
+        };
+
+        if err_code != 0 {
+            // TODO: Return the error code?
+            panic!("Image pixel set() failed with error code {}", err_code);
+        }
     }
 
     /// Assume that the data in this image has been initialized.
-    pub unsafe fn assume_init(self) -> Image {
-        let UninitImage(raw) = self;
+    ///
+    /// Use [`UninitImage::zero()`] to quickly ensure that every pixel value has been
+    /// initialized.
+    ///
+    /// Use [`UninitImage::set()`] to set individual pixel/channel values.
+    ///
+    /// # Safety
+    ///
+    /// This function must only be called once all elements of this image have been
+    /// initialized. It is undefined behavior to construct an [`Image`] without first
+    /// initializing the data array. In practice, uninitialized values will be essentially
+    /// random, causing the resulting image to appear different each time it is created.
+    pub unsafe fn assume_init(self) -> Image<T> {
+        let UninitImage(raw, PhantomData) = self;
 
         // Don't run Drop on `self`; ownership of this value is being given to the caller.
         std::mem::forget(self);
