@@ -257,6 +257,24 @@ impl<T: ImageData> Image<T> {
     }
 
     /// Get the value of the specified pixel and channel.
+    ///
+    /// # Example
+    ///
+    /// Get the value of the second channel of the top-left pixel an in image.
+    ///
+    /// ```no_run
+    /// # use wolfram_library_link::{Image, Pixel};
+    /// # let image: Image<u8> = todo!();
+    /// // let image: Image<u8> = ...
+    ///
+    /// let value: u8 = image.get(Pixel::D2([0, 0]), 2).unwrap();
+    /// ```
+    ///
+    /// In an [`RGB`][ColorSpace::RGB] image, this is the value of the green channel for
+    /// this pixel.
+    ///
+    /// In an [`HSB`][ColorSpace::HSB] image, this is the value of the saturation for this
+    /// pixel.
     pub fn get(&self, pixel: Pixel, channel: usize) -> Option<T> {
         let pixel_pos: &[usize] = pixel.as_slice();
 
