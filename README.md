@@ -26,7 +26,7 @@ Advantages over the LibraryLink/WSTP C API:
 
 Follow the [**Quick Start**](./docs/QuickStart.md) guide to begin using `wolfram-library-link`.
 
-# Quick Examples {#quick-examples}
+# Quick Examples
 
 Each of the examples in this section are written with two back-to-back code blocks. The
 first shows the Rust code, the second shows the Wolfram Language code needed to load and
@@ -80,7 +80,7 @@ total[NumericArray[Range[1000000], "Integer64"]]
 
 See also: [`NumericArray`][ref/NumericArray], [`LibraryDataType`][ref/LibraryDataType]
 
-# Example Programs {#example-programs}
+# Example Programs
 
 The [./wolfram-library-link/examples](./wolfram-library-link/examples) subdirectory
 contains sample programs demonstrating features of the `wolfram-library-link` API.
