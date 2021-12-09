@@ -3429,6 +3429,296 @@ fn bindgen_test_layout_st_WolframImageLibrary_Functions() {
     );
 }
 pub type WolframImageLibrary_Functions = *mut st_WolframImageLibrary_Functions;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct st_WolframSparseLibrary_Functions {
+    pub MSparseArray_clone: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MSparseArray,
+            arg2: *mut MSparseArray,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub MSparseArray_free:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MSparseArray)>,
+    pub MSparseArray_disown:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MSparseArray)>,
+    pub MSparseArray_disownAll:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MSparseArray)>,
+    pub MSparseArray_shareCount:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MSparseArray) -> mint>,
+    pub MSparseArray_getRank:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MSparseArray) -> mint>,
+    pub MSparseArray_getDimensions:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MSparseArray) -> *const mint>,
+    pub MSparseArray_getImplicitValue:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor>,
+    pub MSparseArray_getExplicitValues:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor>,
+    pub MSparseArray_getRowPointers:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor>,
+    pub MSparseArray_getColumnIndices:
+        ::std::option::Option<unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor>,
+    pub MSparseArray_getExplicitPositions: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MSparseArray,
+            arg2: *mut MTensor,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub MSparseArray_resetImplicitValue: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MSparseArray,
+            arg2: MTensor,
+            arg3: *mut MSparseArray,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub MSparseArray_toMTensor: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MSparseArray,
+            arg2: *mut MTensor,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub MSparseArray_fromMTensor: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MTensor,
+            arg2: MTensor,
+            arg3: *mut MSparseArray,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub MSparseArray_fromExplicitPositions: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: MTensor,
+            arg2: MTensor,
+            arg3: MTensor,
+            arg4: MTensor,
+            arg5: *mut MSparseArray,
+        ) -> ::std::os::raw::c_int,
+    >,
+}
+#[test]
+fn bindgen_test_layout_st_WolframSparseLibrary_Functions() {
+    assert_eq!(
+        ::std::mem::size_of::<st_WolframSparseLibrary_Functions>(),
+        128usize,
+        concat!("Size of: ", stringify!(st_WolframSparseLibrary_Functions))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<st_WolframSparseLibrary_Functions>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(st_WolframSparseLibrary_Functions)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_clone as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_clone)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_free as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_free)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_disown as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_disown)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_disownAll as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_disownAll)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_shareCount as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_shareCount)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_getRank as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_getRank)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_getDimensions as *const _ as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_getDimensions)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_getImplicitValue as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_getImplicitValue)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_getExplicitValues as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_getExplicitValues)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_getRowPointers as *const _ as usize
+        },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_getRowPointers)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_getColumnIndices as *const _ as usize
+        },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_getColumnIndices)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_getExplicitPositions as *const _ as usize
+        },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_getExplicitPositions)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_resetImplicitValue as *const _ as usize
+        },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_resetImplicitValue)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_toMTensor as *const _ as usize
+        },
+        104usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_toMTensor)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_fromMTensor as *const _ as usize
+        },
+        112usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_fromMTensor)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<st_WolframSparseLibrary_Functions>()))
+                .MSparseArray_fromExplicitPositions as *const _ as usize
+        },
+        120usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(st_WolframSparseLibrary_Functions),
+            "::",
+            stringify!(MSparseArray_fromExplicitPositions)
+        )
+    );
+}
+pub type WolframSparseLibrary_Functions = *mut st_WolframSparseLibrary_Functions;
 pub type __builtin_va_list = [__va_list_tag; 1usize];
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -3508,11 +3798,6 @@ pub struct st_WolframRuntimeData {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct st_WolframCompileLibrary_Functions {
-    pub _address: u8,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct st_WolframSparseLibrary_Functions {
     pub _address: u8,
 }
 #[repr(C)]
