@@ -432,6 +432,31 @@ rtl_func![
     ]
 ];
 
+//======================================
+// Sparse Library
+//======================================
+
+rtl_func![
+    sparseLibraryFunctions => [
+        pub MSparseArray_clone: unsafe extern "C" fn(arg1: MSparseArray, arg2: *mut MSparseArray) -> c_int,
+        pub MSparseArray_free: unsafe extern "C" fn(arg1: MSparseArray),
+        pub MSparseArray_disown: unsafe extern "C" fn(arg1: MSparseArray),
+        pub MSparseArray_disownAll: unsafe extern "C" fn(arg1: MSparseArray),
+        pub MSparseArray_shareCount: unsafe extern "C" fn(arg1: MSparseArray) -> mint,
+        pub MSparseArray_getRank: unsafe extern "C" fn(arg1: MSparseArray) -> mint,
+        pub MSparseArray_getDimensions: unsafe extern "C" fn(arg1: MSparseArray) -> *const mint,
+        pub MSparseArray_getImplicitValue: unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor,
+        pub MSparseArray_getExplicitValues: unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor,
+        pub MSparseArray_getRowPointers: unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor,
+        pub MSparseArray_getColumnIndices: unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor,
+        pub MSparseArray_getExplicitPositions: unsafe extern "C" fn(arg1: MSparseArray, arg2: *mut MTensor) -> c_int,
+        pub MSparseArray_resetImplicitValue: unsafe extern "C" fn(arg1: MSparseArray, arg2: MTensor, arg3: *mut MSparseArray) -> c_int,
+        pub MSparseArray_toMTensor: unsafe extern "C" fn(arg1: MSparseArray, arg2: *mut MTensor) -> c_int,
+        pub MSparseArray_fromMTensor: unsafe extern "C" fn(arg1: MTensor, arg2: MTensor, arg3: *mut MSparseArray) -> c_int,
+        pub MSparseArray_fromExplicitPositions: unsafe extern "C" fn(arg1: MTensor, arg2: MTensor, arg3: MTensor, arg4: MTensor, arg5: *mut MSparseArray) -> c_int,
+    ]
+];
+
+
 // pub compileLibraryFunctions: *mut st_WolframCompileLibrary_Functions,
-// pub sparseLibraryFunctions: *mut st_WolframSparseLibrary_Functions,
 // pub rawarrayLibraryFunctions: *mut st_WolframRawArrayLibrary_Functions,
