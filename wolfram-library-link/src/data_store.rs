@@ -9,9 +9,22 @@ use static_assertions::assert_not_impl_any;
 use crate::{rtl, sys, NumericArray};
 
 
-/// Storage for heterogenous data.
+/// Storage for heterogenous expression-like data.
+///
+/// `DataStore` can be used to pass expression-like structures via *LibraryLink* functions.
+///
+/// `DataStore` can be used as an argument or return type in a *LibraryLink* function
+/// exposed via [`export![]`][crate::export].
 ///
 /// # Example
+///
+/// The following `DataStore` expression:
+///
+/// ```wolfram
+/// Developer`DataStore[1, "hello", False]
+/// ```
+///
+/// can be created using the Rust code:
 ///
 /// ```no_run
 /// use wolfram_library_link::DataStore;
@@ -19,6 +32,8 @@ use crate::{rtl, sys, NumericArray};
 /// let mut data = DataStore::new();
 ///
 /// data.add_i64(1);
+/// data.add_str("hello");
+/// data.add_bool(false);
 /// ```
 #[derive(Debug)]
 pub struct DataStore(sys::DataStore);
