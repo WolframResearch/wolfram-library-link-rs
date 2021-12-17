@@ -378,11 +378,11 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 ///
 /// ### Primitive data types
 ///
-/// Export a native function with a single argument:
+/// Export a native function with a single integer argument:
 ///
 /// ```
 /// # mod scope {
-/// # use wolfram_library_link::{export, NumericArray};
+/// # use wolfram_library_link::export;
 /// fn square(x: i64) -> i64 {
 ///     x * x
 /// }
@@ -395,12 +395,38 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// LibraryFunctionLoad["...", "square", {Integer}, Integer]
 /// ```
 ///
-/// Export a native function with multiple arguments:
+/// Export a native function with a single string argument:
 ///
 /// ```
+/// # mod scope {
+/// # use wolfram_library_link::export;
 /// fn reverse_string(string: String) -> String {
 ///     string.chars().rev().collect()
 /// }
+///
+/// export![reverse_string(_)];
+/// # }
+/// ```
+///
+/// ```wolfram
+/// LibraryFunctionLoad["...", "reverse_string", {String}, String]
+/// ```
+///
+/// Export a native function with multiple arguments:
+///
+/// ```
+/// # mod scope {
+/// # use wolfram_library_link::export;
+/// fn times(a: f64, b: f64) -> f64 {
+///     a * b
+/// }
+///
+/// export![times(_, _)];
+/// # }
+/// ```
+///
+/// ```wolfram
+/// LibraryFunctionLoad["...", "times", {Real, Real}, Real]
 /// ```
 ///
 /// ### Numeric arrays
@@ -410,7 +436,6 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::{export, NumericArray};
-///
 /// fn total_i64(list: &NumericArray<i64>) -> i64 {
 ///     list.as_slice().into_iter().sum()
 /// }
