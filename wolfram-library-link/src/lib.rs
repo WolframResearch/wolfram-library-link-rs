@@ -314,7 +314,7 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
     boole != 0
 }
 
-/// Export the specified functions as native LibraryLink functions.
+/// Export the specified functions as native *LibraryLink* functions.
 ///
 /// [`NativeFunction`] must be implemented by the functions
 /// exported by this macro.
@@ -443,11 +443,11 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// # Parameter types
 ///
 /// The following table describes the relationship between Rust types that implement
-/// [`FromArg`] and the compatible Wolfram LibraryLink function parameter type(s).
+/// [`FromArg`] and the compatible Wolfram *LibraryLink* function parameter type(s).
 ///
 /// <h4 style="border-bottom: none; margin-bottom: 4px"> ⚠️ Warning! ⚠️ </h4>
 ///
-/// Calling a LibraryLink function from the Wolfram Language that was loaded using the
+/// Calling a *LibraryLink* function from the Wolfram Language that was loaded using the
 /// wrong parameter type may lead to undefined behavior! Ensure that the function
 /// parameter type declared in your Wolfram Language code matches the Rust function
 /// parameter type.
@@ -469,7 +469,7 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// # Return types
 ///
 /// The following table describes the relationship between Rust types that implement
-/// [`IntoArg`] and the compatible Wolfram LibraryLink function return type.
+/// [`IntoArg`] and the compatible Wolfram *LibraryLink* function return type.
 ///
 /// Rust return type                   | Wolfram library function return type
 /// -----------------------------------|---------------------------------------
