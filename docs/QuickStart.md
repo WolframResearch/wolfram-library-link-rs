@@ -122,7 +122,7 @@ This will automatically fetch any dependencies, and build the dynamic library we
 The resulting (unoptimized) library will be located at:
 
 ```text
-	`my-package/target/debug/libmy_package.dylib`
+my-package/target/debug/libmy_package.dylib
 ```
 
 > The name of the `my_package` dynamic library file will vary depending on your operating
