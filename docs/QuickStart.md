@@ -19,7 +19,7 @@ called directly from the Wolfram Language.
 
 Instructions for installing and setting up Rust can be found at:
 
-&nbsp;&nbsp;&nbsp;&nbsp;<https://www.rust-lang.org/tools/install>.
+&nbsp;&nbsp;&nbsp;&nbsp;<https://www.rust-lang.org/tools/install>
 
 [ref/LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
 
