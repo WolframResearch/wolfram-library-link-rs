@@ -134,29 +134,39 @@ impl<'a> FromArg<'a> for String {
 // TODO: Supported borrowed &CStr and &str's using some kind of wrapper that ensures we
 //       disown the Kernel string.
 
-// /// # Safety
-// ///
-// /// The lifetime of the returned `&CStr` must be the same as the lifetime of `arg`.
-// impl<'a> FromArg<'a> for &'a CStr {
-//     unsafe fn from_arg(arg: &'a MArgument) -> &'a CStr {
-//         c_str_from_arg(arg)
-//     }
-// }
+/// # Safety
+///
+/// The lifetime of the returned `&CStr` must be the same as the lifetime of `arg`.
+///
+/// # Warning
+///
+/// Using `&CStr` as the parameter type of a *LibraryLink* function will result in a
+/// memory leak. Use [`String`] or [`CString`] instead.
+impl<'a> FromArg<'a> for &'a CStr {
+    unsafe fn from_arg(arg: &'a MArgument) -> &'a CStr {
+        c_str_from_arg(arg)
+    }
+}
 
-// /// # Panics
-// ///
-// /// This conversion will panic if the [`MArgument::utf8string`] field is not valid UTF-8.
-// ///
-// /// # Safety
-// ///
-// /// The lifetime of the returned `&str` must be the same as the lifetime of `arg`.
-// impl<'a> FromArg<'a> for &'a str {
-//     unsafe fn from_arg(arg: &'a MArgument) -> &'a str {
-//         let cstr: &'a CStr = FromArg::<'a>::from_arg(arg);
-//         cstr.to_str()
-//             .expect("FromArg for &str: string was not valid UTF-8")
-//     }
-// }
+/// # Panics
+///
+/// This conversion will panic if the [`MArgument::utf8string`] field is not valid UTF-8.
+///
+/// # Safety
+///
+/// The lifetime of the returned `&str` must be the same as the lifetime of `arg`.
+///
+/// # Warning
+///
+/// Using `&str` as the parameter type of a *LibraryLink* function will result in a
+/// memory leak. Use [`String`] or [`CString`] instead.
+impl<'a> FromArg<'a> for &'a str {
+    unsafe fn from_arg(arg: &'a MArgument) -> &'a str {
+        let cstr: &'a CStr = FromArg::<'a>::from_arg(arg);
+        cstr.to_str()
+            .expect("FromArg for &str: string was not valid UTF-8")
+    }
+}
 
 //--------------------------------------
 // NumericArray
@@ -226,6 +236,18 @@ impl<'a, T: crate::ImageData> FromArg<'a> for Image<T> {
     }
 }
 
+impl<'a> FromArg<'a> for &'a Image<()> {
+    unsafe fn from_arg(arg: &'a MArgument) -> &'a Image<()> {
+        Image::ref_cast(&*arg.image)
+    }
+}
+
+impl<'a> FromArg<'a> for Image<()> {
+    unsafe fn from_arg(arg: &'a MArgument) -> Image<()> {
+        Image::from_raw(*arg.image)
+    }
+}
+
 //--------------------------------------
 // DataStore
 //--------------------------------------
@@ -233,6 +255,12 @@ impl<'a, T: crate::ImageData> FromArg<'a> for Image<T> {
 impl FromArg<'_> for DataStore {
     unsafe fn from_arg(arg: &MArgument) -> DataStore {
         DataStore::from_raw(*arg.tensor as sys::DataStore)
+    }
+}
+
+impl<'a> FromArg<'a> for &'a DataStore {
+    unsafe fn from_arg(arg: &MArgument) -> &'a DataStore {
+        DataStore::ref_cast(&*(arg.tensor as *mut sys::DataStore))
     }
 }
 

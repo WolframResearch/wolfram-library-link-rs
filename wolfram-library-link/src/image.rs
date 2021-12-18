@@ -16,6 +16,8 @@ use crate::{
 ///
 /// [ref/Image]: https://reference.wolfram.com/language/ref/Image.html
 /// [ref/Image3D]: https://reference.wolfram.com/language/ref/Image3D.html
+// TODO: Provide better Debug formatting for this type.
+#[derive(Debug)]
 #[derive(ref_cast::RefCast)]
 #[repr(transparent)]
 pub struct Image<T = ()>(sys::MImage, PhantomData<T>);

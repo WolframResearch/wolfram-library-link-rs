@@ -111,7 +111,7 @@ pub use wstp;
 pub use self::{
     args::{FromArg, IntoArg, NativeFunction},
     async_tasks::AsyncTaskObject,
-    data_store::DataStore,
+    data_store::{DataStore, DataStoreNode, DataStoreNodeValue, Nodes},
     image::{ColorSpace, Image, ImageData, ImageType, Pixel, UninitImage},
     library_data::{get_library_data, initialize, WolframLibraryData},
     numeric_array::{

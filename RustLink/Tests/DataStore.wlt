@@ -155,3 +155,18 @@ Test[
 	,
 	3
 ]
+
+(*====================================*)
+(* DataStore nodes                    *)
+(*====================================*)
+
+Test[
+	LibraryFunctionLoad[
+		"liblibrary_tests",
+		"test_data_store_nodes",
+		{},
+		"Void"
+	][]
+	,
+	Null
+]
