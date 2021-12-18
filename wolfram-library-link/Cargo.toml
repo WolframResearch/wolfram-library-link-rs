@@ -48,6 +48,10 @@ crate-type = ["cdylib"]
 name = "numeric_arrays"
 crate-type = ["cdylib"]
 
+[[example]]
+name = "data_store"
+crate-type = ["cdylib"]
+
 #------------
 # Expressions
 #------------
