@@ -260,7 +260,7 @@ impl<T: ImageData> Image<T> {
     ///
     /// # Example
     ///
-    /// Get the value of the second channel of the top-left pixel an in image.
+    /// Get the value of the second channel of the top-left pixel in an image.
     ///
     /// ```no_run
     /// # use wolfram_library_link::{Image, Pixel};
