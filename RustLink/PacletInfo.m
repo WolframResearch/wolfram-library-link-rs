@@ -9,6 +9,7 @@ PacletObject[<|
     "Extensions" -> {
         {"Documentation", Language -> "English"},
         {"LibraryLink"},
+        {"Tests", "Method" -> "Experimental-v1", "Root" -> "Examples"},
         {"Tests", "Method" -> "Experimental-v1"}
     }
 |>]
