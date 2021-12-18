@@ -111,6 +111,8 @@ pub enum DataStoreNodeValue<'node> {
 
 /// Iterator over the [`DataStoreNode`]s stored in a [`DataStore`].
 ///
+/// Instances of this type are returned by [`DataStore::nodes()`].
+///
 /// # Example
 ///
 /// ```
