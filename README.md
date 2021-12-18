@@ -85,10 +85,10 @@ See also: [`NumericArray`][ref/NumericArray], [`LibraryDataType`][ref/LibraryDat
 The [./wolfram-library-link/examples](./wolfram-library-link/examples) subdirectory
 contains sample programs demonstrating features of the `wolfram-library-link` API.
 
-* [raw_librarylink_function.rs](wolfram-library-link/examples/raw_librarylink_function.rs)
+* [raw_librarylink_function.rs](wolfram-library-link/examples/raw/raw_librarylink_function.rs)
   - Demonstrates how to write "raw" LibraryLink functions, using the `extern "C"` ABI
     and the raw `MArgument` type.
-* [raw_wstp_function.rs](wolfram-library-link/examples/raw_wstp_function.rs)
+* [raw_wstp_function.rs](wolfram-library-link/examples/raw/raw_wstp_function.rs)
   - Demonstrates how to write "raw" LibraryLink WSTP functions, using the `extern "C"` ABI,
     raw `WSLINK` type, and low-level WSTP operations.
 

@@ -37,19 +37,25 @@ name = "native_data_types"
 crate-type = ["cdylib"]
 
 [[example]]
-name = "raw_wstp_function"
-crate-type = ["cdylib"]
-
-[[example]]
-name = "raw_librarylink_function"
-crate-type = ["cdylib"]
-
-[[example]]
 name = "numeric_arrays"
 crate-type = ["cdylib"]
 
 [[example]]
 name = "data_store"
+crate-type = ["cdylib"]
+
+#-----------------------------
+# Raw (unsafe, low-level) APIs
+#-----------------------------
+
+[[example]]
+name = "raw_wstp_function"
+path = "examples/raw/raw_wstp_function.rs"
+crate-type = ["cdylib"]
+
+[[example]]
+name = "raw_librarylink_function"
+path = "examples/raw/raw_librarylink_function.rs"
 crate-type = ["cdylib"]
 
 #------------
