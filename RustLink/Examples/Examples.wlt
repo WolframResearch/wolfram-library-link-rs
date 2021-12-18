@@ -2,7 +2,7 @@ Needs["MUnit`"]
 
 Test[
 	square = LibraryFunctionLoad[
-		"libnative_data_types",
+		"libbasic_types",
 		"square",
 		{Integer},
 		Integer
@@ -15,7 +15,7 @@ Test[
 
 Test[
 	reverseString = LibraryFunctionLoad[
-		"libnative_data_types",
+		"libbasic_types",
 		"reverse_string",
 		{String},
 		String
@@ -28,7 +28,7 @@ Test[
 
 Test[
 	add2 = LibraryFunctionLoad[
-		"libnative_data_types",
+		"libbasic_types",
 		"add2",
 		{Integer, Integer},
 		Integer
@@ -41,7 +41,7 @@ Test[
 
 Test[
 	totalI64 = LibraryFunctionLoad[
-		"libnative_data_types",
+		"libbasic_types",
 		"total_i64",
 		{LibraryDataType[NumericArray, "Integer64"]},
 		Integer
@@ -54,7 +54,7 @@ Test[
 
 Test[
 	positiveQ = LibraryFunctionLoad[
-		"libnative_data_types",
+		"libbasic_types",
 		"positive_i64",
 		{LibraryDataType[NumericArray, "Integer64"]},
 		LibraryDataType[NumericArray, "UnsignedInteger8"]
@@ -67,7 +67,7 @@ Test[
 
 Test[
 	randomNumber = LibraryFunctionLoad[
-		"libnative_data_types",
+		"libbasic_types",
 		"xkcd_get_random_number",
 		{},
 		Integer
@@ -80,7 +80,7 @@ Test[
 
 Test[
 	rawSquare = LibraryFunctionLoad[
-		"libnative_data_types",
+		"libbasic_types",
 		"raw_square",
 		{Integer},
 		Integer

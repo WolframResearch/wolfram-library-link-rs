@@ -33,7 +33,7 @@ nightly = ["wolfram-library-function-macro/nightly"]
 #=======================================
 
 [[example]]
-name = "native_data_types"
+name = "basic_types"
 crate-type = ["cdylib"]
 
 [[example]]

@@ -16,7 +16,7 @@ use wolfram_library_link::{self as wll, NumericArray, UninitNumericArray};
 /// The exported LibraryLink function may be loaded and used by evaluating:
 ///
 /// ```wolfram
-/// square = LibraryFunctionLoad["libnative_data_types", "square", {Integer}, Integer];
+/// square = LibraryFunctionLoad["libbasic_types", "square", {Integer}, Integer];
 /// square[2]
 /// ```
 fn square(x: i64) -> i64 {
@@ -66,7 +66,7 @@ wll::export![
 //
 // ```wolfram
 // total = LibraryFunctionLoad[
-//     "libnative_data_types",
+//     "libbasic_types",
 //     "total_i64",
 //     {LibraryDataType[NumericArray, "Integer64"]},
 //     Integer
@@ -110,7 +110,7 @@ wll::export![positive_i64(_)];
 //
 // ```wolfram
 // randomNumber = LibraryFunctionLoad[
-//     "libnative_data_types",
+//     "libbasic_types",
 //     "xkcd_get_random_number",
 //     {},
 //     Integer

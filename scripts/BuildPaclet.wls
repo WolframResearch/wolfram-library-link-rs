@@ -28,13 +28,13 @@ Scan[
 		(* Library Tests *)
 		"liblibrary_tests.dylib",
 		(* Examples *)
+		"libbasic_types.dylib",
 		"libraw_wstp_function.dylib",
 		"libbasic_expressions.dylib",
 		"libnumeric_arrays.dylib",
 		"libraw_librarylink_function.dylib",
 		"libasync_file_watcher_raw.dylib",
 		"libasync_file_watcher.dylib",
-		"libnative_data_types.dylib",
 		"libdata_store.dylib"
 	}
 ]
