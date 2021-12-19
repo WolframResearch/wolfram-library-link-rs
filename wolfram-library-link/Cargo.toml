@@ -43,6 +43,10 @@ crate-type = ["cdylib"]
 name = "data_store"
 crate-type = ["cdylib"]
 
+[[example]]
+name = "aborts"
+crate-type = ["cdylib"]
+
 #-----------------------------
 # Raw (unsafe, low-level) APIs
 #-----------------------------
