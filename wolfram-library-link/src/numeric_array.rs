@@ -388,7 +388,7 @@ impl<T: NumericArrayType> NumericArray<T> {
     }
 
     /// Fallible alternative to [`NumericArray::from_slice()`].
-    pub fn try_from_slice(data: &[T]) -> Result<NumericArray<T>, ()> {
+    pub fn try_from_slice(data: &[T]) -> Result<NumericArray<T>, sys::errcode_t> {
         let dim1 = data.len();
 
         NumericArray::try_from_array(&[dim1], data)
@@ -426,7 +426,7 @@ impl<T: NumericArrayType> NumericArray<T> {
     pub fn try_from_array(
         dimensions: &[usize],
         data: &[T],
-    ) -> Result<NumericArray<T>, ()> {
+    ) -> Result<NumericArray<T>, sys::errcode_t> {
         let uninit = UninitNumericArray::try_from_dimensions(dimensions)?;
 
         Ok(uninit.init_from_slice(data))
@@ -705,7 +705,7 @@ impl<T: NumericArrayType> UninitNumericArray<T> {
     /// * the underlying allocation function returns `NULL`.
     pub fn try_from_dimensions(
         dimensions: &[usize],
-    ) -> Result<UninitNumericArray<T>, ()> {
+    ) -> Result<UninitNumericArray<T>, sys::errcode_t> {
         assert!(!dimensions.is_empty());
 
         let rank = dimensions.len();
@@ -722,7 +722,7 @@ impl<T: NumericArrayType> UninitNumericArray<T> {
             );
 
             if err_code != 0 || numeric_array.is_null() {
-                return Err(());
+                return Err(err_code);
             }
 
             Ok(UninitNumericArray(numeric_array, PhantomData))
