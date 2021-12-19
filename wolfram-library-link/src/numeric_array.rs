@@ -432,6 +432,14 @@ impl<T: NumericArrayType> NumericArray<T> {
         Ok(uninit.init_from_slice(data))
     }
 
+    /// Construct a new rank-0 `NumericArray` containing a scalar value.
+    ///
+    /// PRE_COMMIT: Explain how this is used. E.g a function that could return a list or
+    ///             a scalar; SparseArrays (this is not publicly visible?)
+    pub fn from_scalar(value: T) -> NumericArray<T> {
+        NumericArray::from_array(&[], &[value])
+    }
+
     /// Access the elements stored in this [`NumericArray`] as a flat buffer.
     pub fn as_slice(&self) -> &[T] {
         let ptr: *mut c_void = self.data_ptr();
