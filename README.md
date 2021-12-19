@@ -85,12 +85,55 @@ See also: [`NumericArray`][ref/NumericArray], [`LibraryDataType`][ref/LibraryDat
 The [./wolfram-library-link/examples](./wolfram-library-link/examples) subdirectory
 contains sample programs demonstrating features of the `wolfram-library-link` API.
 
-* [raw_librarylink_function.rs](wolfram-library-link/examples/raw/raw_librarylink_function.rs)
-  - Demonstrates how to write "raw" LibraryLink functions, using the `extern "C"` ABI
-    and the raw `MArgument` type.
-* [raw_wstp_function.rs](wolfram-library-link/examples/raw/raw_wstp_function.rs)
-  - Demonstrates how to write "raw" LibraryLink WSTP functions, using the `extern "C"` ABI,
-    raw `WSLINK` type, and low-level WSTP operations.
+#### Basic types
+
+This example demonstrates how to write Rust *LibraryLink* functions utilizing the basic
+types that can be passed efficiently using native data types, like integers,
+floating-point real numbers, and strings.
+
+Rust code                                                      | Wolfram Language code
+---------------------------------------------------------------|-----------------
+[basic_types.rs](wolfram-library-link/examples/basic_types.rs) | [BasicTypes.wlt](RustLink/Examples/BasicTypes.wlt)
+
+#### Numeric arrays
+
+This example demonstrates how the `NumericArray` data type can be used to efficiently
+pass large multi-dimensional arrays of uniform numeric data to and from Rust code.
+
+Rust code                                                            | Wolfram Language code
+---------------------------------------------------------------------|-----------------
+[numeric_arrays.rs](wolfram-library-link/examples/numeric_arrays.rs) | [NumericArrays.wlt](RustLink/Examples/NumericArrays.wlt)
+
+#### `DataStore`, for native heterogenous structures
+
+This example demonstrates how the `DataStore` data type can be used to efficiently
+pass arbitrary expression-like heterogenous structures made up of native *LibraryLink*
+data types to and from Rust code.
+
+Rust code                                                    | Wolfram Language code
+-------------------------------------------------------------|-----------------
+[data_store.rs](wolfram-library-link/examples/data_store.rs) | [DataStore.wlt](RustLink/Examples/DataStore.wlt)
+
+#### Asynchronous Wolfram Language evaluations
+
+This example demonstrates how Rust code can be used to asynchronously generate events that trigger
+Wolfram Language evaluations to process the event.
+
+Rust code                                                                          | Wolfram Language code
+-----------------------------------------------------------------------------------|-----------------
+[async_file_watcher.rs](wolfram-library-link/examples/async/async_file_watcher.rs) | [AsyncExamples.wlt](RustLink/Examples/AsyncExamples.wlt)
+
+#### Raw functions
+
+These examples demonstrate how to write functions that use the "raw" low-level
+*LibraryLink* and WSTP interfaces, using the `extern "C"` ABI, the low-level `MArgument`
+and `WSLINK` types, and manual WSTP operations.
+
+Rust code                                                            | Wolfram Language code
+---------------------------------------------------------------------|-----------------
+[raw_librarylink_function.rs](wolfram-library-link/examples/raw/raw_librarylink_function.rs) and [raw_wstp_function.rs](wolfram-library-link/examples/raw/raw_wstp_function.rs) | [RawFunctions.wlt](RustLink/Examples/RawFunctions.wlt)
+
+#### Additional examples
 
 In addition to the polished high-level examples, the
 [wolfram-library-link/examples/tests/](wolfram-library-link/examples/tests/) directory
