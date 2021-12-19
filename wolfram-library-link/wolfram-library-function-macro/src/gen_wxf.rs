@@ -48,7 +48,7 @@ pub(crate) fn gen_arg_mode_pattern<'a>(
             wxf_argument,
             wxf_result,
             |argument_expr: Expr| -> Expr {
-                #[derive(wl_expr::FromExpr)]
+                #[derive(::wl_pattern_match::FromExpr)]
                 #[pattern({ #pattern })]
                 #[allow(non_camel_case_types)]
                 struct #struct_name {

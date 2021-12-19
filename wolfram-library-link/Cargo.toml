@@ -22,7 +22,6 @@ ref-cast = "1.0.6"
 
 [dev-dependencies]
 wl-pattern-match = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-pattern-match.git" }
-wl-parse         = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-parse.git" }
 
 [features]
 default = []

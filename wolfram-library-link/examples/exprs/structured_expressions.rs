@@ -2,8 +2,9 @@
 
 use wl_expr::{
     forms::{FormError, FromExpr, List},
-    Expr, FromExpr, Number,
+    Expr, Number,
 };
+use wl_pattern_match::FromExpr;
 use wolfram_library_link::{self as wll, wolfram_library_function};
 
 #[derive(FromExpr)]
