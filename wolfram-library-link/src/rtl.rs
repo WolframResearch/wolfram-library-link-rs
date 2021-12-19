@@ -18,8 +18,17 @@ use crate::sys::{
 // TODO: Include auto-generated doc comment with path to appropriate field.
 //       Mention that these functions are looked-up dynamically using get_library_data().
 macro_rules! rtl_func {
-    ($($vis:vis $path:ident : $type:ty,)*) => {
+    ($($(#[$autodoc:ident])? $vis:vis $path:ident : $type:ty,)*) => {
         $(
+            $(
+                #[$autodoc = concat!(
+                    "*LibraryLink C API Documentation:* [`",
+                    stringify!($path),
+                    "`](https://reference.wolfram.com/language/LibraryLink/ref/callback/",
+                    stringify!($path),
+                    ".html)"
+                )]
+            )?
             #[allow(missing_docs, non_upper_case_globals)]
             $vis static $path: Lazy<$type> = Lazy::new(
                 || crate::get_library_data().$path
@@ -27,11 +36,20 @@ macro_rules! rtl_func {
         )*
     };
 
-    ($group:ident => [$($vis:vis $path:ident : $type:ty,)*]) => {
+    ($group:ident => [$($(#[$autodoc:ident])? $vis:vis $path:ident : $type:ty,)*]) => {
         // NOTE: That these fields are even an Option is likely just bindgen being
         //       conservative with function pointers possibly being null.
         // TODO: Investigate making bindgen treat these as non-null fields?
         $(
+            $(
+                #[$autodoc = concat!(
+                    "*LibraryLink C API Documentation:* [`",
+                    stringify!($path),
+                    "`](https://reference.wolfram.com/language/LibraryLink/ref/callback/",
+                    stringify!($path),
+                    ".html)"
+                )]
+            )?
             #[allow(missing_docs, non_upper_case_globals)]
             $vis static $path: Lazy<$type> = Lazy::new(
                 || unsafe { (*crate::get_library_data().$group) }.$path.expect(concat!("unwrap: ", stringify!($group)))
@@ -45,89 +63,89 @@ macro_rules! rtl_func {
 //======================================
 
 rtl_func![
-    pub UTF8String_disown: unsafe extern "C" fn(arg1: *mut ::std::os::raw::c_char),
+    #[doc] pub UTF8String_disown: unsafe extern "C" fn(arg1: *mut ::std::os::raw::c_char),
 
-    pub MTensor_new: unsafe extern "C" fn(
+    #[doc] pub MTensor_new: unsafe extern "C" fn(
         arg1: mint,
         arg2: mint,
         arg3: *const mint,
         arg4: *mut MTensor,
     ) -> ::std::os::raw::c_int,
 
-    pub MTensor_free: unsafe extern "C" fn(arg1: MTensor),
+    #[doc] pub MTensor_free: unsafe extern "C" fn(arg1: MTensor),
 
-    pub MTensor_clone:
+    #[doc] pub MTensor_clone:
         unsafe extern "C" fn(arg1: MTensor, arg2: *mut MTensor) -> ::std::os::raw::c_int,
 
-    pub MTensor_shareCount: unsafe extern "C" fn(arg1: MTensor) -> mint,
+    #[doc] pub MTensor_shareCount: unsafe extern "C" fn(arg1: MTensor) -> mint,
 
-    pub MTensor_disown: unsafe extern "C" fn(arg1: MTensor),
+    #[doc] pub MTensor_disown: unsafe extern "C" fn(arg1: MTensor),
 
-    pub MTensor_disownAll: unsafe extern "C" fn(arg1: MTensor),
+    #[doc] pub MTensor_disownAll: unsafe extern "C" fn(arg1: MTensor),
 
-    pub MTensor_setInteger: unsafe extern "C" fn(
+    #[doc] pub MTensor_setInteger: unsafe extern "C" fn(
         arg1: MTensor,
         arg2: *mut mint,
         arg3: mint,
     ) -> ::std::os::raw::c_int,
 
-    pub MTensor_setReal: unsafe extern "C" fn(
+    #[doc] pub MTensor_setReal: unsafe extern "C" fn(
         arg1: MTensor,
         arg2: *mut mint,
         arg3: mreal,
     ) -> ::std::os::raw::c_int,
 
-    pub MTensor_setComplex: unsafe extern "C" fn(
+    #[doc] pub MTensor_setComplex: unsafe extern "C" fn(
         arg1: MTensor,
         arg2: *mut mint,
         arg3: mcomplex,
     ) -> ::std::os::raw::c_int,
 
-    pub MTensor_setMTensor: unsafe extern "C" fn(
+    #[doc] pub MTensor_setMTensor: unsafe extern "C" fn(
         arg1: MTensor,
         arg2: MTensor,
         arg3: *mut mint,
         arg4: mint,
     ) -> ::std::os::raw::c_int,
 
-    pub MTensor_getInteger: unsafe extern "C" fn(
+    #[doc] pub MTensor_getInteger: unsafe extern "C" fn(
         arg1: MTensor,
         arg2: *mut mint,
         arg3: *mut mint,
     ) -> ::std::os::raw::c_int,
 
-    pub MTensor_getReal: unsafe extern "C" fn(
+    #[doc] pub MTensor_getReal: unsafe extern "C" fn(
         arg1: MTensor,
         arg2: *mut mint,
         arg3: *mut mreal,
     ) -> ::std::os::raw::c_int,
 
-    pub MTensor_getComplex: unsafe extern "C" fn(
+    #[doc] pub MTensor_getComplex: unsafe extern "C" fn(
         arg1: MTensor,
         arg2: *mut mint,
         arg3: *mut mcomplex,
     ) -> ::std::os::raw::c_int,
 
-    pub MTensor_getMTensor: unsafe extern "C" fn(
+    #[doc] pub MTensor_getMTensor: unsafe extern "C" fn(
         arg1: MTensor,
         arg2: *mut mint,
         arg3: mint,
         arg4: *mut MTensor,
     ) -> ::std::os::raw::c_int,
 
-    pub MTensor_getRank: unsafe extern "C" fn(arg1: MTensor) -> mint,
-    pub MTensor_getDimensions: unsafe extern "C" fn(arg1: MTensor) -> *const mint,
-    pub MTensor_getType: unsafe extern "C" fn(arg1: MTensor) -> mint,
-    pub MTensor_getFlattenedLength: unsafe extern "C" fn(arg1: MTensor) -> mint,
-    pub MTensor_getIntegerData: unsafe extern "C" fn(arg1: MTensor) -> *mut mint,
-    pub MTensor_getRealData: unsafe extern "C" fn(arg1: MTensor) -> *mut mreal,
-    pub MTensor_getComplexData: unsafe extern "C" fn(arg1: MTensor) -> *mut mcomplex,
+    #[doc] pub MTensor_getRank: unsafe extern "C" fn(arg1: MTensor) -> mint,
+    #[doc] pub MTensor_getDimensions: unsafe extern "C" fn(arg1: MTensor) -> *const mint,
+    #[doc] pub MTensor_getType: unsafe extern "C" fn(arg1: MTensor) -> mint,
+    #[doc] pub MTensor_getFlattenedLength: unsafe extern "C" fn(arg1: MTensor) -> mint,
+    #[doc] pub MTensor_getIntegerData: unsafe extern "C" fn(arg1: MTensor) -> *mut mint,
+    #[doc] pub MTensor_getRealData: unsafe extern "C" fn(arg1: MTensor) -> *mut mreal,
+    #[doc] pub MTensor_getComplexData: unsafe extern "C" fn(arg1: MTensor) -> *mut mcomplex,
 
-    pub Message: unsafe extern "C" fn(arg1: *const ::std::os::raw::c_char),
-    pub AbortQ: unsafe extern "C" fn() -> mint,
+    #[doc] pub Message: unsafe extern "C" fn(arg1: *const ::std::os::raw::c_char),
+    #[doc] pub AbortQ: unsafe extern "C" fn() -> mint,
 
-    pub getWSLINK: unsafe extern "C" fn(arg1: sys::WolframLibraryData) -> WSLINK,
-    pub processWSLINK: unsafe extern "C" fn(arg1: WSLINK) -> ::std::os::raw::c_int,
+    #[doc] pub getWSLINK: unsafe extern "C" fn(arg1: sys::WolframLibraryData) -> WSLINK,
+    #[doc] pub processWSLINK: unsafe extern "C" fn(arg1: WSLINK) -> ::std::os::raw::c_int,
 
     pub evaluateExpression: unsafe extern "C" fn(
         arg1: sys::WolframLibraryData,
@@ -190,7 +208,7 @@ rtl_func![
     pub getWSLINKEnvironment:
         unsafe extern "C" fn(arg1: sys::WolframLibraryData) -> WSENV,
 
-    pub registerLibraryExpressionManager: unsafe extern "C" fn(
+    #[doc] pub registerLibraryExpressionManager: unsafe extern "C" fn(
         mname: *const ::std::os::raw::c_char,
         mfun: Option<
             unsafe extern "C" fn(arg1: sys::WolframLibraryData, arg2: mbool, arg3: mint),
@@ -198,18 +216,18 @@ rtl_func![
     )
         -> ::std::os::raw::c_int,
 
-    pub unregisterLibraryExpressionManager: unsafe extern "C" fn(
+    #[doc] pub unregisterLibraryExpressionManager: unsafe extern "C" fn(
         mname: *const ::std::os::raw::c_char,
     )
         -> ::std::os::raw::c_int,
 
-    pub releaseManagedLibraryExpression: unsafe extern "C" fn(
+    #[doc] pub releaseManagedLibraryExpression: unsafe extern "C" fn(
         mname: *const ::std::os::raw::c_char,
         id: mint,
     )
         -> ::std::os::raw::c_int,
 
-    pub registerLibraryCallbackManager: unsafe extern "C" fn(
+    #[doc] pub registerLibraryCallbackManager: unsafe extern "C" fn(
         name: *const ::std::os::raw::c_char,
         mfun: Option<
             unsafe extern "C" fn(
@@ -221,19 +239,19 @@ rtl_func![
     )
         -> ::std::os::raw::c_int,
 
-    pub unregisterLibraryCallbackManager: unsafe extern "C" fn(
+    #[doc] pub unregisterLibraryCallbackManager: unsafe extern "C" fn(
         name: *const ::std::os::raw::c_char,
     )
         -> ::std::os::raw::c_int,
 
-    pub callLibraryCallbackFunction: unsafe extern "C" fn(
+    #[doc] pub callLibraryCallbackFunction: unsafe extern "C" fn(
         id: mint,
         ArgC: mint,
         Args: *mut MArgument,
         Res: MArgument,
     ) -> ::std::os::raw::c_int,
 
-    pub releaseLibraryCallbackFunction:
+    #[doc] pub releaseLibraryCallbackFunction:
         unsafe extern "C" fn(id: mint) -> ::std::os::raw::c_int,
 
     pub validatePath: unsafe extern "C" fn(
@@ -374,18 +392,18 @@ rtl_func![
 
 rtl_func![
     numericarrayLibraryFunctions => [
-        pub MNumericArray_new: unsafe extern "C" fn(arg1: numericarray_data_t, arg2: mint, arg3: *const mint, arg4: *mut MNumericArray) -> errcode_t,
-        pub MNumericArray_free: unsafe extern "C" fn(arg1: MNumericArray),
-        pub MNumericArray_clone: unsafe extern "C" fn(arg1: MNumericArray, arg2: *mut MNumericArray) -> errcode_t,
-        pub MNumericArray_disown: unsafe extern "C" fn(arg1: MNumericArray),
-        pub MNumericArray_disownAll: unsafe extern "C" fn(arg1: MNumericArray),
-        pub MNumericArray_shareCount: unsafe extern "C" fn(arg1: MNumericArray) -> mint,
-        pub MNumericArray_getType: unsafe extern "C" fn(arg1: MNumericArray) -> numericarray_data_t,
-        pub MNumericArray_getRank: unsafe extern "C" fn(arg1: MNumericArray) -> mint,
-        pub MNumericArray_getDimensions: unsafe extern "C" fn(arg1: MNumericArray) -> *const mint,
-        pub MNumericArray_getFlattenedLength: unsafe extern "C" fn(arg1: MNumericArray) -> mint,
-        pub MNumericArray_getData: unsafe extern "C" fn(arg1: MNumericArray) -> *mut c_void,
-        pub MNumericArray_convertType: unsafe extern "C" fn(arg1: *mut MNumericArray, arg2: MNumericArray, arg3: numericarray_data_t, arg4: numericarray_convert_method_t, arg5: mreal) -> errcode_t,
+        #[doc] pub MNumericArray_new: unsafe extern "C" fn(arg1: numericarray_data_t, arg2: mint, arg3: *const mint, arg4: *mut MNumericArray) -> errcode_t,
+        #[doc] pub MNumericArray_free: unsafe extern "C" fn(arg1: MNumericArray),
+        #[doc] pub MNumericArray_clone: unsafe extern "C" fn(arg1: MNumericArray, arg2: *mut MNumericArray) -> errcode_t,
+        #[doc] pub MNumericArray_disown: unsafe extern "C" fn(arg1: MNumericArray),
+        #[doc] pub MNumericArray_disownAll: unsafe extern "C" fn(arg1: MNumericArray),
+        #[doc] pub MNumericArray_shareCount: unsafe extern "C" fn(arg1: MNumericArray) -> mint,
+        #[doc] pub MNumericArray_getType: unsafe extern "C" fn(arg1: MNumericArray) -> numericarray_data_t,
+        #[doc] pub MNumericArray_getRank: unsafe extern "C" fn(arg1: MNumericArray) -> mint,
+        #[doc] pub MNumericArray_getDimensions: unsafe extern "C" fn(arg1: MNumericArray) -> *const mint,
+        #[doc] pub MNumericArray_getFlattenedLength: unsafe extern "C" fn(arg1: MNumericArray) -> mint,
+        #[doc] pub MNumericArray_getData: unsafe extern "C" fn(arg1: MNumericArray) -> *mut c_void,
+        #[doc] pub MNumericArray_convertType: unsafe extern "C" fn(arg1: *mut MNumericArray, arg2: MNumericArray, arg3: numericarray_data_t, arg4: numericarray_convert_method_t, arg5: mreal) -> errcode_t,
     ]
 ];
 
@@ -395,40 +413,40 @@ rtl_func![
 
 rtl_func![
     imageLibraryFunctions => [
-        pub MImage_new2D: unsafe extern "C" fn(arg1: mint, arg2: mint, arg3: mint, arg4: imagedata_t, arg5: colorspace_t, arg6: mbool, arg7: *mut MImage) -> c_int,
-        pub MImage_new3D: unsafe extern "C" fn(arg1: mint, arg2: mint, arg3: mint, arg4: mint, arg5: imagedata_t, arg6: colorspace_t, arg7: mbool, arg8: *mut MImage) -> c_int,
-        pub MImage_clone: unsafe extern "C" fn(arg1: MImage, arg2: *mut MImage) -> c_int,
-        pub MImage_free: unsafe extern "C" fn(arg1: MImage),
-        pub MImage_disown: unsafe extern "C" fn(arg1: MImage),
-        pub MImage_disownAll: unsafe extern "C" fn(arg1: MImage),
-        pub MImage_shareCount: unsafe extern "C" fn(arg1: MImage) -> mint,
-        pub MImage_getDataType: unsafe extern "C" fn(arg1: MImage) -> imagedata_t,
-        pub MImage_getRowCount: unsafe extern "C" fn(arg1: MImage) -> mint,
-        pub MImage_getColumnCount: unsafe extern "C" fn(arg1: MImage) -> mint,
-        pub MImage_getSliceCount: unsafe extern "C" fn(arg1: MImage) -> mint,
-        pub MImage_getRank: unsafe extern "C" fn(arg1: MImage) -> mint,
-        pub MImage_getChannels: unsafe extern "C" fn(arg1: MImage) -> mint,
-        pub MImage_alphaChannelQ: unsafe extern "C" fn(arg1: MImage) -> mbool,
-        pub MImage_interleavedQ: unsafe extern "C" fn(arg1: MImage) -> mbool,
-        pub MImage_getColorSpace: unsafe extern "C" fn(arg1: MImage) -> colorspace_t,
-        pub MImage_getFlattenedLength: unsafe extern "C" fn(arg1: MImage) -> mint,
-        pub MImage_getBit: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_bit) -> c_int,
-        pub MImage_getByte: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_ubit8) -> c_int,
-        pub MImage_getBit16: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_ubit16) -> c_int,
-        pub MImage_getReal32: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_real32) -> c_int,
-        pub MImage_getReal: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_real64) -> c_int,
-        pub MImage_setBit: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_bit) -> c_int,
-        pub MImage_setByte: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_ubit8) -> c_int,
-        pub MImage_setBit16: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_ubit16) -> c_int,
-        pub MImage_setReal32: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_real32) -> c_int,
-        pub MImage_setReal: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_real64) -> c_int,
-        pub MImage_getRawData: unsafe extern "C" fn(arg1: MImage) -> *mut c_void,
-        pub MImage_getBitData: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_bit,
-        pub MImage_getByteData: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_ubit8,
-        pub MImage_getBit16Data: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_ubit16,
-        pub MImage_getReal32Data: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_real32,
-        pub MImage_getRealData: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_real64,
-        pub MImage_convertType: unsafe extern "C" fn(arg1: MImage, arg2: imagedata_t, arg3: mbool) -> MImage,
+        #[doc] pub MImage_new2D: unsafe extern "C" fn(arg1: mint, arg2: mint, arg3: mint, arg4: imagedata_t, arg5: colorspace_t, arg6: mbool, arg7: *mut MImage) -> c_int,
+        #[doc] pub MImage_new3D: unsafe extern "C" fn(arg1: mint, arg2: mint, arg3: mint, arg4: mint, arg5: imagedata_t, arg6: colorspace_t, arg7: mbool, arg8: *mut MImage) -> c_int,
+        #[doc] pub MImage_clone: unsafe extern "C" fn(arg1: MImage, arg2: *mut MImage) -> c_int,
+        #[doc] pub MImage_free: unsafe extern "C" fn(arg1: MImage),
+        #[doc] pub MImage_disown: unsafe extern "C" fn(arg1: MImage),
+        #[doc] pub MImage_disownAll: unsafe extern "C" fn(arg1: MImage),
+        #[doc] pub MImage_shareCount: unsafe extern "C" fn(arg1: MImage) -> mint,
+        #[doc] pub MImage_getDataType: unsafe extern "C" fn(arg1: MImage) -> imagedata_t,
+        #[doc] pub MImage_getRowCount: unsafe extern "C" fn(arg1: MImage) -> mint,
+        #[doc] pub MImage_getColumnCount: unsafe extern "C" fn(arg1: MImage) -> mint,
+        #[doc] pub MImage_getSliceCount: unsafe extern "C" fn(arg1: MImage) -> mint,
+        #[doc] pub MImage_getRank: unsafe extern "C" fn(arg1: MImage) -> mint,
+        #[doc] pub MImage_getChannels: unsafe extern "C" fn(arg1: MImage) -> mint,
+        #[doc] pub MImage_alphaChannelQ: unsafe extern "C" fn(arg1: MImage) -> mbool,
+        #[doc] pub MImage_interleavedQ: unsafe extern "C" fn(arg1: MImage) -> mbool,
+        #[doc] pub MImage_getColorSpace: unsafe extern "C" fn(arg1: MImage) -> colorspace_t,
+        #[doc] pub MImage_getFlattenedLength: unsafe extern "C" fn(arg1: MImage) -> mint,
+        #[doc] pub MImage_getBit: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_bit) -> c_int,
+        #[doc] pub MImage_getByte: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_ubit8) -> c_int,
+        #[doc] pub MImage_getBit16: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_ubit16) -> c_int,
+        #[doc] pub MImage_getReal32: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_real32) -> c_int,
+        #[doc] pub MImage_getReal: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: *mut raw_t_real64) -> c_int,
+        #[doc] pub MImage_setBit: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_bit) -> c_int,
+        #[doc] pub MImage_setByte: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_ubit8) -> c_int,
+        #[doc] pub MImage_setBit16: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_ubit16) -> c_int,
+        #[doc] pub MImage_setReal32: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_real32) -> c_int,
+        #[doc] pub MImage_setReal: unsafe extern "C" fn(arg1: MImage, arg2: *mut mint, arg3: mint, arg4: raw_t_real64) -> c_int,
+        #[doc] pub MImage_getRawData: unsafe extern "C" fn(arg1: MImage) -> *mut c_void,
+        #[doc] pub MImage_getBitData: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_bit,
+        #[doc] pub MImage_getByteData: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_ubit8,
+        #[doc] pub MImage_getBit16Data: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_ubit16,
+        #[doc] pub MImage_getReal32Data: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_real32,
+        #[doc] pub MImage_getRealData: unsafe extern "C" fn(arg1: MImage) -> *mut raw_t_real64,
+        #[doc] pub MImage_convertType: unsafe extern "C" fn(arg1: MImage, arg2: imagedata_t, arg3: mbool) -> MImage,
     ]
 ];
 
@@ -438,22 +456,22 @@ rtl_func![
 
 rtl_func![
     sparseLibraryFunctions => [
-        pub MSparseArray_clone: unsafe extern "C" fn(arg1: MSparseArray, arg2: *mut MSparseArray) -> c_int,
-        pub MSparseArray_free: unsafe extern "C" fn(arg1: MSparseArray),
-        pub MSparseArray_disown: unsafe extern "C" fn(arg1: MSparseArray),
-        pub MSparseArray_disownAll: unsafe extern "C" fn(arg1: MSparseArray),
-        pub MSparseArray_shareCount: unsafe extern "C" fn(arg1: MSparseArray) -> mint,
-        pub MSparseArray_getRank: unsafe extern "C" fn(arg1: MSparseArray) -> mint,
-        pub MSparseArray_getDimensions: unsafe extern "C" fn(arg1: MSparseArray) -> *const mint,
-        pub MSparseArray_getImplicitValue: unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor,
-        pub MSparseArray_getExplicitValues: unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor,
-        pub MSparseArray_getRowPointers: unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor,
-        pub MSparseArray_getColumnIndices: unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor,
-        pub MSparseArray_getExplicitPositions: unsafe extern "C" fn(arg1: MSparseArray, arg2: *mut MTensor) -> c_int,
-        pub MSparseArray_resetImplicitValue: unsafe extern "C" fn(arg1: MSparseArray, arg2: MTensor, arg3: *mut MSparseArray) -> c_int,
-        pub MSparseArray_toMTensor: unsafe extern "C" fn(arg1: MSparseArray, arg2: *mut MTensor) -> c_int,
-        pub MSparseArray_fromMTensor: unsafe extern "C" fn(arg1: MTensor, arg2: MTensor, arg3: *mut MSparseArray) -> c_int,
-        pub MSparseArray_fromExplicitPositions: unsafe extern "C" fn(arg1: MTensor, arg2: MTensor, arg3: MTensor, arg4: MTensor, arg5: *mut MSparseArray) -> c_int,
+        #[doc] pub MSparseArray_clone: unsafe extern "C" fn(arg1: MSparseArray, arg2: *mut MSparseArray) -> c_int,
+        #[doc] pub MSparseArray_free: unsafe extern "C" fn(arg1: MSparseArray),
+        #[doc] pub MSparseArray_disown: unsafe extern "C" fn(arg1: MSparseArray),
+        #[doc] pub MSparseArray_disownAll: unsafe extern "C" fn(arg1: MSparseArray),
+        #[doc] pub MSparseArray_shareCount: unsafe extern "C" fn(arg1: MSparseArray) -> mint,
+        #[doc] pub MSparseArray_getRank: unsafe extern "C" fn(arg1: MSparseArray) -> mint,
+        #[doc] pub MSparseArray_getDimensions: unsafe extern "C" fn(arg1: MSparseArray) -> *const mint,
+        #[doc] pub MSparseArray_getImplicitValue: unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor,
+        #[doc] pub MSparseArray_getExplicitValues: unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor,
+        #[doc] pub MSparseArray_getRowPointers: unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor,
+        #[doc] pub MSparseArray_getColumnIndices: unsafe extern "C" fn(arg1: MSparseArray) -> *mut MTensor,
+        #[doc] pub MSparseArray_getExplicitPositions: unsafe extern "C" fn(arg1: MSparseArray, arg2: *mut MTensor) -> c_int,
+        #[doc] pub MSparseArray_resetImplicitValue: unsafe extern "C" fn(arg1: MSparseArray, arg2: MTensor, arg3: *mut MSparseArray) -> c_int,
+        #[doc] pub MSparseArray_toMTensor: unsafe extern "C" fn(arg1: MSparseArray, arg2: *mut MTensor) -> c_int,
+        #[doc] pub MSparseArray_fromMTensor: unsafe extern "C" fn(arg1: MTensor, arg2: MTensor, arg3: *mut MSparseArray) -> c_int,
+        #[doc] pub MSparseArray_fromExplicitPositions: unsafe extern "C" fn(arg1: MTensor, arg2: MTensor, arg3: MTensor, arg4: MTensor, arg5: *mut MSparseArray) -> c_int,
     ]
 ];
 
