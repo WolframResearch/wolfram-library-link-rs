@@ -85,43 +85,12 @@ See also: [`NumericArray`][ref/NumericArray], [`LibraryDataType`][ref/LibraryDat
 The [./wolfram-library-link/examples](./wolfram-library-link/examples) subdirectory
 contains sample programs demonstrating features of the `wolfram-library-link` API.
 
-#### Basic types
-
-This example demonstrates how to write Rust *LibraryLink* functions utilizing the basic
-types that can be passed efficiently using native data types, like integers,
-floating-point real numbers, and strings.
-
-Rust code                                                      | Wolfram Language code
----------------------------------------------------------------|-----------------
-[basic_types.rs](wolfram-library-link/examples/basic_types.rs) | [BasicTypes.wlt](RustLink/Examples/BasicTypes.wlt)
-
-#### Numeric arrays
-
-This example demonstrates how the `NumericArray` data type can be used to efficiently
-pass large multi-dimensional arrays of uniform numeric data to and from Rust code.
-
-Rust code                                                            | Wolfram Language code
----------------------------------------------------------------------|-----------------
-[numeric_arrays.rs](wolfram-library-link/examples/numeric_arrays.rs) | [NumericArrays.wlt](RustLink/Examples/NumericArrays.wlt)
-
-#### `DataStore`, for native heterogenous structures
-
-This example demonstrates how the `DataStore` data type can be used to efficiently
-pass arbitrary expression-like heterogenous structures made up of native *LibraryLink*
-data types to and from Rust code.
-
-Rust code                                                    | Wolfram Language code
--------------------------------------------------------------|-----------------
-[data_store.rs](wolfram-library-link/examples/data_store.rs) | [DataStore.wlt](RustLink/Examples/DataStore.wlt)
-
-#### Asynchronous Wolfram Language evaluations
-
-This example demonstrates how Rust code can be used to asynchronously generate events that trigger
-Wolfram Language evaluations to process the event.
-
-Rust code                                                                          | Wolfram Language code
------------------------------------------------------------------------------------|-----------------
-[async_file_watcher.rs](wolfram-library-link/examples/async/async_file_watcher.rs) | [AsyncExamples.wlt](RustLink/Examples/AsyncExamples.wlt)
+Rust code                                                                          | Wolfram Language code                                      | Demonstrates ...
+-----------------------------------------------------------------------------------|------------------------------------------------------------|-------------------------------
+[basic_types.rs](wolfram-library-link/examples/basic_types.rs)                     | [BasicTypes.wlt](RustLink/Examples/BasicTypes.wlt)         | how to write Rust *LibraryLink* functions utilizing the basic, native types that can be passed efficiently, like integers, floating-point real numbers, and strings.
+[numeric_arrays.rs](wolfram-library-link/examples/numeric_arrays.rs)               | [NumericArrays.wlt](RustLink/Examples/NumericArrays.wlt)   | how the `NumericArray` data type can be used to efficiently pass large multi-dimensional arrays of uniform numeric data.
+[data_store.rs](wolfram-library-link/examples/data_store.rs)                       | [DataStore.wlt](RustLink/Examples/DataStore.wlt)           | how the `DataStore` data type can be used to efficiently pass arbitrary expression-like heterogenous structures made up of native *LibraryLink* data types.
+[async_file_watcher.rs](wolfram-library-link/examples/async/async_file_watcher.rs) | [AsyncExamples.wlt](RustLink/Examples/AsyncExamples.wlt)   | how Rust code can be used to generate asynchronous events that trigger Wolfram Language evaluations to process the event.
 
 #### Raw functions
 
