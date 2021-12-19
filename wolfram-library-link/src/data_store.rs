@@ -115,7 +115,7 @@ pub enum DataStoreNodeValue<'node> {
 ///
 /// # Example
 ///
-/// ```
+/// ```no_run
 /// # use wolfram_library_link::DataStore;
 /// let mut store = DataStore::new();
 ///
