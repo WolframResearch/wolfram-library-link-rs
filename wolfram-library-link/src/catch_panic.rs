@@ -9,7 +9,6 @@ use backtrace::Backtrace;
 use once_cell::sync::Lazy;
 
 use wl_expr_core::{Expr, Number, Symbol};
-use wl_symbol_table as sym;
 
 static CAUGHT_PANICS: Lazy<Mutex<HashMap<ThreadId, (Instant, CaughtPanic)>>> =
     Lazy::new(|| Default::default());
@@ -147,7 +146,7 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
             ]));
         }
 
-        let frames = Expr::normal(&*sym::List, frames);
+        let frames = Expr::normal(Symbol::new("System`List").unwrap(), frames);
         // Set ImageSize so that the lines don't wordwrap for very long function names,
         // which makes the backtrace hard to read.
 

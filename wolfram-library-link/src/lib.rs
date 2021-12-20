@@ -100,7 +100,6 @@ use std::sync::Mutex;
 use once_cell::sync::Lazy;
 
 use wl_expr_core::{Expr, ExprKind, Symbol};
-use wl_symbol_table as sym;
 use wolfram_library_link_sys::mint;
 use wstp::Link;
 
@@ -235,7 +234,9 @@ pub fn try_evaluate(expr: &Expr) -> Result<Expr, String> {
 
         let returned_expr = match return_packet.kind() {
             ExprKind::Normal(normal) => {
-                debug_assert!(normal.has_head(&*sym::ReturnPacket));
+                debug_assert!(
+                    normal.has_head(&Symbol::new("System`ReturnPacket").unwrap())
+                );
                 debug_assert!(normal.contents.len() == 1);
                 normal.contents[0].clone()
             },

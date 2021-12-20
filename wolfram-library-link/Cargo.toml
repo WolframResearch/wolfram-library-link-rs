@@ -11,7 +11,6 @@ wolfram-library-link-sys       = { path = "../wolfram-library-link-sys" }
 
 wstp                = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wstp.git" }
 wl-expr-core        = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr-core.git" }
-wl-symbol-table     = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-symbol-table.git" }
 wxf                 = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wxf.git" }
 
 once_cell = "1.8.0"
