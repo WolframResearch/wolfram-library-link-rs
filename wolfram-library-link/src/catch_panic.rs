@@ -8,7 +8,7 @@ use std::time::Instant;
 use backtrace::Backtrace;
 use once_cell::sync::Lazy;
 
-use wl_expr::{forms::ToPrettyExpr, Expr, Symbol};
+use wl_expr_core::{Expr, Number, Symbol};
 use wl_symbol_table as sym;
 
 static CAUGHT_PANICS: Lazy<Mutex<HashMap<ThreadId, (Instant, CaughtPanic)>>> =
@@ -31,10 +31,8 @@ pub struct CaughtPanic {
     backtrace: Option<Backtrace>,
 }
 
-impl ToPrettyExpr for CaughtPanic {
-    type Options = ();
-
-    fn to_pretty_expr(&self) -> Expr {
+impl CaughtPanic {
+    pub(crate) fn to_pretty_expr(&self) -> Expr {
         let CaughtPanic {
             message,
             location,
@@ -47,13 +45,42 @@ impl ToPrettyExpr for CaughtPanic {
 
         let head = Expr::symbol(Symbol::new("LibraryLink`Panic").unwrap());
 
-        Expr! {
-            Failure['head[Panel[Column[{
-                Row[{Style["Message", Bold], ": ", 'message}],
-                Row[{Style["SourceLocation", Bold], ": ", 'location}],
-                'backtrace
-            }]]]]
-        }
+        // Failure['head[Panel[Column[{
+        //     Row[{Style["Message", Bold], ": ", 'message}],
+        //     Row[{Style["SourceLocation", Bold], ": ", 'location}],
+        //     'backtrace
+        // }]]]]
+        Expr::normal(Symbol::new("System`Failure").unwrap(), vec![Expr::normal(
+            head,
+            vec![Expr::normal(Symbol::new("System`Panel").unwrap(), vec![
+                Expr::normal(Symbol::new("System`Column").unwrap(), vec![Expr::normal(
+                    Symbol::new("System`List").unwrap(),
+                    vec![
+                        Expr::normal(Symbol::new("System`Row").unwrap(), vec![
+                            Expr::normal(Symbol::new("System`List").unwrap(), vec![
+                                Expr::normal(Symbol::new("System`Style").unwrap(), vec![
+                                    Expr::string("Message"),
+                                    Expr::symbol(Symbol::new("System`Bold").unwrap()),
+                                ]),
+                                Expr::string(": "),
+                                message,
+                            ]),
+                        ]),
+                        Expr::normal(Symbol::new("System`Row").unwrap(), vec![
+                            Expr::normal(Symbol::new("System`List").unwrap(), vec![
+                                Expr::normal(Symbol::new("System`Style").unwrap(), vec![
+                                    Expr::string("SourceLocation"),
+                                    Expr::symbol(Symbol::new("System`Bold").unwrap()),
+                                ]),
+                                Expr::string(": "),
+                                location,
+                            ]),
+                        ]),
+                        backtrace,
+                    ],
+                )]),
+            ])],
+        )])
     }
 }
 
@@ -67,7 +94,7 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
     // millisends).
     if !should_show_backtrace() {
         // This Sequence[] will not show up in the FE.
-        return Expr! { Sequence[] };
+        return Expr::normal(Symbol::new("System`Sequence").unwrap(), vec![]);
     }
 
     let bt: Expr = if let Some(mut bt) = bt {
@@ -104,31 +131,67 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
                 _ => "".into(),
             };
 
-            frames.push(Expr! {
-                Row[{
-                    %[index.to_string()],
-                    ": ",
-                    'file_and_line,
-                    'name
-                }]
-            });
+            // Row[{
+            //     %[index.to_string()],
+            //     ": ",
+            //     'file_and_line,
+            //     'name
+            // }]
+            frames.push(Expr::normal(Symbol::new("System`Row").unwrap(), vec![
+                Expr::normal(Symbol::new("System`List").unwrap(), vec![
+                    Expr::string(index.to_string()),
+                    Expr::string(": "),
+                    Expr::string(file_and_line),
+                    Expr::string(name),
+                ]),
+            ]));
         }
 
         let frames = Expr::normal(&*sym::List, frames);
         // Set ImageSize so that the lines don't wordwrap for very long function names,
         // which makes the backtrace hard to read.
-        Expr! { Column['frames, ImageSize -> {1200, Automatic}] }
+
+        // Column['frames, ImageSize -> {1200, Automatic}]
+        Expr::normal(Symbol::new("System`Column").unwrap(), vec![
+            frames,
+            Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+                Expr::symbol(Symbol::new("System`ImageSize").unwrap()),
+                Expr::normal(Symbol::new("System`List").unwrap(), vec![
+                    Expr::number(Number::Integer(1200)),
+                    Expr::symbol(Symbol::new("System`Automatic").unwrap()),
+                ]),
+            ]),
+        ])
     } else {
         Expr::string("<unable to capture backtrace>")
     };
 
-    Expr! {
-        Row[{
-            Style["Backtrace", Bold],
-            ": ",
-            Style['bt, FontSize -> 13, FontFamily -> "Source Code Pro"]
-        }]
-    }
+    // Row[{
+    //     Style["Backtrace", Bold],
+    //     ": ",
+    //     Style['bt, FontSize -> 13, FontFamily -> "Source Code Pro"]
+    // }]
+    Expr::normal(Symbol::new("System`Row").unwrap(), vec![Expr::normal(
+        Symbol::new("System`List").unwrap(),
+        vec![
+            Expr::normal(Symbol::new("System`Style").unwrap(), vec![
+                Expr::string("Backtrace"),
+                Expr::symbol(Symbol::new("System`Bold").unwrap()),
+            ]),
+            Expr::string(": "),
+            Expr::normal(Symbol::new("System`Style").unwrap(), vec![
+                bt,
+                Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+                    Expr::symbol(Symbol::new("System`FontSize").unwrap()),
+                    Expr::number(Number::Integer(13)),
+                ]),
+                Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+                    Expr::symbol(Symbol::new("System`FontFamily").unwrap()),
+                    Expr::string("Source Code Pro"),
+                ]),
+            ]),
+        ],
+    )])
 }
 
 /// Call `func` and catch any unwinding panic which occurs during that call, returning

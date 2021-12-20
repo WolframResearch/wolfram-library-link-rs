@@ -99,7 +99,7 @@ use std::sync::Mutex;
 
 use once_cell::sync::Lazy;
 
-use wl_expr::{Expr, ExprKind};
+use wl_expr_core::{Expr, ExprKind, Symbol};
 use wl_symbol_table as sym;
 use wolfram_library_link_sys::mint;
 use wstp::Link;
@@ -222,7 +222,11 @@ pub fn try_evaluate(expr: &Expr) -> Result<Expr, String> {
     with_link(|link: &mut Link| {
         // Send an EvaluatePacket['expr].
         let _: () = link
-            .put_expr(&Expr! { EvaluatePacket['expr] })
+            // .put_expr(&Expr! { EvaluatePacket['expr] })
+            .put_expr(&Expr::normal(
+                Symbol::new("System`EvaluatePacket").unwrap(),
+                vec![expr.clone()],
+            ))
             .map_err(|e| e.to_string())?;
 
         let _: () = process_wstp_link(link)?;

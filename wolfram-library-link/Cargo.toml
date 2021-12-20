@@ -10,7 +10,7 @@ wolfram-library-function-macro = { path = "./wolfram-library-function-macro" }
 wolfram-library-link-sys       = { path = "../wolfram-library-link-sys" }
 
 wstp                = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wstp.git" }
-wl-expr             = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr.git" }
+wl-expr-core        = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr-core.git" }
 wl-symbol-table     = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-symbol-table.git" }
 wxf                 = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wxf.git" }
 
@@ -21,6 +21,7 @@ static_assertions = "1.1.0"
 ref-cast = "1.0.6"
 
 [dev-dependencies]
+wl-expr          = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr.git" }
 wl-pattern-match = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-pattern-match.git" }
 
 [features]

@@ -1,6 +1,6 @@
 use std::{ffi::CString, os::raw::c_uint};
 
-use wl_expr::{forms::ToPrettyExpr, Expr, ExprKind};
+use wl_expr_core::{Expr, ExprKind, Symbol};
 use wstp::{self, Link};
 
 use crate::{
@@ -68,11 +68,25 @@ pub fn call_wstp_wolfram_library_function<
                         return;
                     }
 
-                    let _: Result<_, _> = link.put_expr(&Expr! {
-                        Failure["LibraryFunctionWSTPError", <|
-                            "Message" -> %[Expr::string(message.to_string())]
-                        |>]
-                    });
+                    // Failure["LibraryFunctionWSTPError", <|
+                    //     "Message" -> %[Expr::string(message.to_string())]
+                    // |>]
+                    let failure =
+                        Expr::normal(Symbol::new("System`Failure").unwrap(), vec![
+                            Expr::string("LibraryFunctionWSTPError"),
+                            Expr::normal(
+                                Symbol::new("System`Association").unwrap(),
+                                vec![Expr::normal(
+                                    Symbol::new("System`Rule").unwrap(),
+                                    vec![
+                                        Expr::string("Message"),
+                                        Expr::string(message.to_string()),
+                                    ],
+                                )],
+                            ),
+                        ]);
+
+                    let _: Result<_, _> = link.put_expr(&failure);
                     return;
                 },
             };
