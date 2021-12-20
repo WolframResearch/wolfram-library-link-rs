@@ -17,7 +17,7 @@ once_cell = "1.8.0"
 backtrace = "^0.3.46"
 cfg-if = "0.1"
 static_assertions = "1.1.0"
-ref-cast = "1.0.6"
+# ref-cast = "1.0.6"
 
 [dev-dependencies]
 wl-expr          = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr.git" }

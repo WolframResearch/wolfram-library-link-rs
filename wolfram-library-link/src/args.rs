@@ -7,8 +7,6 @@ use std::{
     os::raw::c_char,
 };
 
-use ref_cast::RefCast;
-
 use crate::{
     rtl,
     sys::{self, mint, mreal, MArgument},
@@ -198,7 +196,7 @@ impl<'a> FromArg<'a> for &'a str {
 /// which is not valid because `bool` is not a valid numeric array type.
 impl<'a, T: crate::NumericArrayType> FromArg<'a> for &'a NumericArray<T> {
     unsafe fn from_arg(arg: &'a MArgument) -> &'a NumericArray<T> {
-        NumericArray::ref_cast(&*arg.numeric)
+        NumericArray::unsafe_ref_cast(&*arg.numeric)
     }
 }
 
@@ -210,7 +208,7 @@ impl<'a, T: crate::NumericArrayType> FromArg<'a> for NumericArray<T> {
 
 impl<'a> FromArg<'a> for &'a NumericArray<()> {
     unsafe fn from_arg(arg: &'a MArgument) -> &'a NumericArray<()> {
-        NumericArray::ref_cast(&*arg.numeric)
+        NumericArray::unsafe_ref_cast(&*arg.numeric)
     }
 }
 
@@ -226,7 +224,7 @@ impl<'a> FromArg<'a> for NumericArray<()> {
 
 impl<'a, T: crate::ImageData> FromArg<'a> for &'a Image<T> {
     unsafe fn from_arg(arg: &'a MArgument) -> &'a Image<T> {
-        Image::ref_cast(&*arg.image)
+        Image::unsafe_ref_cast(&*arg.image)
     }
 }
 
@@ -238,7 +236,7 @@ impl<'a, T: crate::ImageData> FromArg<'a> for Image<T> {
 
 impl<'a> FromArg<'a> for &'a Image<()> {
     unsafe fn from_arg(arg: &'a MArgument) -> &'a Image<()> {
-        Image::ref_cast(&*arg.image)
+        Image::unsafe_ref_cast(&*arg.image)
     }
 }
 
@@ -260,7 +258,7 @@ impl FromArg<'_> for DataStore {
 
 impl<'a> FromArg<'a> for &'a DataStore {
     unsafe fn from_arg(arg: &MArgument) -> &'a DataStore {
-        DataStore::ref_cast(&*(arg.tensor as *mut sys::DataStore))
+        DataStore::unsafe_ref_cast(&*(arg.tensor as *mut sys::DataStore))
     }
 }
 

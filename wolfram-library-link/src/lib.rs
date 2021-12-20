@@ -93,6 +93,7 @@ mod library_data;
 pub mod macro_utils;
 mod numeric_array;
 pub mod rtl;
+mod unsafe_ref_cast;
 
 
 use std::sync::Mutex;
@@ -120,6 +121,7 @@ pub use self::{
 };
 
 pub(crate) use self::library_data::assert_main_thread;
+pub(crate) use self::unsafe_ref_cast::unsafe_ref_cast;
 
 /// Attribute to generate a [LibraryLink][library-link]-compatible wrapper around a Rust
 /// function.

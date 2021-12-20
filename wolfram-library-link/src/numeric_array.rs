@@ -28,23 +28,24 @@ use crate::sys::MNumericArray_Data_Type::{
 
 use crate::sys::MNumericArray_Convert_Method::*;
 
-/// Native Wolfram [`NumericArray`][ref/NumericArray]<sub>WL</sub>.
-///
-/// This type is an ABI-compatible wrapper around [`wolfram_library_link_sys::MNumericArray`].
-///
-/// A [`NumericArray`] can contain any type `T` which satisfies the trait
-/// [`NumericArrayType`].
-///
-/// Use [`NumericArray::kind()`] to dynamically resolve a `NumericArray` with unknown
-/// element type into a `NumericArray<T>` with explicit element type.
-///
-/// Use [`UninitNumericArray`] to construct a [`NumericArray`] without requiring an
-/// intermediate allocation to copy the elements from.
-///
-/// [ref/NumericArray]: https://reference.wolfram.com/language/ref/NumericArray.html
-#[repr(transparent)]
-#[derive(ref_cast::RefCast)]
-pub struct NumericArray<T = ()>(sys::MNumericArray, PhantomData<T>);
+crate::unsafe_ref_cast! {
+    /// Native Wolfram [`NumericArray`][ref/NumericArray]<sub>WL</sub>.
+    ///
+    /// This type is an ABI-compatible wrapper around [`wolfram_library_link_sys::MNumericArray`].
+    ///
+    /// A [`NumericArray`] can contain any type `T` which satisfies the trait
+    /// [`NumericArrayType`].
+    ///
+    /// Use [`NumericArray::kind()`] to dynamically resolve a `NumericArray` with unknown
+    /// element type into a `NumericArray<T>` with explicit element type.
+    ///
+    /// Use [`UninitNumericArray`] to construct a [`NumericArray`] without requiring an
+    /// intermediate allocation to copy the elements from.
+    ///
+    /// [ref/NumericArray]: https://reference.wolfram.com/language/ref/NumericArray.html
+    // #[repr(transparent)]
+    pub struct NumericArray<T = ()>(sys::MNumericArray, PhantomData<T>);
+}
 
 /// Represents an allocated [`NumericArray`] whose elements have not yet been initialized.
 ///

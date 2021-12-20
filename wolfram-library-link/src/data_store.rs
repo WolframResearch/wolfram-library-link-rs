@@ -15,41 +15,41 @@ use crate::{
     FromArg, Image, NumericArray,
 };
 
-
-/// Storage for heterogenous expression-like data.
-///
-/// `DataStore` can be used to pass expression-like structures via *LibraryLink* functions.
-///
-/// `DataStore` can be used as an argument or return type in a *LibraryLink* function
-/// exposed via [`export![]`][crate::export].
-///
-/// Use [`DataStore::nodes()`] to get an iterator over the [`DataStoreNode`]s contained
-/// in this `DataStore`.
-///
-/// # Example
-///
-/// The following `DataStore` expression:
-///
-/// ```wolfram
-/// Developer`DataStore[1, "hello", False]
-/// ```
-///
-/// can be created using the Rust code:
-///
-/// ```no_run
-/// use wolfram_library_link::DataStore;
-///
-/// let mut data = DataStore::new();
-///
-/// data.add_i64(1);
-/// data.add_str("hello");
-/// data.add_bool(false);
-/// ```
-// TODO: Provide better Debug formatting for this type.
-#[derive(Debug)]
-#[derive(ref_cast::RefCast)]
-#[repr(transparent)]
-pub struct DataStore(sys::DataStore);
+crate::unsafe_ref_cast! {
+    /// Storage for heterogenous expression-like data.
+    ///
+    /// `DataStore` can be used to pass expression-like structures via *LibraryLink* functions.
+    ///
+    /// `DataStore` can be used as an argument or return type in a *LibraryLink* function
+    /// exposed via [`export![]`][crate::export].
+    ///
+    /// Use [`DataStore::nodes()`] to get an iterator over the [`DataStoreNode`]s contained
+    /// in this `DataStore`.
+    ///
+    /// # Example
+    ///
+    /// The following `DataStore` expression:
+    ///
+    /// ```wolfram
+    /// Developer`DataStore[1, "hello", False]
+    /// ```
+    ///
+    /// can be created using the Rust code:
+    ///
+    /// ```no_run
+    /// use wolfram_library_link::DataStore;
+    ///
+    /// let mut data = DataStore::new();
+    ///
+    /// data.add_i64(1);
+    /// data.add_str("hello");
+    /// data.add_bool(false);
+    /// ```
+    // TODO: Provide better Debug formatting for this type.
+    #[derive(Debug)]
+    // #[repr(transparent)]
+    pub struct DataStore<>(sys::DataStore);
+}
 
 assert_not_impl_any!(DataStore: Copy);
 
