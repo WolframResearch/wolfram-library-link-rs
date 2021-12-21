@@ -16,6 +16,7 @@
 //!
 //! #### Related Links
 //!
+//! * [*LibraryLink for Rust Quick Start*][QuickStart] &nbsp;&nbsp;<small>[[TODO: Update to public link]]</small>
 //! * [*Wolfram LibraryLink User Guide*](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
 //!
 //! # Examples
@@ -35,7 +36,7 @@
 //! # }
 //! ```
 //!
-//! [[building your dynamic library]], and loading the function into the Wolfram Language
+//! [building your dynamic library][QuickStart], and loading the function into the Wolfram Language
 //! using [`LibraryFunctionLoad`][library-function-load]:
 //!
 //! ```wolfram
@@ -43,6 +44,8 @@
 //!
 //! func[5]   (* Returns 25 *)
 //! ```
+//!
+//! [QuickStart]: https://stash.wolfram.com/users/connorg/repos/rustlink/browse/docs/QuickStart.md
 //!
 //! ## Show backtrace when a panic occurs
 //!
