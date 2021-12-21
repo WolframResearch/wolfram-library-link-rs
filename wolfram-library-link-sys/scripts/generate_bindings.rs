@@ -12,25 +12,7 @@ use std::path::PathBuf;
 const ENV_VAR: &str = "WOLFRAM_C_INCLUDES";
 const GENERATED_BINDINGS_FILE: &str = "LibraryLink_bindings.rs";
 
-// lazy_static! {
-//     static ref WOLFRAM_INSTALLATION: PathBuf =
-//         PathBuf::from("/Applications/Mathematica Base.app/Contents/");
-
-//     static ref WOLFRAM_INCLUDE_C: PathBuf = WOLFRAM_INSTALLATION
-//         .join("SystemFiles/IncludeFiles/C/");
-// }
-
 fn main() {
-    // if !WOLFRAM_INSTALLATION.exists() {
-    //     panic!("no Wolfram System exists at '{}'", WOLFRAM_INSTALLATION.display());
-    // }
-
-    // if !WOLFRAM_INCLUDE_C.exists() {
-    //     // NOTE: For WRI developers, if the Mathematica installation at this path is a
-    //     //       prototype / custom Kernel build, it's
-    //     panic!("no Wolfram System includes files exist at '{}'", WOLFRAM_INCLUDE_C.display());
-    // }
-
     let c_includes = match std::env::var(ENV_VAR) {
         Ok(path) => PathBuf::from(path),
         Err(err) => panic!(
