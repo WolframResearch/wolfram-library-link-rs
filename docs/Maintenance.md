@@ -1,7 +1,9 @@
 # Maintenance
 
 This document describes tasks necessary to maintain the `wolfram-library-link` and
-`wolfram-library-link-sys` over time.
+`wolfram-library-link-sys` crates over time. This document is informational and intended
+for the maintainer of these crates; users of these crates do not need to read this
+document.
 
 ## Generating `wolfram-library-link-sys` bindings
 
@@ -22,3 +24,15 @@ on each supported platform.
 TODO: Mention usage of `RUST_WOLFRAM_LOCATION` env variable used by wolfram-app-discovery
 to configure the Wolfram Engine (Wolfram Engine/Wolfram Desktop/Mathematica products)
 location to use.
+
+#### Example
+
+From the `RustLink` repository root directory:
+
+```
+$ export RUST_WOLFRAM_LOCATION=/Applications/Wolfram/12.2.x/Mathematica-12.2.0.app/Contents/
+$ cargo make gen-bindings
+```
+
+will re-generate the `wolfram-library-link-sys/generated/12.2.0/MacOSX-x86-64/LibraryLink_bindings.rs`
+file.
