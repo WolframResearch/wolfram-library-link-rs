@@ -10,7 +10,7 @@
 //! * Passing data efficiently to and from the Wolfram Language using native data types
 //!   like [`NumericArray`] and [`Image`].
 //! * Passing arbitrary expressions to and from the Wolfram Language using
-//!   [`Expr`][struct@wl_expr::Expr] and the [`#[wolfram_library_function]`][wlf] macro.
+//!   [`Expr`][struct@wl_expr_core::Expr] and the [`#[wolfram_library_function]`][wlf] macro.
 //! * Asynchronous events handled by the Wolfram Language, generated using a background
 //!   thread spawned via [`AsyncTaskObject`].
 //!
