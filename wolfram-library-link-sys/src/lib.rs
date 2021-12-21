@@ -4,4 +4,7 @@
 #![allow(deref_nullptr)]
 
 // The name of this file comes from `build.rs`.
-include!("../generated/LibraryLink_bindings.rs");
+include!(concat!(
+    "../",
+    env!("CRATE_WOLFRAM_LIBRARYLINK_SYS_BINDINGS"),
+));

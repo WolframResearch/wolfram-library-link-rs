@@ -9,3 +9,6 @@ publish = false
 #       See: https://doc.rust-lang.org/cargo/reference/build-scripts.html#a-sys-packages
 
 [dependencies]
+
+[build-dependencies]
+wolfram-app-discovery = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wolfram-app-discovery.git" }

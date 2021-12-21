@@ -5,9 +5,9 @@ default_to_workspace = false
 # Task definitions
 #=======================================
 
-#-----------
-# Main tasks
-#-----------
+#------------------
+# Development tasks
+#------------------
 
 [tasks.paclet]
 dependencies = ["clean-library-resources", "build-library-resources"]
@@ -29,3 +29,12 @@ rm -rf ./RustLink/LibraryResources
 [tasks.build-library-resources]
 command = "cargo"
 args = ["build", "--examples"]
+
+#------------------
+# Maintenance tasks
+#------------------
+
+# Generate LibraryLink sys bindings for the current platform.
+[tasks.gen-bindings]
+script_runner = "@rust"
+script = { file = "scripts/generate_versioned_bindings.rs" }
