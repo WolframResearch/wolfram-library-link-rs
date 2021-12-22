@@ -693,7 +693,7 @@ macro_rules! export {
 ///
 /// # Examples
 ///
-/// Export a WSTP function that squares its integer argument:
+/// ##### WSTP function that squares a single integer argument:
 ///
 /// ```
 /// # mod scope {
@@ -714,7 +714,7 @@ macro_rules! export {
 ///     link.put_i64(x * x).unwrap();
 /// }
 ///
-/// export_wstp![square_wstp(_)];
+/// export_wstp![square_wstp];
 /// # }
 /// ```
 ///
@@ -722,9 +722,12 @@ macro_rules! export {
 /// LibraryFunctionLoad["...", "square_wstp", LinkObject, LinkObject]
 /// ```
 ///
-/// Export a WSTP function that computes the sum of a variable number of arguments:
+/// ##### WSTP function that computes the sum of a variable number of arguments:
 ///
 /// ```
+/// # mod scope {
+/// use wolfram_library_link::{export_wstp, wstp::Link};
+///
 /// fn total_args_i64(link: &mut Link) {
 ///     // Check that we recieved a functions arguments list, and get the number of arguments.
 ///     let arg_count: usize = link.test_head("List").unwrap();
@@ -740,6 +743,9 @@ macro_rules! export {
 ///     // Write the return value to the link.
 ///     link.put_i64(total).unwrap();
 /// }
+///
+/// export_wstp![total_args_i64];
+/// # }
 /// ```
 ///
 /// ```wolfram
