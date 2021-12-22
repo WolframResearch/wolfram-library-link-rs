@@ -4,17 +4,18 @@ use wl_expr_core::{Expr, ExprKind, Symbol};
 use wstp::{self, Link};
 
 use crate::{
-    catch_panic,
+    catch_panic::{call_and_catch_panic, CaughtPanic},
     sys::{self, MArgument, LIBRARY_NO_ERROR},
     NativeFunction, NumericArray,
 };
+
 
 //======================================
 // #[wolfram_library_function] helpers
 //======================================
 
 //==================
-// WSTP helpers
+// WSTP Expr helpers
 //==================
 
 /// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
@@ -49,10 +50,7 @@ pub fn call_wstp_wolfram_library_function<
     mut unsafe_link: wstp::sys::WSLINK,
     function: F,
 ) -> c_uint {
-    use self::{
-        catch_panic::{call_and_catch_panic, CaughtPanic},
-        wstp::sys::{WSEndPacket, WSPutString},
-    };
+    use crate::wstp::sys::{WSEndPacket, WSPutString};
 
     let _ = unsafe { crate::initialize(libdata) };
 
@@ -116,6 +114,74 @@ pub fn call_wstp_wolfram_library_function<
 }
 
 //==================
+// WSTP helpers
+//==================
+
+/// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
+///
+/// [wlf]: attr.wolfram_library_function.html
+pub fn call_wstp_link_wolfram_library_function<
+    F: FnOnce(&mut Link) + std::panic::UnwindSafe,
+>(
+    libdata: sys::WolframLibraryData,
+    mut unsafe_link: wstp::sys::WSLINK,
+    function: F,
+) -> c_uint {
+    let _ = unsafe { crate::initialize(libdata) };
+
+    let link = unsafe { Link::unchecked_ref_cast_mut(&mut unsafe_link) };
+
+    let result: Result<(), CaughtPanic> = unsafe {
+        call_and_catch_panic(std::panic::AssertUnwindSafe(|| {
+            let _: () = function(link);
+        }))
+    };
+
+    match result {
+        Ok(()) => LIBRARY_NO_ERROR,
+        // Try to fail gracefully by writing the panic message as a Failure[..] object to
+        // be returned, but if that fails, just return LIBRARY_FUNCTION_ERROR.
+        Err(panic) => match write_panic_failure_to_link(link, panic) {
+            Ok(()) => LIBRARY_NO_ERROR,
+            Err(_wstp_err) => sys::LIBRARY_FUNCTION_ERROR,
+        },
+    }
+}
+
+fn write_panic_failure_to_link(
+    link: &mut Link,
+    caught_panic: CaughtPanic,
+) -> Result<(), wstp::Error> {
+    // Clear the last error on the link, if any.
+    //
+    // This is necessary because the panic we caught might have been caused by
+    // code like:
+    //
+    //     link.do_something(...).unwrap()`
+    //
+    // which will have "poisoned" the link, and would cause our attempt to write
+    // the panic message to the link to fail if we didn't clear the error.
+    //
+    // If there is no error condition set on the link, this is a no-op.
+    //
+    // TODO: If an error *is* set, mention that in the Failure message? That might help
+    //       users debug link issues more quickly.
+    link.clear_error();
+
+    // Skip whatever data is still stored in the link.
+    link.raw_get_next()?;
+    link.new_packet()?;
+
+    debug_assert!(!link.is_ready());
+
+    // FIXME: Return this as a full expr
+    // let panic_string = caught_panic.to_pretty_expr().to_string();
+    // link.put_str(panic_string.as_str())
+
+    link.put_expr(&caught_panic.to_pretty_expr())
+}
+
+//==================
 // WXF helpers
 //==================
 
@@ -154,8 +220,6 @@ pub fn call_wxf_wolfram_library_function<
     wxf_result: MArgument,
     function: F,
 ) -> c_uint {
-    use self::catch_panic::{call_and_catch_panic, CaughtPanic};
-
     let _ = unsafe { crate::initialize(libdata) };
 
     let result: Result<(), CaughtPanic> = unsafe {

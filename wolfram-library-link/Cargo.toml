@@ -47,6 +47,11 @@ crate-type = ["cdylib"]
 name = "aborts"
 crate-type = ["cdylib"]
 
+[[example]]
+name = "wstp_example" # avoid "libwstp.dylib", which seems too generic.
+path = "examples/wstp.rs"
+crate-type = ["cdylib"]
+
 #-----------------------------
 # Raw (unsafe, low-level) APIs
 #-----------------------------

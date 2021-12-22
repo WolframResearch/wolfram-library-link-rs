@@ -631,4 +631,150 @@ macro_rules! export {
     };
 }
 
+/// Export the specified functions as native *LibraryLink* WSTP functions.
+///
+/// Every function exported by this macro must have the type signature: `fn(&mut Link)`.
+///
+/// Functions exported using this macro will automatically:
+///
+/// * Call [`initialize()`][crate::initialize] to initialize this library.
+/// * Catch any panics that occur.
+///   - If a panic does occur, it will be returned as a [`Failure[...]`][ref/Failure]
+///     expression.
+///
+/// [ref/Failure]: https://reference.wolfram.com/language/ref/Failure.html
+///
+/// # Syntax
+///
+/// Export a LibraryLink WSTP function.
+///
+/// ```
+/// # mod scope {
+/// # use wolfram_library_link::{export_wstp, wstp::Link};
+/// # fn square(link: &mut Link) { }
+/// export_wstp![square];
+/// # }
+/// ```
+///
+/// Export a LibraryLink WSTP function using the specified low-level shared library symbol
+/// name.
+///
+/// ```
+/// # mod scope {
+/// # use wolfram_library_link::{export_wstp, wstp::Link};
+/// # fn square(link: &mut Link) { }
+/// export_wstp![square as WL_square];
+/// # }
+/// ```
+///
+/// Export multiple functions with one `export_wstp!` invocation. This is purely for
+/// convenience.
+///
+/// ```
+/// # mod scope {
+/// # use wolfram_library_link::{export_wstp, wstp::Link};
+/// # fn square(link: &mut Link) { }
+/// # fn add_two(link: &mut Link) { }
+/// export_wstp![
+///     square;
+///     add_two as AddTwo;
+/// ];
+/// # }
+/// ```
+///
+// TODO: Remove this feature? If someone wants to export the low-level function, they
+//       should do `pub use square::square as ...` instead of exposing the hidden module
+//       (which is just an implementation detail of `export![]` anyway).
+// Make public the `mod` module that contains the low-level wrapper function.
+//
+// ```
+// export![pub square(_)];
+// ```
+///
+/// # Examples
+///
+/// Export a WSTP function that squares its integer argument:
+///
+/// ```
+/// # mod scope {
+/// use wolfram_library_link::{export_wstp, wstp::Link};
+///
+/// fn square_wstp(link: &mut Link) {
+///     // Get the number of elements in the arguments list.
+///     let arg_count = link.test_head("List").unwrap();
+///
+///     if arg_count != 1 {
+///         panic!("square_wstp: expected to get a single argument");
+///     }
+///
+///     // Get the argument value.
+///     let x = link.get_i64().expect("expected Integer argument");
+///
+///     // Write the return value.
+///     link.put_i64(x * x).unwrap();
+/// }
+///
+/// export_wstp![square_wstp(_)];
+/// # }
+/// ```
+///
+/// ```wolfram
+/// LibraryFunctionLoad["...", "square_wstp", LinkObject, LinkObject]
+/// ```
+///
+/// Export a WSTP function that computes the sum of a variable number of arguments:
+///
+/// ```
+/// fn total_args_i64(link: &mut Link) {
+///     // Check that we recieved a functions arguments list, and get the number of arguments.
+///     let arg_count: usize = link.test_head("List").unwrap();
+///
+///     let mut total: i64 = 0;
+///
+///     // Get each argument, assuming that they are all integers, and add it to the total.
+///     for _ in 0..arg_count {
+///         let term = link.get_i64().expect("expected Integer argument");
+///         total += term;
+///     }
+///
+///     // Write the return value to the link.
+///     link.put_i64(total).unwrap();
+/// }
+/// ```
+///
+/// ```wolfram
+/// LibraryFunctionLoad["...", "total_args_i64", LinkObject, LinkObject]
+/// ```
+#[macro_export]
+macro_rules! export_wstp {
+    ($vis:vis $name:ident as $exported:ident) => {
+        $vis mod $name {
+            #[no_mangle]
+            pub unsafe extern "C" fn $exported(
+                lib: $crate::sys::WolframLibraryData,
+                raw_link: $crate::wstp::sys::WSLINK,
+            ) -> std::os::raw::c_uint {
+                let func: fn(&mut $crate::wstp::Link) -> _ = super::$name;
+
+                $crate::macro_utils::call_wstp_link_wolfram_library_function(
+                    lib,
+                    raw_link,
+                    func
+                )
+            }
+        }
+    };
+
+    // Convert export![name] to export![name as name].
+    ($vis:vis $name:ident) => {
+        $crate::export_wstp![$vis $name as $name];
+    };
+
+    ($($vis:vis $name:ident $(as $exported:ident)?);* $(;)?) => {
+        $(
+            $crate::export_wstp![$vis $name $(as $exported)?];
+        )*
+    };
+}
+
 // TODO: Allow any type which implements FromExpr in wrapper parameter lists?

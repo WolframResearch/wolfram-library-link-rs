@@ -36,7 +36,8 @@ Scan[
 		"libasync_file_watcher_raw.dylib",
 		"libasync_file_watcher.dylib",
 		"libdata_store.dylib",
-		"libaborts.dylib"
+		"libaborts.dylib",
+		"libwstp_example.dylib"
 	}
 ]
 
