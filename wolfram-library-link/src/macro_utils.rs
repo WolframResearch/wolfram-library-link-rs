@@ -1,4 +1,4 @@
-use std::{ffi::CString, os::raw::c_uint};
+use std::os::raw::c_uint;
 
 use wl_expr_core::{Expr, ExprKind, Symbol};
 use wstp::{self, Link};
@@ -21,12 +21,12 @@ use crate::{
 /// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
 ///
 /// [wlf]: attr.wolfram_library_function.html
-pub fn call_wstp_wolfram_library_function_expr_list(
+pub fn call_wstp_expr_list_wolfram_library_function(
     libdata: sys::WolframLibraryData,
     unsafe_link: wstp::sys::WSLINK,
     function: fn(Vec<Expr>) -> Expr,
 ) -> c_uint {
-    call_wstp_wolfram_library_function(
+    call_wstp_expr_wolfram_library_function(
         libdata,
         unsafe_link,
         |argument_expr: Expr| -> Expr {
@@ -43,74 +43,46 @@ pub fn call_wstp_wolfram_library_function_expr_list(
 /// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
 ///
 /// [wlf]: attr.wolfram_library_function.html
-pub fn call_wstp_wolfram_library_function<
+pub fn call_wstp_expr_wolfram_library_function<
     F: FnOnce(Expr) -> Expr + std::panic::UnwindSafe,
 >(
     libdata: sys::WolframLibraryData,
-    mut unsafe_link: wstp::sys::WSLINK,
+    unsafe_link: wstp::sys::WSLINK,
     function: F,
 ) -> c_uint {
-    use crate::wstp::sys::{WSEndPacket, WSPutString};
-
-    let _ = unsafe { crate::initialize(libdata) };
-
-    let result: Result<(), CaughtPanic> = unsafe {
-        call_and_catch_panic(move || {
-            let link = Link::unchecked_ref_cast_mut(&mut unsafe_link);
-
-            let arguments: Expr = match link.get_expr() {
-                Ok(args) => args,
-                Err(message) => {
-                    // Skip reading the argument list packet.
-                    if link.raw_get_next().and_then(|_| link.new_packet()).is_err() {
-                        return;
-                    }
-
-                    // Failure["LibraryFunctionWSTPError", <|
-                    //     "Message" -> %[Expr::string(message.to_string())]
-                    // |>]
-                    let failure =
-                        Expr::normal(Symbol::new("System`Failure").unwrap(), vec![
-                            Expr::string("LibraryFunctionWSTPError"),
-                            Expr::normal(
-                                Symbol::new("System`Association").unwrap(),
-                                vec![Expr::normal(
-                                    Symbol::new("System`Rule").unwrap(),
-                                    vec![
-                                        Expr::string("Message"),
-                                        Expr::string(message.to_string()),
-                                    ],
-                                )],
-                            ),
-                        ]);
-
-                    let _: Result<_, _> = link.put_expr(&failure);
+    call_wstp_link_wolfram_library_function(libdata, unsafe_link, |link: &mut Link| {
+        let arguments: Expr = match link.get_expr() {
+            Ok(args) => args,
+            Err(message) => {
+                // Skip reading the argument list packet.
+                if link.raw_get_next().and_then(|_| link.new_packet()).is_err() {
                     return;
-                },
-            };
+                }
 
-            let result: Expr = function(arguments);
+                // Failure["LibraryFunctionWSTPError", <|
+                //     "Message" -> %[Expr::string(message.to_string())]
+                // |>]
+                let failure = Expr::normal(Symbol::new("System`Failure").unwrap(), vec![
+                    Expr::string("LibraryFunctionWSTPError"),
+                    Expr::normal(Symbol::new("System`Association").unwrap(), vec![
+                        Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+                            Expr::string("Message"),
+                            Expr::string(message.to_string()),
+                        ]),
+                    ]),
+                ]);
 
-            link.put_expr(&result).expect(
-                "LibraryFunction result expression could not be written to WSTP link",
-            );
-        })
-    };
+                let _: Result<_, _> = link.put_expr(&failure);
+                return;
+            },
+        };
 
-    match result {
-        Ok(()) => LIBRARY_NO_ERROR,
-        Err(caught_panic) => unsafe {
-            // FIXME: Fix unwraps + return this as a full expr
-            let cstring =
-                CString::new(caught_panic.to_pretty_expr().to_string()).unwrap();
+        let result: Expr = function(arguments);
 
-            WSPutString(unsafe_link, cstring.as_ptr());
-
-            WSEndPacket(unsafe_link);
-
-            LIBRARY_NO_ERROR
-        },
-    }
+        link.put_expr(&result).expect(
+            "LibraryFunction result expression could not be written to WSTP link",
+        );
+    })
 }
 
 //==================

@@ -9,7 +9,7 @@ pub(crate) fn gen_arg_mode_expr_list(
     wrapper_function_name: Ident,
 ) -> TokenStream {
     let inner = quote::quote! {
-        ::wolfram_library_link::macro_utils::call_wstp_wolfram_library_function_expr_list(
+        ::wolfram_library_link::macro_utils::call_wstp_expr_list_wolfram_library_function(
             libdata,
             unsafe_link,
             #function_name
@@ -42,7 +42,7 @@ pub(crate) fn gen_arg_mode_pattern(
     let inner = quote::quote! {
         use ::wl_expr::{Expr, forms::{FromExpr, FormError}};
 
-        ::wolfram_library_link::macro_utils::call_wstp_wolfram_library_function(
+        ::wolfram_library_link::macro_utils::call_wstp_expr_wolfram_library_function(
             libdata,
             unsafe_link,
             |argument_expr: Expr| -> Expr {
