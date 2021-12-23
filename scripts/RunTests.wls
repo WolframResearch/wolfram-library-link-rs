@@ -32,7 +32,15 @@ Scan[
 
 		Replace[failedCases, {
 			{__} :> (
-				Echo[CodeFormat @ ToString[failedCases, InputForm], "tests failed"];
+				Print[];
+				Do[
+					Print["=========================="];
+					Print["Failed Case: \n"];
+					Print[CodeFormat @ ToString[case, InputForm]];
+					Print["\n"];
+					,
+					{case, failedCases}
+				];
 			),
 			{} :> Null,
 			_ :> (
