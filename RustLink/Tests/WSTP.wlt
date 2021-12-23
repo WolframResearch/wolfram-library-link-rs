@@ -26,7 +26,7 @@ TestMatch[
 		"MessageParameters" -> <|"message" -> "successful panic"|>,
 		(* Avoid hard-coding the panic line/column number into the test. *)
 		"SourceLocation" -> s_?StringQ /; StringStartsQ[s, "wolfram-library-link/examples/tests/test_wstp.rs:"],
-		"Backtrace" -> Sequence[]
+		"Backtrace" -> Missing["NotEnabled"]
 	|>]
 ]
 
@@ -43,6 +43,6 @@ TestMatch[
 		"MessageParameters" -> <|"message" -> "successful panic"|>,
 		(* Avoid hard-coding the panic line/column number into the test. *)
 		"SourceLocation" -> s_?StringQ /; StringStartsQ[s, "wolfram-library-link/examples/tests/test_wstp.rs:"],
-		"Backtrace" -> Sequence[]
+		"Backtrace" -> Missing["NotEnabled"]
 	|>]
 ]

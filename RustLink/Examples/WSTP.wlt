@@ -24,7 +24,7 @@ TestMatch[
 		"MessageTemplate" -> "Rust LibraryLink function panic: `message`",
 		"MessageParameters" -> <|"message" -> "square_wstp: expected to get a single argument"|>,
 		"SourceLocation" -> s_?StringQ /; StringStartsQ[s, "wolfram-library-link/examples/wstp.rs:"],
-		"Backtrace" -> Sequence[]
+		"Backtrace" -> Missing["NotEnabled"]
 	|>]
 ]
 

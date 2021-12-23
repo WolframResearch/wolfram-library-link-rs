@@ -86,8 +86,9 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
     // This avoids calling `.resolve()` below, which can sometimes be very slow (100s of
     // millisends).
     if !should_show_backtrace() {
-        // This Sequence[] will not show up in the FE.
-        return Expr::normal(Symbol::new("System`Sequence").unwrap(), vec![]);
+        return Expr::normal(Symbol::new("System`Missing").unwrap(), vec![Expr::string(
+            "NotEnabled",
+        )]);
     }
 
     let bt: Expr = if let Some(mut bt) = bt {
