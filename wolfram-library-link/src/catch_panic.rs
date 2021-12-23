@@ -42,44 +42,38 @@ impl CaughtPanic {
         let location = Expr::string(location.unwrap_or("Unknown".into()));
         let backtrace = display_backtrace(backtrace);
 
-        let head = Expr::symbol(Symbol::new("LibraryLink`Panic").unwrap());
-
-        // Failure['head[Panel[Column[{
-        //     Row[{Style["Message", Bold], ": ", 'message}],
-        //     Row[{Style["SourceLocation", Bold], ": ", 'location}],
-        //     'backtrace
-        // }]]]]
-        Expr::normal(Symbol::new("System`Failure").unwrap(), vec![Expr::normal(
-            head,
-            vec![Expr::normal(Symbol::new("System`Panel").unwrap(), vec![
-                Expr::normal(Symbol::new("System`Column").unwrap(), vec![Expr::normal(
-                    Symbol::new("System`List").unwrap(),
-                    vec![
-                        Expr::normal(Symbol::new("System`Row").unwrap(), vec![
-                            Expr::normal(Symbol::new("System`List").unwrap(), vec![
-                                Expr::normal(Symbol::new("System`Style").unwrap(), vec![
-                                    Expr::string("Message"),
-                                    Expr::symbol(Symbol::new("System`Bold").unwrap()),
-                                ]),
-                                Expr::string(": "),
-                                message,
-                            ]),
+        // Failure["RustPanic", <|
+        //     "MessageTemplate" -> "Rust LibraryLink function panic: `message`",
+        //     "MessageParameters" -> <| "message" -> "..." |>,
+        //     "SourceLocation" -> "...",
+        //     "Backtrace" -> "..."
+        // |>]
+        Expr::normal(Symbol::new("System`Failure").unwrap(), vec![
+            Expr::string("RustPanic"),
+            Expr::normal(Symbol::new("System`Association").unwrap(), vec![
+                Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+                    Expr::string("MessageTemplate"),
+                    Expr::string("Rust LibraryLink function panic: `message`"),
+                ]),
+                Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+                    Expr::string("MessageParameters"),
+                    Expr::normal(Symbol::new("System`Association").unwrap(), vec![
+                        Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+                            Expr::string("message"),
+                            message,
                         ]),
-                        Expr::normal(Symbol::new("System`Row").unwrap(), vec![
-                            Expr::normal(Symbol::new("System`List").unwrap(), vec![
-                                Expr::normal(Symbol::new("System`Style").unwrap(), vec![
-                                    Expr::string("SourceLocation"),
-                                    Expr::symbol(Symbol::new("System`Bold").unwrap()),
-                                ]),
-                                Expr::string(": "),
-                                location,
-                            ]),
-                        ]),
-                        backtrace,
-                    ],
-                )]),
-            ])],
-        )])
+                    ]),
+                ]),
+                Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+                    Expr::string("SourceLocation"),
+                    location,
+                ]),
+                Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+                    Expr::string("Backtrace"),
+                    backtrace,
+                ]),
+            ]),
+        ])
     }
 }
 

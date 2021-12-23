@@ -12,7 +12,7 @@ Test[
 ]
 
 (* Test that passing more than one argument to square_wstp() results in a Failure. *)
-Test[
+TestMatch[
 	LibraryFunctionLoad[
 		"libwstp_example",
 		"square_wstp",
@@ -20,10 +20,12 @@ Test[
 		LinkObject
 	][4, 4]
 	,
-	Failure[LibraryLink`Panic[Panel[Column[{
-		Row[{Style["Message", Bold], ": ", "square_wstp: expected to get a single argument"}],
-		Row[{Style["SourceLocation", Bold], ": ", "wolfram-library-link/examples/wstp.rs:29:9"}]
-	}]]]]
+	Failure["RustPanic", <|
+		"MessageTemplate" -> "Rust LibraryLink function panic: `message`",
+		"MessageParameters" -> <|"message" -> "square_wstp: expected to get a single argument"|>,
+		"SourceLocation" -> s_?StringQ /; StringStartsQ[s, "wolfram-library-link/examples/wstp.rs:"],
+		"Backtrace" -> Sequence[]
+	|>]
 ]
 
 Test[

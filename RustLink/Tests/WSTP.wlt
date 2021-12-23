@@ -21,15 +21,13 @@ TestMatch[
 		LinkObject
 	][]
 	,
-	Failure[LibraryLink`Panic[Panel[Column[{
-		Row[{Style["Message", Bold], ": ", "successful panic"}],
-		Row[{
-			Style["SourceLocation", Bold],
-			": ",
-			(* Avoid hard-coding the panic line/column number into the test. *)
-			s_?StringQ /; StringStartsQ[s, "wolfram-library-link/examples/tests/test_wstp.rs:"]
-		}]
-	}]]]]
+	Failure["RustPanic", <|
+		"MessageTemplate" -> "Rust LibraryLink function panic: `message`",
+		"MessageParameters" -> <|"message" -> "successful panic"|>,
+		(* Avoid hard-coding the panic line/column number into the test. *)
+		"SourceLocation" -> s_?StringQ /; StringStartsQ[s, "wolfram-library-link/examples/tests/test_wstp.rs:"],
+		"Backtrace" -> Sequence[]
+	|>]
 ]
 
 TestMatch[
@@ -40,13 +38,11 @@ TestMatch[
 		LinkObject
 	][]
 	,
-	Failure[LibraryLink`Panic[Panel[Column[{
-		Row[{Style["Message", Bold], ": ", "successful panic"}],
-		Row[{
-			Style["SourceLocation", Bold],
-			": ",
-			(* Avoid hard-coding the panic line/column number into the test. *)
-			s_?StringQ /; StringStartsQ[s, "wolfram-library-link/examples/tests/test_wstp.rs:"]
-		}]
-	}]]]]
+	Failure["RustPanic", <|
+		"MessageTemplate" -> "Rust LibraryLink function panic: `message`",
+		"MessageParameters" -> <|"message" -> "successful panic"|>,
+		(* Avoid hard-coding the panic line/column number into the test. *)
+		"SourceLocation" -> s_?StringQ /; StringStartsQ[s, "wolfram-library-link/examples/tests/test_wstp.rs:"],
+		"Backtrace" -> Sequence[]
+	|>]
 ]
