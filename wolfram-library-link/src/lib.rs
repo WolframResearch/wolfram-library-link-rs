@@ -70,7 +70,7 @@
 //! [library-function-load]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
 //! [failure]: https://reference.wolfram.com/language/ref/Failure.html
 //! [cargo-features]: https://doc.rust-lang.org/cargo/reference/features.html
-
+// #![doc = include_str!("../docs/included/Overview.md")]
 #![cfg_attr(feature = "nightly", feature(panic_info_message))]
 #![warn(missing_docs)]
 
