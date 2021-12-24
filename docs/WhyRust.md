@@ -6,7 +6,7 @@ The LibraryLink and WSTP C libraries already offer Wolfram Language developers t
 capability to write performant low-level code, interface with external libraries, and
 perform system operations, all easily callable from the Wolfram Language. This document
 describes some reasons why the Rust programming language might be appealing to Wolfram
-Language developers who might otherwise reach for C or C++:
+Language developers looking to write native code:
 
 * **Performance** –
   Rust is fast. Powerful zero-cost abstractions enable Rust code to easily achieve
