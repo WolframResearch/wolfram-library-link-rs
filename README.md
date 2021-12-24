@@ -37,7 +37,7 @@ use wolfram_library_link::export;
 export![square(_)];
 
 fn square(x: i64) -> i64 {
-	x * x
+    x * x
 }
 ```
 
@@ -60,16 +60,16 @@ use wolfram_library_link::{export, NumericArray};
 export![total(_)];
 
 fn total(array: &NumericArray<i64>) -> i64 {
-	array.as_slice().into_iter().sum()
+    array.as_slice().into_iter().sum()
 }
 ```
 
 ```wolfram
 total = LibraryFunctionLoad[
-	"...",
-	"square",
-	{LibraryDataType[NumericArray, "Integer64"]},
-	Integer
+    "...",
+    "square",
+    {LibraryDataType[NumericArray, "Integer64"]},
+    Integer
 ];
 
 total[NumericArray[Range[1000000], "Integer64"]]
