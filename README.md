@@ -1,7 +1,7 @@
 # wolfram-library-link
 
-This library wraps the Wolfram LibraryLink interface, making it possible to call Rust code
-from the Wolfram language.
+Bindings to the Wolfram LibraryLink interface, making it possible to call Rust code
+from the Wolfram Language.
 
 This library is used for writing Rust programs that can be loaded by the Wolfram Language
 LibraryLink family of functions, specifically by
