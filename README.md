@@ -79,7 +79,7 @@ See also: [`NumericArray`][ref/NumericArray], [`LibraryDataType`][ref/LibraryDat
 
 ## Example Programs
 
-The [./wolfram-library-link/examples](./wolfram-library-link/examples) subdirectory
+The [wolfram-library-link/examples](./wolfram-library-link/examples) subdirectory
 contains sample programs demonstrating features of the `wolfram-library-link` API.
 
 Rust code                                                                          | Wolfram Language code                                      | Demonstrates ...
