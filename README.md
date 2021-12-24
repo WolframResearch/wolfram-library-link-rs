@@ -1,6 +1,7 @@
 # wolfram-library-link
 
-This library offers bindings to Rust code from the Wolfram language.
+This library wraps the Wolfram LibraryLink interface, making it possible to call Rust code
+from the Wolfram language.
 
 This library is used for writing Rust programs that can be loaded by the Wolfram language
 LibraryLink family of functions, specifically by
@@ -16,15 +17,11 @@ Features:
     language via `derive(FromExpr)`.
   * Safe API for the Wolfram Symbolic Transport Protocol, using the [`wstp`][wstp] crate.
 
-Advantages over the LibraryLink/WSTP C API:
-
-  * The API is easier to use
-    - No need to worry about managing allocations
-    - No potential memory unsafety
-    - Easy and safe method call to evaluate an expression from Rust code
-  * Ability to use a safer, but still just as performant, modern programming language
-
 Follow the [**Quick Start**](./docs/QuickStart.md) guide to begin using `wolfram-library-link`.
+
+See [**Why Rust?**](./docs/WhyRust.md) for an overview of some of the advantages Rust has
+when writing native code for use from the Wolfram Language: performance, memory and thread
+safety, high-level features, and more.
 
 # Quick Examples
 
