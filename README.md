@@ -25,9 +25,9 @@ safety, high-level features, and more.
 
 # Quick Examples
 
-Each of the examples in this section are written with two back-to-back code blocks. The
-first shows the Rust code, the second shows the Wolfram Language code needed to load and
-use the related Rust function(s).
+The examples in this section are written with two back-to-back code blocks. The first
+shows the Rust code, the second shows the Wolfram Language code needed to load and use the
+related Rust function(s).
 
 #### Basic data types
 
