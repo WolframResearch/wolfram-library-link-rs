@@ -86,8 +86,8 @@ crate-type = ["cdylib"]
 wolfram-library-link = "X.X.X"
 ```
 
-See the [Cargo manifest documentation][cargo-manifest-docs] for a complete description of
-the Cargo TOML file.
+> See the [Cargo manifest documentation][cargo-manifest-docs] for a complete description
+> of the Cargo.toml file.
 
 ## Write a basic Rust function
 
