@@ -7,7 +7,7 @@ This library is used for writing Rust programs that can be loaded by the Wolfram
 LibraryLink family of functions, specifically by
 [`LibraryFunctionLoad[]`][ref/LibraryFunctionLoad].
 
-Features:
+#### Features
 
   * Call Rust functions from the Wolfram language.
   * Pass general Wolfram language expressions to and from Rust code.
