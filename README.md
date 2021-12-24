@@ -23,7 +23,7 @@ See [**Why Rust?**](./docs/WhyRust.md) for an overview of some of the advantages
 when writing native code for use from the Wolfram Language: performance, memory and thread
 safety, high-level features, and more.
 
-# Quick Examples
+## Quick Examples
 
 The examples in this section are written with two back-to-back code blocks. The first
 shows the Rust code, the second shows the Wolfram Language code needed to load and use the
@@ -77,7 +77,7 @@ total[NumericArray[Range[1000000], "Integer64"]]
 
 See also: [`NumericArray`][ref/NumericArray], [`LibraryDataType`][ref/LibraryDataType]
 
-# Example Programs
+## Example Programs
 
 The [./wolfram-library-link/examples](./wolfram-library-link/examples) subdirectory
 contains sample programs demonstrating features of the `wolfram-library-link` API.
@@ -116,7 +116,7 @@ the Wolfram Language unit testing logic that loads and calls the test functions.
 [ref/LibraryDataType]: https://reference.wolfram.com/language/ref/LibraryDataType.html
 [ref/NumericArray]: https://reference.wolfram.com/language/ref/NumericArray.html
 
-# Related Links
+## Related Links
 
 * [*Wolfram LibraryLink User Guide*](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
 * [*Introducing C++ and the Wolfram Language with LibraryLinkUtilities*](https://community.wolfram.com/groups/-/m/t/2133603), a C++ wrapper around the *LibraryLink* API.
