@@ -54,7 +54,7 @@ similiar to other high-level languages: -->
 #### High-leverage tools
 
 * **Dependency management** –
-  Rust has built-in super for managing dependencies, via the [`cargo`][cargo] command-line
+  Rust has built-in support for managing dependencies, via the [`cargo`][cargo] command-line
   tool. Use `cargo` to automatically download your dependencies, build your library, run
   tests, and more. Easily use any of the tens of thousands of existing libraries from
   [crates.io](https://crates.io) in your project.
