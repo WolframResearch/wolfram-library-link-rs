@@ -3,7 +3,7 @@
 Bindings to the Wolfram LibraryLink interface, making it possible to call Rust code
 from the Wolfram Language.
 
-This library is used for writing Rust programs that can be loaded by the Wolfram Language
+This library is used for writing Rust programs that can be loaded by the Wolfram
 LibraryLink family of functions, specifically by
 [`LibraryFunctionLoad[]`][ref/LibraryFunctionLoad].
 
