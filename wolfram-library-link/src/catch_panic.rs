@@ -300,8 +300,17 @@ fn custom_hook(info: &panic::PanicInfo) {
 }
 
 fn get_panic_message(info: &panic::PanicInfo) -> Option<String> {
+    // Extract the message from `panic!("...")` statements.
+    // In this case, the payload is always the static formatting string.
     if let Some(string) = info.payload().downcast_ref::<&str>() {
         return Some(string.to_string());
+    }
+
+    // Extract the message from `panic!("... {} ...", arg...)` statements.
+    // In this case, the payload has to be a dynamically allocated String to contain
+    // the arbitrary formatted arguments.
+    if let Some(string) = info.payload().downcast_ref::<String>() {
+        return Some(string.to_owned());
     }
 
     #[cfg(feature = "nightly")]
