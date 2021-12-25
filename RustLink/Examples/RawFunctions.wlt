@@ -80,6 +80,6 @@ Test[
 	,
 	(* FIXME: This output is a bug. Fix the bug and update this test case. *)
 	Failure["WSTP Error", <|
-		"Message" -> "WSTP error: Symbol name `List` has no context"
+		"Message" -> "WSTP error: symbol name 'List' has no context"
 	|>]
 ]
