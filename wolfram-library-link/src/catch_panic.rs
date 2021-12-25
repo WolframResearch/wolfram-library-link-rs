@@ -299,28 +299,17 @@ fn custom_hook(info: &panic::PanicInfo) {
     }
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(feature = "nightly")] {
-        fn get_panic_message(info: &panic::PanicInfo) -> Option<String> {
-            let message = info.payload().downcast_ref::<&str>();
-            if let Some(string) = message {
-                Some(string.to_string())
-            } else if let Some(fmt_arguments) = info.message() {
-                Some(format!("{}", fmt_arguments))
-            } else {
-                None
-            }
-        }
-    } else {
-        fn get_panic_message(info: &panic::PanicInfo) -> Option<String> {
-            let message = info.payload().downcast_ref::<&str>();
-            if let Some(string) = message {
-                Some(string.to_string())
-            } else {
-                None
-            }
-        }
+fn get_panic_message(info: &panic::PanicInfo) -> Option<String> {
+    if let Some(string) = info.payload().downcast_ref::<&str>() {
+        return Some(string.to_string());
     }
+
+    #[cfg(feature = "nightly")]
+    if let Some(fmt_arguments) = info.message() {
+        return Some(format!("{}", fmt_arguments));
+    }
+
+    None
 }
 
 /// Attempt to acquire a lock on CAUGHT_PANIC. Exit the current process if we can not,
