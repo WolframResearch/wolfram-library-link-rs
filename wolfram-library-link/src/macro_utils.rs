@@ -149,10 +149,6 @@ fn write_panic_failure_to_link(
         link.new_packet()?;
     }
 
-    // FIXME: Return this as a full expr
-    // let panic_string = caught_panic.to_pretty_expr().to_string();
-    // link.put_str(panic_string.as_str())
-
     link.put_expr(&caught_panic.to_pretty_expr())
 }
 
