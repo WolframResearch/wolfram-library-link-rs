@@ -10,6 +10,60 @@
 
 ## WSTP Functions
 
+### Symbol contexts problem
+
+<details>
+ <summary>
+  Background
+ </summary>
+
+ In the Wolfram Language, a symbol is made up of two parts: a context, and a symbol name.
+ For example, in the the symbol `` System`Plot ``, `` System` `` is the context, and `Plot`
+ is the symbol name. The context denotes a collection of related symbols. For example, all
+ symbols that are part of the core Wolfram Language are in the ``"System`"`` context; when
+ you start a new Wolfram Language session, the default context that new symbols get created
+ in is called ``"Global`"``; and so on. However, you won't often see symbol contexts
+ written out explicitly in a Wolfram Language program. Instead, when a symbol name is
+ entered, the system looks up that symbol name in the contexts listed in the
+ [`$ContextPath`][ref/$ContextPath]: if a symbol with that name exists in one of the
+ listed contexts, then the symbol name the user entered resolves to that context.
+
+ So, for example, if the user enters the symbol name `Plot`, and ``"System`"`` is on
+ `$ContextPath`, the system deduces the user was referring to the symbol ``System`Plot``.
+ In this way, `$ContextPath` allows the user to user shorter symbol names to refer to
+ symbols, and avoid having to write out the full context + symbol name as input.
+
+ This shortening also works when printing symbols. For example, doing `ToString[Plot]`
+ doesn't return ``"System`Plot"``, but rather just `"Plot"`. And herein lies the problem
+ for WSTP functions.
+</details>
+
+When an expression is sent across a WSTP link, symbols whose contexts are equal to
+[`$Context`][ref/$Context] or on [`$ContextPath`][ref/$ContextPath] will be sent as
+strings without the symbol context.
+
+This is a problem because, within Rust code, a symbol name without a context is ambiguous.
+If Rust code is expecting to get the symbol ``MyPackage`foo``, but recieves just `foo`
+over the WSTP link, there is no easy way for it to tell if that `foo` came from the symbol
+it expected, or e.g. ``MyOtherPackage`foo``.
+
+#### The solution
+
+When calling a WSTP function that parses the incoming arguments using the
+[`Expr`][wl_expr_core::Expr] type in some way (e.g. by calling `Link::get_expr()`), use
+the following idiom:
+
+```wolfram
+(* func: LibraryFunction[_, _, LinkObject, LinkObject] *)
+
+Block[{$Context = "UnusedContext`", $ContextPath = {}},
+    func[arg1, arg2, ...]
+]
+```
+
+Setting `$Context` and `$ContextPath` in this way will force symbols written to the
+function `Link` object to explicitly include their context.
+
 ### Panic `Failure[..]`s
 
 When a WSTP function [panics][panics], a [`Failure["RustPanic", ...]`][ref/Failure] object
@@ -75,3 +129,11 @@ SetEnvironment["LIBRARY_LINK_RUST_BACKTRACE" -> "True"]
 
 `wolfram-library-link` captures information about panics by setting a custom Rust
 [panic hook](https://doc.rust-lang.org/std/panic/fn.set_hook.html).
+
+
+<!----------------->
+<!-- Named links -->
+<!----------------->
+
+[ref/$Context]: https://reference.wolfram.com/language/ref/$Context.html
+[ref/$ContextPath]: https://reference.wolfram.com/language/ref/$ContextPath.html
