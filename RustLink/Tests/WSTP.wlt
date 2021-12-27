@@ -63,3 +63,19 @@ TestMatch[
 		"Backtrace" -> Missing["NotEnabled"]
 	|>]
 ]
+
+TestMatch[
+	LibraryFunctionLoad[
+		"liblibrary_tests",
+		"test_wstp_panic_with_empty_link",
+		LinkObject,
+		LinkObject
+	][]
+	,
+	Failure["RustPanic", <|
+		"MessageTemplate" -> "Rust LibraryLink function panic: `message`",
+		"MessageParameters" -> <|"message" -> "panic while !link.is_ready()"|>,
+		"SourceLocation" -> s_?StringQ /; StringStartsQ[s, "wolfram-library-link/examples/tests/test_wstp.rs:"],
+		"Backtrace" -> Missing["NotEnabled"]
+	|>]
+]

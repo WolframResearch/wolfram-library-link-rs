@@ -115,7 +115,10 @@ pub fn call_wstp_link_wolfram_library_function<
         // be returned, but if that fails, just return LIBRARY_FUNCTION_ERROR.
         Err(panic) => match write_panic_failure_to_link(link, panic) {
             Ok(()) => LIBRARY_NO_ERROR,
-            Err(_wstp_err) => sys::LIBRARY_FUNCTION_ERROR,
+            Err(_wstp_err) => {
+                // println!("PANIC ERROR: {}", _wstp_err);
+                sys::LIBRARY_FUNCTION_ERROR // +1
+            },
         },
     }
 }
@@ -140,11 +143,11 @@ fn write_panic_failure_to_link(
     //       users debug link issues more quickly.
     link.clear_error();
 
-    // Skip whatever data is still stored in the link.
-    link.raw_get_next()?;
-    link.new_packet()?;
-
-    debug_assert!(!link.is_ready());
+    // Skip whatever data is still stored in the link, if any.
+    if link.is_ready() {
+        link.raw_get_next()?;
+        link.new_packet()?;
+    }
 
     // FIXME: Return this as a full expr
     // let panic_string = caught_panic.to_pretty_expr().to_string();
