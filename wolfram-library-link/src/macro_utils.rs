@@ -132,10 +132,11 @@ fn write_panic_failure_to_link(
     // This is necessary because the panic we caught might have been caused by
     // code like:
     //
-    //     link.do_something(...).unwrap()`
+    //     link.do_something(...).unwrap()
     //
-    // which will have "poisoned" the link, and would cause our attempt to write
-    // the panic message to the link to fail if we didn't clear the error.
+    // where `do_something()` fails, which will have "poisoned" the link, and would cause
+    // our attempt to write the panic message to the link to fail if we didn't clear the
+    // error.
     //
     // If there is no error condition set on the link, this is a no-op.
     //
