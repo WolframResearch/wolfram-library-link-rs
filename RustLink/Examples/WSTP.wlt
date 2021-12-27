@@ -95,3 +95,39 @@ TestMatch[
 	,
 	{foo[], bar[baz]}
 ]
+
+TestMatch[
+	exprStringJoin = LibraryFunctionLoad[
+		"libwstp_example",
+		"expr_string_join",
+		LinkObject,
+		LinkObject
+	];
+	(* Note:
+		Set $Context and $ContextPath to force symbols sent across the LinkObject to
+		contain the symbol context explicitly.
+	*)
+	Block[{$Context = "UnusedContext`", $ContextPath = {}},
+		{
+			exprStringJoin[],
+			exprStringJoin["Foo"],
+			exprStringJoin["Foo", "Bar"],
+			exprStringJoin[Sequence @@ CharacterRange["a", "f"]],
+			exprStringJoin[1, 2, 3]
+		}
+	]
+	,
+	{
+		"",
+		"Foo",
+		"FooBar",
+		"abcdef",
+		Failure["RustPanic", <|
+			"MessageTemplate" -> "Rust LibraryLink function panic: `message`",
+			"MessageParameters" -> <|"message" -> "expected String argument, got: 1"|>,
+			(* Avoid hard-coding the panic line/column number into the test. *)
+			"SourceLocation" -> s_?StringQ /; StringStartsQ[s, "wolfram-library-link/examples/wstp.rs:"],
+			"Backtrace" -> Missing["NotEnabled"]
+		|>]
+	}
+]

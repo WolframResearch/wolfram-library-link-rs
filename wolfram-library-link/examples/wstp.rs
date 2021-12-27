@@ -1,6 +1,7 @@
 //! This example demonstrates how WSTP links can be used in LibraryLink functions to pass
 //! arbitrary expressions as the function arguments and return value.
 
+use wl_expr_core::{ExprKind, Symbol};
 use wolfram_library_link::{self as wll, wstp::Link};
 
 //------------------
@@ -169,4 +170,31 @@ fn link_expr_identity(link: &mut Link) {
     let expr = link.get_expr().unwrap();
     assert!(!link.is_ready());
     link.put_expr(&expr).unwrap();
+}
+
+//------------------
+// expr_string_join()
+//------------------
+
+wll::export_wstp![expr_string_join];
+
+/// This example is an alternative to the `string_join()` example.
+///
+/// This example shows using the `Expr` and `ExprKind` types to process expressions on
+/// the WSTP link.
+fn expr_string_join(link: &mut Link) {
+    let expr = link.get_expr().unwrap();
+
+    let list = expr.try_normal().unwrap();
+    assert!(list.has_head(&Symbol::new("System`List").unwrap()));
+
+    let mut buffer = String::new();
+    for elem in &list.contents {
+        match elem.kind() {
+            ExprKind::String(str) => buffer.push_str(str),
+            _ => panic!("expected String argument, got: {:?}", elem),
+        }
+    }
+
+    link.put_str(buffer.as_str()).unwrap()
 }
