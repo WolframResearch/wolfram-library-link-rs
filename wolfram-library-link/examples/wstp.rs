@@ -142,3 +142,31 @@ fn string_join(link: &mut Link) {
     // Write the joined string value to the link.
     link.put_str(buffer.as_str()).unwrap();
 }
+
+//------------------
+// link_expr_identity()
+//------------------
+
+wll::export_wstp!(link_expr_identity);
+
+/// Define a function that returns the argument expression that was sent over the link.
+/// That expression will be a list of the arguments passed to this LibraryFunction[..].
+///
+/// ```wolfram
+/// linkExprIdentity = LibraryFunctionLoad[
+///     "libwstp_example",
+///     "link_expr_identity",
+///     LinkObject,
+///     LinkObject
+/// ];
+///
+/// Block[{$Context = "UnusedContext`", $ContextPath = {}},
+///     linkExprIdentity[5]      (* Returns {5} *)
+///     linkExprIdentity[a, b]   (* Returns {a, b} *)
+/// ]
+/// ```
+fn link_expr_identity(link: &mut Link) {
+    let expr = link.get_expr().unwrap();
+    assert!(!link.is_ready());
+    link.put_expr(&expr).unwrap();
+}

@@ -77,3 +77,21 @@ Test[
 		""
 	}
 ]
+
+TestMatch[
+	linkExprIdentity = LibraryFunctionLoad[
+		"libwstp_example",
+		"link_expr_identity",
+		LinkObject,
+		LinkObject
+	];
+	(* Note:
+		Set $Context and $ContextPath to force symbols sent across the LinkObject to
+		contain the symbol context explicitly.
+	*)
+	Block[{$Context = "UnusedContext`", $ContextPath = {}},
+		linkExprIdentity[foo[], bar[baz]]
+	]
+	,
+	{foo[], bar[baz]}
+]
