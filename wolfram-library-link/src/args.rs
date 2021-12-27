@@ -15,13 +15,13 @@ use crate::{
     DataStore, Image, NumericArray,
 };
 
-/// Trait implemented for types that may be passed via an [`MArgument`].
+/// Trait implemented for types that can be passed via an [`MArgument`].
 pub trait FromArg<'a> {
     #[allow(missing_docs)]
     unsafe fn from_arg(arg: &'a MArgument) -> Self;
 }
 
-/// Trait implemented for that that may be returned via an [`MArgument`].
+/// Trait implemented for types that can be returned via an [`MArgument`].
 ///
 /// The [`MArgument`] that this trait is used to modify must be the return value of a
 /// LibraryLink function. It is not valid to modify [`MArgument`]s that contain
