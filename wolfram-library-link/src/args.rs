@@ -451,7 +451,7 @@ impl IntoArg for DataStore {
 /// ```wolfram
 /// LibraryFunctionLoad["...", "raw_add2", {Integer, Integer}, Integer]
 /// ```
-impl<'a: 'b, 'b> NativeFunction<'a> for &dyn Fn(&'b [MArgument], MArgument) {
+impl<'a: 'b, 'b> NativeFunction<'a> for fn(&'b [MArgument], MArgument) {
     unsafe fn call(&self, args: &'a [MArgument], ret: MArgument) {
         self(args, ret)
     }
@@ -463,7 +463,7 @@ impl<'a: 'b, 'b> NativeFunction<'a> for &dyn Fn(&'b [MArgument], MArgument) {
 
 macro_rules! impl_NativeFunction {
     ($($type:ident),*) => {
-        impl<'a, $($type: FromArg<'a>,)* R: IntoArg> NativeFunction<'a> for &dyn Fn($($type),*) -> R {
+        impl<'a, $($type: FromArg<'a>,)* R: IntoArg> NativeFunction<'a> for fn($($type),*) -> R {
             unsafe fn call(&self, args: &'a [MArgument], ret: MArgument) {
                 // Re-use the $type name as the local variable names. E.g.
                 //     let A1 = A1::from_arg(..);
@@ -492,7 +492,7 @@ macro_rules! impl_NativeFunction {
 }
 
 // Handle the zero-arguments case specially.
-impl<'a, R> NativeFunction<'a> for &dyn Fn() -> R
+impl<'a, R> NativeFunction<'a> for fn() -> R
 where
     R: IntoArg,
 {

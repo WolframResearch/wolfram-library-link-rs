@@ -556,13 +556,13 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 //
 // To satisfy constraint 1, it's necessary to depend on the type system rather than
 // clever macro operations. This leads naturally to the creation of the `NativeFunction`
-// trait, which is implemented for all suitable `Fn(..) -> _` types.
+// trait, which is implemented for all suitable `fn(..) -> _` types.
 //
 // Constraint 1b is unable to be met completely by the current implementation due to
-// limitations with Rust's coercion from `fn(A, B, ..) -> C` to `Fn(A, B, ..) -> C`. The
-// coercion requires that the number of parameters (`foo(_, _)`) be made explicit, even
-// if their types can be elided. If eliding the number of Fn(..) arguments were permitted,
-// `export![foo]` could work.
+// limitations with Rust's coercion from `fn(A, B, ..) -> C {some_name}` to
+// `fn(A, B, ..) -> C`. The coercion requires that the number of parameters (`foo(_, _)`)
+// be made explicit, even if their types can be elided. If eliding the number of fn(..)
+// arguments were permitted, `export![foo]` could work.
 //
 // To satisfy constraint 2, this implementation creates a private module with the same
 // name as the function that is being wrapped. This is required because in Rust (as in
@@ -604,9 +604,11 @@ macro_rules! export {
                 args: *mut $crate::sys::MArgument,
                 res: $crate::sys::MArgument,
             ) -> std::os::raw::c_uint {
+                // Cast away the unique `fn(...) {some_name}` function type to get the
+                // generic `fn(...)` type.
                 // The number of `$argc` is required for type inference of the variadic
-                // `&dyn Fn(..) -> _` type to work. See constraint 2a.
-                let func: &dyn Fn($($argc),*) -> _ = &super::$name;
+                // `fn(..) -> _` type to work. See constraint 2a.
+                let func: fn($($argc),*) -> _ = super::$name;
 
                 $crate::macro_utils::call_native_wolfram_library_function(
                     lib,
