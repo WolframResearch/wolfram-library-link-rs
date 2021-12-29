@@ -16,7 +16,7 @@ generated/<$VersionNumber.$ReleaseNumber>/<$SystemID>/LibraryLink_bindings.rs
 ```
 
 The [`scripts/generate_versioned_bindings.rs`](../scripts/generate_versioned_bindings.rs)
-script (invoked using `$cargo make gen-bindings`) can be used to quickly generate bindings
+script (invoked using `$ cargo make gen-bindings`) can be used to quickly generate bindings
 for the current platform. The new bindings will automatically be placed in the appropriate
 sub-directory, and should be commited to this repository. The script will need to be run
 on each supported platform.
