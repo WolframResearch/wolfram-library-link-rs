@@ -79,7 +79,7 @@ pub trait NativeFunction<'a> {
     unsafe fn call(&self, args: &'a [MArgument], ret: MArgument);
 
     /// Get the type signature of this function, suitable for use in
-    /// [`LibraryFunctionLoad`][ref/LibraryFunctionLoad]<code>[_, _, <i>args</i>, <i>ret</i>]</code>.
+    /// [`LibraryFunctionLoad`][ref/LibraryFunctionLoad]<code>[_, _, <i>parameters</i>, <i>ret</i>]</code>.
     ///
     /// [ref/LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
     ///
