@@ -1,5 +1,26 @@
 Needs["MUnit`"]
 
+TestMatch[
+	load = LibraryFunctionLoad[
+		"libbasic_types",
+		"load_basic_types_functions",
+		LinkObject,
+		LinkObject
+	];
+
+	load["libbasic_types"] // Sort
+	,
+	<|
+		"add2" -> _LibraryFunction,
+		"add3" -> _LibraryFunction,
+		"positive_i64" -> _LibraryFunction,
+		"reverse_string" -> _LibraryFunction,
+		"square" -> _LibraryFunction,
+		"total_i64" -> _LibraryFunction,
+		"xkcd_get_random_number" -> _LibraryFunction
+	|>
+]
+
 Test[
 	square = LibraryFunctionLoad[
 		"libbasic_types",
@@ -43,7 +64,7 @@ Test[
 	totalI64 = LibraryFunctionLoad[
 		"libbasic_types",
 		"total_i64",
-		{LibraryDataType[NumericArray, "Integer64"]},
+		{{LibraryDataType[NumericArray, "Integer64"], "Constant"}},
 		Integer
 	];
 
@@ -56,7 +77,7 @@ Test[
 	positiveQ = LibraryFunctionLoad[
 		"libbasic_types",
 		"positive_i64",
-		{LibraryDataType[NumericArray, "Integer64"]},
+		{{LibraryDataType[NumericArray, "Integer64"], "Constant"}},
 		LibraryDataType[NumericArray, "UnsignedInteger8"]
 	];
 

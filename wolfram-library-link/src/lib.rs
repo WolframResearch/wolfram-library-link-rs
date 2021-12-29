@@ -110,6 +110,10 @@ use wstp::Link;
 pub use wolfram_library_link_sys as sys;
 pub use wstp;
 
+// Used by the export!/export_wstp! macro implementations.
+#[doc(hidden)]
+pub use inventory;
+
 pub use self::{
     args::{FromArg, IntoArg, NativeFunction},
     async_tasks::AsyncTaskObject,
@@ -619,6 +623,19 @@ macro_rules! export {
                 )
             }
         }
+
+        // Register this exported function.
+        $crate::inventory::submit! {
+            $crate::macro_utils::LibraryLinkFunction::Native {
+                name: stringify!($exported),
+                signature: || {
+                    let func: fn($($argc),*) -> _ = $name;
+                    let func: &dyn $crate::NativeFunction<'_> = &func;
+
+                    func.signature()
+                }
+            }
+        }
     };
 
     // Convert export![name(..)] to export![name(..) as name].
@@ -770,6 +787,11 @@ macro_rules! export_wstp {
                     func
                 )
             }
+
+            // Register this exported function.
+            $crate::inventory::submit! {
+                $crate::macro_utils::LibraryLinkFunction::Wstp { name: stringify!($exported) }
+            }
         }
     };
 
@@ -786,3 +808,24 @@ macro_rules! export_wstp {
 }
 
 // TODO: Allow any type which implements FromExpr in wrapper parameter lists?
+
+/// Generate and export a "loader" function, which returns an Association containing the
+/// names and loaded forms of all functions exported by this library.
+///
+/// All functions exported by the [`export!`] and [`export_wstp!`] macros will
+/// automatically be included in the Association returned by this function.
+#[macro_export]
+macro_rules! generate_loader {
+    ($name:ident) => {
+        // TODO: Use this anonymous `const` trick in export! and export_wstp! too.
+        const _: () = {
+            #[no_mangle]
+            pub unsafe extern "C" fn $name(
+                lib: $crate::sys::WolframLibraryData,
+                raw_link: $crate::wstp::sys::WSLINK,
+            ) -> std::os::raw::c_uint {
+                $crate::macro_utils::load_library_functions_impl(lib, raw_link)
+            }
+        };
+    };
+}

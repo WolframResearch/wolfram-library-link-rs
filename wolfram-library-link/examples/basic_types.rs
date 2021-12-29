@@ -3,6 +3,8 @@
 
 use wolfram_library_link::{self as wll, NumericArray, UninitNumericArray};
 
+wll::generate_loader!(load_basic_types_functions);
+
 //======================================
 // Primitive data types
 //======================================

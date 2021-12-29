@@ -830,6 +830,31 @@ impl NumericArrayDataType {
     pub fn as_raw(self) -> sys::numericarray_data_t {
         self as u32
     }
+
+    /// Get the string name of this type, suitable for use in
+    /// [`NumericArray`][ref/NumericArray]<code>[<i>data</i>, &quot;<i>type</i>&quot;]</code>.
+    ///
+    /// [ref/NumericArray]: https://reference.wolfram.com/language/ref/NumericArray.html
+    #[rustfmt::skip]
+    pub fn name(&self) -> &'static str {
+        match self {
+            NumericArrayDataType::Bit8  => "Integer8",
+            NumericArrayDataType::Bit16 => "Integer16",
+            NumericArrayDataType::Bit32 => "Integer32",
+            NumericArrayDataType::Bit64 => "Integer64",
+
+            NumericArrayDataType::UBit8  => "UnsignedInteger8",
+            NumericArrayDataType::UBit16 => "UnsignedInteger16",
+            NumericArrayDataType::UBit32 => "UnsignedInteger32",
+            NumericArrayDataType::UBit64 => "UnsignedInteger64",
+
+            NumericArrayDataType::Real32 => "Real32",
+            NumericArrayDataType::Real64 => "Real64",
+
+            NumericArrayDataType::ComplexReal32 => "ComplexReal32",
+            NumericArrayDataType::ComplexReal64 => "ComplexReal64",
+        }
+    }
 }
 
 impl NumericArrayConvertMethod {

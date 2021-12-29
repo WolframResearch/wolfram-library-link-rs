@@ -572,6 +572,26 @@ impl ImageType {
     pub fn as_raw(self) -> sys::imagedata_t {
         self as i32
     }
+
+    /// Get the string name of this type, suitable for use in
+    /// [`Image`][ref/Image]<code>[<i>data</i>, &quot;<i>type</i>&quot;]</code>.
+    ///
+    /// [ref/Image]: https://reference.wolfram.com/language/ref/Image.html
+    pub fn name(&self) -> &'static str {
+        match self {
+            ImageType::Bit => "Bit",
+            // TODO: Is "Bit8" supported by LibraryLink? The C enum name uses Bit8, but
+            //       the ref/Image docs and the LibraryLink User Guide both say "Byte" is
+            //       the WL name for this type.
+            //
+            //       There is a similar inconsistence with Real vs Real64: the User Guide
+            //       lists "Real32" and "Real", but ref/Image uses "Real32" and "Real64".
+            ImageType::Bit8 => "Byte",
+            ImageType::Bit16 => "Bit16",
+            ImageType::Real32 => "Real32",
+            ImageType::Real64 => "Real64",
+        }
+    }
 }
 
 impl ColorSpace {

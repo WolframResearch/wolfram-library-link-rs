@@ -271,3 +271,136 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
 
     sys::LIBRARY_NO_ERROR
 }
+
+//======================================
+// Automatic Loader
+//======================================
+
+pub enum LibraryLinkFunction {
+    Native {
+        name: &'static str,
+        /// # Implementation note on the type of this field
+        ///
+        /// In an ideal world, the type of this field would be something like
+        /// `ty: Box<dyn NativeFunction>`.
+        ///
+        /// Using `fn() -> _` as the type of this field is necessary to work around
+        /// the following constraints :
+        ///
+        /// * Instances of `LibraryLinkFunction` are constructed within a `static` context,
+        ///   so only operations that are allowed in a `static` context can be used.
+        ///
+        /// * Can't be `&'static dyn for<'a> NativeFunction<'a>>`
+        ///   - Doesn't work because it would require an intermediate `&'static fn(..)`
+        ///     value, which can only be derived from an explicit `static FUNC: fn(..)`,
+        ///     which in turn needs to be declared using explicit types for the function
+        ///     parameter and return types (`static FUNC: fn(_, _) -> _` is not allowed,
+        ///     because type inferrence doesn't work on static variables).
+        ///
+        /// * Can't be `Box<dyn for<'a> NativeFunction<'a>>`.
+        ///   - Doesn't work because `Box::new()` can't be used in a `static` context.
+        ///
+        /// * Can't be `fn() -> Box<dyn NativeFunction<'a>>` because the `'a` lifetime
+        ///   parameter can't be declared in any way.
+        ///
+        /// So in the end, we just call `NativeFunction::signature()` within `fn()`
+        /// that is constructed in the macro-generated code (and where the concrete
+        /// function type is still available) to avoid trying and failing to box up or
+        /// return the `NativeFunction` trait object.
+        signature: fn() -> Result<(Vec<Expr>, Expr), String>,
+    },
+    Wstp {
+        name: &'static str,
+    },
+}
+
+inventory::collect!(LibraryLinkFunction);
+
+pub unsafe fn load_library_functions_impl(
+    lib_data: sys::WolframLibraryData,
+    raw_link: wstp::sys::WSLINK,
+) -> c_uint {
+    call_wstp_link_wolfram_library_function(lib_data, raw_link, |link: &mut Link| {
+        let arg_count: usize =
+            link.test_head("List").expect("expected 'List' expression");
+
+        if arg_count != 1 {
+            panic!(
+                "expected 1 argument: the name of or file path to the dynamic library"
+            );
+        }
+
+        let path = {
+            let path = match link.get_string_ref() {
+                Ok(value) => value,
+                Err(err) => panic!("expected String argument (error: {})", err),
+            };
+            std::path::PathBuf::from(path.to_str())
+        };
+
+        let expr = library_function_load_expr(path);
+
+        link.put_expr(&expr)
+            .expect("failed to write loader Association");
+    })
+}
+
+fn library_function_load_expr(library: std::path::PathBuf) -> Expr {
+    let mut fields = Vec::new();
+    let rule = Symbol::new("System`Rule").unwrap();
+
+    for func in inventory::iter::<LibraryLinkFunction> {
+        let code = match func.loading_code(&library) {
+            Ok(code) => code,
+            // TODO: Generate a message? Return a Failure[..]? Doing nothing seems
+            //       reasonable too. This only currently fails for
+            //       `fn(&[MArgument], MArgument)` functions.
+            Err(_) => continue,
+        };
+
+        fields.push(Expr::normal(&rule, vec![Expr::string(func.name()), code]));
+    }
+
+    Expr::normal(Symbol::new("System`Association").unwrap(), fields)
+}
+
+impl LibraryLinkFunction {
+    fn name(&self) -> &str {
+        match self {
+            LibraryLinkFunction::Native { name, .. } => name,
+            LibraryLinkFunction::Wstp { name } => name,
+        }
+    }
+
+    fn loading_code(&self, library: &std::path::PathBuf) -> Result<Expr, String> {
+        let lib_func_load = Symbol::new("System`LibraryFunctionLoad").unwrap();
+        let link_object = Expr::from(Symbol::new("System`LinkObject").unwrap());
+        let library = Expr::string(
+            library
+                .to_str()
+                .expect("unable to convert library file path to str"),
+        );
+
+        let code = match self {
+            LibraryLinkFunction::Native { name, signature } => {
+                let (args, ret) = signature()?;
+
+                Expr::normal(&lib_func_load, vec![
+                    library.clone(),
+                    Expr::string(*name),
+                    Expr::normal(Symbol::new("System`List").unwrap(), args),
+                    ret,
+                ])
+            },
+            // LibraryFunctionLoad[_,]
+            LibraryLinkFunction::Wstp { name } => Expr::normal(&lib_func_load, vec![
+                library.clone(),
+                Expr::string(*name),
+                link_object.clone(),
+                link_object,
+            ]),
+        };
+
+        Ok(code)
+    }
+}
