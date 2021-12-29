@@ -93,7 +93,7 @@ basic Wolfram LibraryLink program in Rust.
     introduction to how Rust's concepts of *ownership* and *borrowing* lead naturally to
     how thread-safety is modeled.
 <!-- The [Send and Sync][Rustonomicon/Send-and-Sync] chapter
-of [The Rustonomicon][RustonomiconPRE_COMMIT] goes into more detail about the `Send`
+of [The Rustonomicon][Rustonomicon] goes into more detail about the `Send`
 and `Sync` traits. -->
 
 [^func-ret-expr]: If the last statement in a function is an expression, that value is
