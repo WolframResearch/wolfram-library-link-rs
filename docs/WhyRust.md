@@ -2,7 +2,7 @@
 
 #### *For Wolfram Language Developers*
 
-The LibraryLink and WSTP C libraries already offer Wolfram Language developers the
+The LibraryLink interface and WSTP library offer Wolfram Language developers the
 capability to write performant low-level code, interface with external libraries, and
 perform system operations, all easily callable from the Wolfram Language. This document
 describes some reasons why the Rust programming language might be appealing to Wolfram
