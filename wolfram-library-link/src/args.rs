@@ -734,7 +734,11 @@ impl<'a: 'b, 'b> NativeFunction<'a> for fn(&'b [MArgument], MArgument) {
 
 macro_rules! impl_NativeFunction {
     ($($type:ident),*) => {
-        impl<'a, $($type: FromArg<'a>,)* R: IntoArg> NativeFunction<'a> for fn($($type),*) -> R {
+        impl<'a, $($type,)* R> NativeFunction<'a> for fn($($type),*) -> R
+        where
+            R: IntoArg,
+            $($type: FromArg<'a>),*
+        {
             unsafe fn call(&self, args: &'a [MArgument], ret: MArgument) {
                 // Re-use the $type name as the local variable names. E.g.
                 //     let A1 = A1::from_arg(..);
