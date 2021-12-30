@@ -99,7 +99,10 @@ pub fn call_wstp_link_wolfram_library_function<
     mut unsafe_link: wstp::sys::WSLINK,
     function: F,
 ) -> c_uint {
-    let _ = unsafe { crate::initialize(libdata) };
+    // Initialize the library.
+    if unsafe { crate::initialize(libdata) }.is_err() {
+        return sys::LIBRARY_FUNCTION_ERROR;
+    }
 
     let link = unsafe { Link::unchecked_ref_cast_mut(&mut unsafe_link) };
 
