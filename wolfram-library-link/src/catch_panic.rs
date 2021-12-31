@@ -1,3 +1,6 @@
+//! Utilities for catching panics, capturing a backtrace, and extracting the panic
+//! message.
+
 use std::collections::HashMap;
 use std::panic::{self, UnwindSafe};
 use std::process;

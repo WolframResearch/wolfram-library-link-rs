@@ -77,13 +77,7 @@
 
 mod args;
 mod async_tasks;
-/// This module is *semver exempt*. This is not intended to be part of the public API of
-/// wolfram-library-link.
-///
-/// Utility for catching panics, capturing a backtrace, and extracting the panic
-/// message.
-#[doc(hidden)]
-pub mod catch_panic;
+mod catch_panic;
 mod data_store;
 mod image;
 mod library_data;
