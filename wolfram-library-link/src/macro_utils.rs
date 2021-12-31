@@ -1,89 +1,13 @@
 use std::os::raw::c_uint;
 
-use wl_expr_core::{Expr, ExprKind, Symbol};
+use wl_expr_core::{Expr, Symbol};
 use wstp::{self, Link};
 
 use crate::{
     catch_panic::{call_and_catch_panic, CaughtPanic},
     sys::{self, MArgument, LIBRARY_NO_ERROR},
-    NativeFunction, NumericArray, WstpFunction,
+    NativeFunction, WstpFunction,
 };
-
-
-//======================================
-// #[wolfram_library_function] helpers
-//======================================
-
-//==================
-// WSTP Expr helpers
-//==================
-
-/// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
-///
-/// [wlf]: attr.wolfram_library_function.html
-pub fn call_wstp_expr_list_wolfram_library_function(
-    libdata: sys::WolframLibraryData,
-    unsafe_link: wstp::sys::WSLINK,
-    function: fn(Vec<Expr>) -> Expr,
-) -> c_uint {
-    call_wstp_expr_wolfram_library_function(
-        libdata,
-        unsafe_link,
-        |argument_expr: Expr| -> Expr {
-            let arguments = match argument_expr.to_kind() {
-                ExprKind::Normal(normal) => normal.contents,
-                _ => panic!("WSTP argument expression was non-Normal"),
-            };
-
-            function(arguments)
-        },
-    )
-}
-
-/// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
-///
-/// [wlf]: attr.wolfram_library_function.html
-pub fn call_wstp_expr_wolfram_library_function<
-    F: FnOnce(Expr) -> Expr + std::panic::UnwindSafe,
->(
-    libdata: sys::WolframLibraryData,
-    unsafe_link: wstp::sys::WSLINK,
-    function: F,
-) -> c_uint {
-    call_wstp_link_wolfram_library_function(libdata, unsafe_link, |link: &mut Link| {
-        let arguments: Expr = match link.get_expr() {
-            Ok(args) => args,
-            Err(message) => {
-                // Skip reading the argument list packet.
-                if link.raw_get_next().and_then(|_| link.new_packet()).is_err() {
-                    return;
-                }
-
-                // Failure["LibraryFunctionWSTPError", <|
-                //     "Message" -> %[Expr::string(message.to_string())]
-                // |>]
-                let failure = Expr::normal(Symbol::new("System`Failure").unwrap(), vec![
-                    Expr::string("LibraryFunctionWSTPError"),
-                    Expr::normal(Symbol::new("System`Association").unwrap(), vec![
-                        Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
-                            Expr::string("Message"),
-                            Expr::string(message.to_string()),
-                        ]),
-                    ]),
-                ]);
-
-                let _: Result<_, _> = link.put_expr(&failure);
-                return;
-            },
-        };
-
-        let result: Expr = function(arguments);
-
-        link.put_expr(&result).expect(
-            "LibraryFunction result expression could not be written to WSTP link",
-        );
-    })
-}
 
 //==================
 // WSTP helpers
@@ -154,91 +78,6 @@ fn write_panic_failure_to_link(
     }
 
     link.put_expr(&caught_panic.to_pretty_expr())
-}
-
-//==================
-// WXF helpers
-//==================
-
-/// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
-///
-/// [wlf]: attr.wolfram_library_function.html
-pub fn call_wxf_wolfram_library_function_expr_list(
-    libdata: sys::WolframLibraryData,
-    wxf_argument: MArgument,
-    wxf_result: MArgument,
-    function: fn(Vec<Expr>) -> Expr,
-) -> c_uint {
-    call_wxf_wolfram_library_function(
-        libdata,
-        wxf_argument,
-        wxf_result,
-        |argument_expr: Expr| -> Expr {
-            let arguments = match argument_expr.to_kind() {
-                ExprKind::Normal(normal) => normal.contents,
-                _ => panic!("WXF argument expression was non-Normal"),
-            };
-
-            function(arguments)
-        },
-    )
-}
-
-/// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
-///
-/// [wlf]: attr.wolfram_library_function.html
-pub fn call_wxf_wolfram_library_function<
-    F: FnOnce(Expr) -> Expr + std::panic::UnwindSafe,
->(
-    libdata: sys::WolframLibraryData,
-    wxf_argument: MArgument,
-    wxf_result: MArgument,
-    function: F,
-) -> c_uint {
-    let _ = unsafe { crate::initialize(libdata) };
-
-    let result: Result<(), CaughtPanic> = unsafe {
-        call_and_catch_panic(|| {
-            let argument_numeric_array = NumericArray::from_raw(*wxf_argument.numeric)
-                .try_into_kind::<u8>()
-                .expect(
-                    "wolfram_library_function: expected NumericArray of UnsignedInteger8",
-                );
-
-            let arguments = wxf::deserialize(argument_numeric_array.as_slice()).expect(
-                "wolfram_library_function: failed to deserialize argument WXF data",
-            );
-
-            let result: Expr = function(arguments);
-
-            *wxf_result.numeric = wxf_numeric_array_from_expr(&result).into_raw();
-        })
-    };
-
-    match result {
-        Ok(()) => LIBRARY_NO_ERROR,
-        // NOTE: This block tries to minimize calls to functions which could potentially
-        //       panic, on a best-effort basis. If a panic were to occur within this code
-        //       it would not be caught and the Rust stack unwinder would likely abort
-        //       the Kernel process, which isn't very user friendly.
-        Err(caught_panic) => {
-            let pretty_expr = caught_panic.to_pretty_expr();
-
-            unsafe {
-                *wxf_result.numeric =
-                    wxf_numeric_array_from_expr(&pretty_expr).into_raw();
-            }
-
-            LIBRARY_NO_ERROR
-        },
-    }
-}
-
-fn wxf_numeric_array_from_expr(expr: &Expr) -> NumericArray<u8> {
-    let result_wxf: Vec<u8> = wxf::serialize(expr)
-        .expect("wolfram_library_function: failed to serialize result expression to WXF");
-
-    NumericArray::from_slice(result_wxf.as_slice())
 }
 
 //======================================
