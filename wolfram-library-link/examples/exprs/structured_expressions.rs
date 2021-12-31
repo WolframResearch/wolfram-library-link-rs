@@ -5,7 +5,9 @@ use wl_expr::{
     Expr, Number,
 };
 use wl_pattern_match::FromExpr;
-use wolfram_library_link::{self as wll, wolfram_library_function};
+use wolfram_library_link::{self as wll};
+
+wll::export_wstp![sum_of_numbers(_)];
 
 #[derive(FromExpr)]
 #[pattern(numbers:{___})]
@@ -18,12 +20,11 @@ struct Numbers {
 /// ```wolfram
 /// LibraryFunctionLoad[
 ///     "/path/to/libstructured_expressions.dylib",
-///     "sum_of_numbers_wrapper",
+///     "sum_of_numbers",
 ///     LinkObject,
 ///     LinkObject
 /// ]
 /// ```
-#[wolfram_library_function]
 pub fn sum_of_numbers(arguments: Vec<Expr>) -> Expr {
     let Numbers { numbers } = match Numbers::from_expr(&arguments[0]) {
         Ok(numbers) => numbers,

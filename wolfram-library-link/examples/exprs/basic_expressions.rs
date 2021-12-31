@@ -1,17 +1,18 @@
 use wl_expr::Expr;
-use wolfram_library_link::{self as wll, wolfram_library_function};
+use wolfram_library_link::{self as wll};
+
+wll::export_wstp![echo_arguments(_)];
 
 /// This function is loaded by evaluating:
 ///
 /// ```wolfram
 /// LibraryFunctionLoad[
 ///     "/path/to/libbasic_expressions.dylib",
-///     "echo_arguments_wrapper",
+///     "echo_arguments",
 ///     LinkObject,
 ///     LinkObject
 /// ]
 /// ```
-#[wolfram_library_function]
 pub fn echo_arguments(args: Vec<Expr>) -> Expr {
     let arg_count = args.len();
 
