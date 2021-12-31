@@ -1,14 +1,18 @@
 //! This example demonstrates how WSTP links can be used in LibraryLink functions to pass
 //! arbitrary expressions as the function arguments and return value.
 
-use wl_expr_core::{ExprKind, Symbol};
+use wl_expr_core::{Expr, ExprKind, Number, Symbol};
 use wolfram_library_link::{self as wll, wstp::Link};
+
+//======================================
+// Using `&mut Link`
+//======================================
 
 //------------------
 // square_wstp()
 //------------------
 
-wll::export_wstp![square_wstp];
+wll::export_wstp![square_wstp(&mut Link)];
 
 /// Define a WSTP function that squares a number.
 ///
@@ -41,7 +45,7 @@ fn square_wstp(link: &mut Link) {
 // count_args()
 //------------------
 
-wll::export_wstp![count_args];
+wll::export_wstp![count_args(&mut Link)];
 
 /// Define a function that returns an integer count of the number of arguments it was
 /// given.
@@ -74,7 +78,7 @@ fn count_args(link: &mut Link) {
 // total_args_i64()
 //------------------
 
-wll::export_wstp![total_args_i64];
+wll::export_wstp![total_args_i64(&mut Link)];
 
 /// Define a function that returns the sum of it's integer arguments.
 ///
@@ -110,7 +114,7 @@ fn total_args_i64(link: &mut Link) {
 // string_join()
 //------------------
 
-wll::export_wstp![string_join];
+wll::export_wstp![string_join(&mut Link)];
 
 /// Define a function that will join its string arguments into a single string.
 ///
@@ -148,7 +152,7 @@ fn string_join(link: &mut Link) {
 // link_expr_identity()
 //------------------
 
-wll::export_wstp!(link_expr_identity);
+wll::export_wstp!(link_expr_identity(&mut Link));
 
 /// Define a function that returns the argument expression that was sent over the link.
 /// That expression will be a list of the arguments passed to this LibraryFunction[..].
@@ -176,7 +180,7 @@ fn link_expr_identity(link: &mut Link) {
 // expr_string_join()
 //------------------
 
-wll::export_wstp![expr_string_join];
+wll::export_wstp![expr_string_join(&mut Link)];
 
 /// This example is an alternative to the `string_join()` example.
 ///
@@ -197,4 +201,43 @@ fn expr_string_join(link: &mut Link) {
     }
 
     link.put_str(buffer.as_str()).unwrap()
+}
+
+//======================================
+// Using `Vec<Expr>` argument list
+//======================================
+
+//------------------
+// total()
+//------------------
+
+wll::export_wstp![total(_)];
+
+fn total(args: Vec<Expr>) -> Expr {
+    let mut total = Number::Integer(0);
+
+    for (index, arg) in args.into_iter().enumerate() {
+        let number = match arg.kind() {
+            ExprKind::Number(number) => *number,
+            _ => panic!(
+                "expected argument as position {} to be a number, got {}",
+                index, arg
+            ),
+        };
+
+        use Number::{Integer, Real};
+
+        total = match (total, number) {
+            // If the sum and new term are integers, use integers.
+            (Integer(total), Integer(term)) => Integer(total + term),
+            // Otherwise, if the either the total or new term are machine real numbers,
+            // use floating point numbers.
+            (Integer(int), Real(real)) | (Real(real), Integer(int)) => {
+                Number::real(int as f64 + *real)
+            },
+            (Real(total), Real(term)) => Real(total + term),
+        }
+    }
+
+    Expr::number(total)
 }

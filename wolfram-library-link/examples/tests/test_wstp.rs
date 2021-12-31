@@ -1,14 +1,18 @@
+use wl_expr_core::Expr;
 use wolfram_library_link::{
     self as wll,
     wstp::{self, Link},
 };
 
 wll::export_wstp![
-    test_wstp_fn_empty;
-    test_wstp_fn_panic_immediately;
-    test_wstp_fn_panic_immediately_with_formatting;
-    test_wstp_panic_with_empty_link;
-    test_wstp_fn_poison_link_and_panic;
+    // &mut Link
+    test_wstp_fn_empty(&mut Link);
+    test_wstp_fn_panic_immediately(&mut Link);
+    test_wstp_fn_panic_immediately_with_formatting(&mut Link);
+    test_wstp_panic_with_empty_link(&mut Link);
+    test_wstp_fn_poison_link_and_panic(&mut Link);
+    // Vec<Expr>
+    test_wstp_expr_return_null(_);
 ];
 
 fn test_wstp_fn_empty(_link: &mut Link) {
@@ -56,4 +60,8 @@ fn test_wstp_fn_poison_link_and_panic(link: &mut Link) {
 
     // Panic while leaving the link in the error state.
     panic!("successful panic")
+}
+
+fn test_wstp_expr_return_null(_args: Vec<Expr>) {
+    // Do nothing.
 }

@@ -6,7 +6,7 @@ use wstp::{self, Link};
 use crate::{
     catch_panic::{call_and_catch_panic, CaughtPanic},
     sys::{self, MArgument, LIBRARY_NO_ERROR},
-    NativeFunction, NumericArray,
+    NativeFunction, NumericArray, WstpFunction,
 };
 
 
@@ -273,6 +273,38 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
     };
 
     sys::LIBRARY_NO_ERROR
+}
+
+pub fn call_wstp_wolfram_library_function<F: WstpFunction>(
+    libdata: sys::WolframLibraryData,
+    mut unsafe_link: wstp::sys::WSLINK,
+    func: F,
+) -> c_uint {
+    // Initialize the library.
+    if unsafe { crate::initialize(libdata) }.is_err() {
+        return sys::LIBRARY_FUNCTION_ERROR;
+    }
+
+    let link: &mut Link = unsafe { Link::unchecked_ref_cast_mut(&mut unsafe_link) };
+
+    let result: Result<(), CaughtPanic> = unsafe {
+        call_and_catch_panic(std::panic::AssertUnwindSafe(|| {
+            let _: () = func.call(link);
+        }))
+    };
+
+    match result {
+        Ok(()) => LIBRARY_NO_ERROR,
+        // Try to fail gracefully by writing the panic message as a Failure[..] object to
+        // be returned, but if that fails, just return LIBRARY_FUNCTION_ERROR.
+        Err(panic) => match write_panic_failure_to_link(link, panic) {
+            Ok(()) => LIBRARY_NO_ERROR,
+            Err(_wstp_err) => {
+                // println!("PANIC ERROR: {}", _wstp_err);
+                sys::LIBRARY_FUNCTION_ERROR // +1
+            },
+        },
+    }
 }
 
 //======================================

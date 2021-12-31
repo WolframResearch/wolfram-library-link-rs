@@ -115,7 +115,7 @@ pub use wstp;
 pub use inventory;
 
 pub use self::{
-    args::{FromArg, IntoArg, NativeFunction},
+    args::{FromArg, IntoArg, NativeFunction, WstpFunction},
     async_tasks::AsyncTaskObject,
     data_store::{DataStore, DataStoreNode, DataStoreNodeValue, Nodes},
     image::{ColorSpace, Image, ImageData, ImageType, Pixel, UninitImage},
@@ -670,8 +670,9 @@ macro_rules! export {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::{export_wstp, wstp::Link};
-/// # fn square(link: &mut Link) { }
-/// export_wstp![square];
+/// # use wl_expr_core::Expr;
+/// # fn square(args: Vec<Expr>) -> Expr { todo!() }
+/// export_wstp![square(_)];
 /// # }
 /// ```
 ///
@@ -681,8 +682,9 @@ macro_rules! export {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::{export_wstp, wstp::Link};
-/// # fn square(link: &mut Link) { }
-/// export_wstp![square as WL_square];
+/// # use wl_expr_core::Expr;
+/// # fn square(args: Vec<Expr>) -> Expr { todo!() }
+/// export_wstp![square(_) as WL_square];
 /// # }
 /// ```
 ///
@@ -692,11 +694,12 @@ macro_rules! export {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::{export_wstp, wstp::Link};
-/// # fn square(link: &mut Link) { }
-/// # fn add_two(link: &mut Link) { }
+/// # use wl_expr_core::Expr;
+/// # fn square(args: Vec<Expr>) { }
+/// # fn add_two(args: Vec<Expr>) { }
 /// export_wstp![
-///     square;
-///     add_two as AddTwo;
+///     square(_);
+///     add_two(_) as AddTwo;
 /// ];
 /// # }
 /// ```
@@ -733,7 +736,7 @@ macro_rules! export {
 ///     link.put_i64(x * x).unwrap();
 /// }
 ///
-/// export_wstp![square_wstp];
+/// export_wstp![square_wstp(&mut Link)];
 /// # }
 /// ```
 ///
@@ -763,7 +766,7 @@ macro_rules! export {
 ///     link.put_i64(total).unwrap();
 /// }
 ///
-/// export_wstp![total_args_i64];
+/// export_wstp![total_args_i64(&mut Link)];
 /// # }
 /// ```
 ///
@@ -772,16 +775,29 @@ macro_rules! export {
 /// ```
 #[macro_export]
 macro_rules! export_wstp {
-    ($vis:vis $name:ident as $exported:ident) => {
+    ($vis:vis $name:ident($($argc:ty),*) as $exported:ident) => {
         $vis mod $name {
+            // Ensure that types imported into the enclosing parent module can be used in
+            // the expansion of $argc. Always `Link` or `Vec<Expr>` at the moment.
+            use super::*;
+
             #[no_mangle]
             pub unsafe extern "C" fn $exported(
                 lib: $crate::sys::WolframLibraryData,
                 raw_link: $crate::wstp::sys::WSLINK,
             ) -> std::os::raw::c_uint {
-                let func: fn(&mut $crate::wstp::Link) -> _ = super::$name;
+                // Cast away the unique `fn(...) {some_name}` function type to get the
+                // generic `fn(...)` type.
+                // The number of `$argc` is required for type inference of the variadic
+                // `fn(..) -> _` type to work. See constraint 2a.
+                let func: fn($($argc),*) -> _ = super::$name;
 
-                $crate::macro_utils::call_wstp_link_wolfram_library_function(
+                // TODO: Why does this code work:
+                //   let func: fn(&mut _) = super::$name;
+                // but this does not:
+                //   let func: fn(_) = super::$name;
+
+                $crate::macro_utils::call_wstp_wolfram_library_function(
                     lib,
                     raw_link,
                     func
@@ -795,14 +811,14 @@ macro_rules! export_wstp {
         }
     };
 
-    // Convert export![name] to export![name as name].
-    ($vis:vis $name:ident) => {
-        $crate::export_wstp![$vis $name as $name];
+    // Convert export![name(..)] to export![name(..) as name].
+    ($vis:vis $name:ident($($argc:ty),*)) => {
+        $crate::export_wstp![$vis $name($($argc),*) as $name];
     };
 
-    ($($vis:vis $name:ident $(as $exported:ident)?);* $(;)?) => {
+    ($($vis:vis $name:ident($($argc:ty),*) $(as $exported:ident)?);* $(;)?) => {
         $(
-            $crate::export_wstp![$vis $name $(as $exported)?];
+            $crate::export_wstp![$vis $name($($argc),*) $(as $exported)?];
         )*
     };
 }

@@ -79,3 +79,20 @@ TestMatch[
 		"Backtrace" -> Missing["NotEnabled"]
 	|>]
 ]
+
+(*====================================*)
+(* Vec<Expr>                          *)
+(*====================================*)
+
+TestMatch[
+	Block[{$Context = "UnusedContext`", $ContextPath = {}},
+		LibraryFunctionLoad[
+			"liblibrary_tests",
+			"test_wstp_expr_return_null",
+			LinkObject,
+			LinkObject
+		][]
+	]
+	,
+	Null
+]

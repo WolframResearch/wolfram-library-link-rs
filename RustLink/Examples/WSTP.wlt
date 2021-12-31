@@ -131,3 +131,46 @@ TestMatch[
 		|>]
 	}
 ]
+
+TestMatch[
+	total = LibraryFunctionLoad[
+		"libwstp_example",
+		"total",
+		LinkObject,
+		LinkObject
+	];
+	(* Note:
+		Set $Context and $ContextPath to force symbols sent across the LinkObject to
+		contain the symbol context explicitly.
+	*)
+	Block[{$Context = "UnusedContext`", $ContextPath = {}},
+		{
+			total[],
+			total[1, 2, 3],
+			total[1, 2.5, 7],
+			(* Cause an integer overflow. *)
+			total[2^62, 2^62, 2^62],
+			total[5, "Hello"]
+		}
+	]
+	,
+	{
+		0,
+		6,
+		10.5,
+		Failure["RustPanic", <|
+			"MessageTemplate" -> "Rust LibraryLink function panic: `message`",
+			"MessageParameters" -> <|"message" -> "attempt to add with overflow"|>,
+			"SourceLocation" -> s0_?StringQ /; StringStartsQ[s0, "wolfram-library-link/examples/wstp.rs:232:56"],
+			"Backtrace" -> Missing["NotEnabled"]
+		|>],
+		Failure["RustPanic", <|
+			"MessageTemplate" -> "Rust LibraryLink function panic: `message`",
+			"MessageParameters" -> <|
+				"message" -> "expected argument as position 1 to be a number, got \"Hello\""
+			|>,
+			"SourceLocation" -> s1_?StringQ /; StringStartsQ[s1, "wolfram-library-link/examples/wstp.rs:222:18"],
+			"Backtrace" -> Missing["NotEnabled"]
+		|>]
+	}
+]

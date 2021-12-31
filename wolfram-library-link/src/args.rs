@@ -9,11 +9,12 @@ use std::{
 
 use ref_cast::RefCast;
 
-use wl_expr_core::{Expr, Symbol};
+use wl_expr_core::{Expr, ExprKind, Symbol};
 
 use crate::{
     rtl,
     sys::{self, mint, mreal, MArgument},
+    wstp::Link,
     DataStore, Image, NumericArray,
 };
 
@@ -67,13 +68,13 @@ pub trait IntoArg {
 /// Trait implemented for any function whose parameters and return type are native
 /// LibraryLink [`MArgument`] types.
 ///
-/// [`export!`][crate::export] may only be used with functions that implement this trait.
+/// [`export!`][crate::export] can only be used with functions that implement this trait.
 ///
 /// A function implements this trait if all of its parameters implement [`FromArg`] and
 /// its return type implements [`IntoArg`].
 ///
 /// Functions that pass their arguments and return value using a [`wstp::Link`] do not
-/// implement this trait.
+/// implement this trait. See [`WstpFunction`].
 pub trait NativeFunction<'a> {
     /// Call the function using the raw LibraryLink [`MArgument`] fields.
     unsafe fn call(&self, args: &'a [MArgument], ret: MArgument);
@@ -89,6 +90,22 @@ pub trait NativeFunction<'a> {
     /// type signature for functions exported by [`export!`].
     // Note: This method takes `self` so that it is object safe.
     fn signature(&self) -> Result<(Vec<Expr>, Expr), String>;
+}
+
+/// Trait implemented for any function whose parameters and return type can be passed
+/// over a WSTP [`Link`][crate::wstp::Link].
+///
+/// [`export_wstp!`][crate::export_wstp] can only be used with functions that implement
+/// this trait.
+///
+/// A function implements this trait if its type signature is one of:
+///
+/// * `fn(_: &mut Link)`
+/// * `fn(_: Vec<Expr>) -> Expr`
+/// * `fn(_: Vec<Expr>)`
+pub trait WstpFunction {
+    /// Call the function using the [`Link`] object passed by the Kernel.
+    unsafe fn call(&self, link: &mut Link);
 }
 
 //======================================
@@ -812,3 +829,141 @@ impl_NativeFunction!(A1, A2, A3, A4, A5, A6, A7, A8, A9);
 impl_NativeFunction!(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10);
 impl_NativeFunction!(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11);
 impl_NativeFunction!(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12);
+
+//======================================
+// impl WstpFunction
+//======================================
+
+/// Implement [`WstpFunction`] for functions that use a [`Link`] for their arguments and
+/// return value.
+///
+/// # Example
+///
+/// ```
+/// # mod scope {
+/// use wolfram_library_link::{self as wll, wstp::Link};
+///
+/// wll::export_wstp![add2_link(&mut Link)];
+///
+/// fn add2_link(link: &mut Link) {
+///     let argc: usize = link.test_head("List").unwrap();
+///
+///     if argc != 2 {
+///         panic!("expected 2 arguments, got {}", argc);
+///     }
+///
+///     let x = link.get_i64().unwrap();
+///     let y = link.get_i64().unwrap();
+///
+///     link.put_i64(x + y).unwrap();
+/// }
+/// # }
+/// ```
+///
+/// ```wolfram
+/// LibraryFunctionLoad["...", "add2_link", LinkObject, LinkObject]
+/// ```
+impl WstpFunction for fn(&mut Link) {
+    unsafe fn call(&self, link: &mut Link) {
+        self(link)
+    }
+}
+
+/// Implement [`WstpFunction`] for functions that use [`Expr`] for their arguments and
+/// return value.
+///
+/// # Example
+///
+/// ```
+/// # mod scope {
+/// use wolfram_library_link::{self as wll, wstp::Link};
+/// use wl_expr_core::{Expr, ExprKind, Number};
+///
+/// wll::export_wstp![add2(_)];
+///
+/// fn add2(args: Vec<Expr>) -> Expr {
+///     if args.len() != 2 {
+///         panic!("expected 2 arguments, got {}", args.len());
+///     }
+///
+///     let x: i64 = match *args[0].kind() {
+///         ExprKind::Number(Number::Integer(value)) => value,
+///         _ => panic!("expected 1st argument to be Integer, got: {}", args[0])
+///     };
+///     let y: i64 = match *args[1].kind() {
+///         ExprKind::Number(Number::Integer(value)) => value,
+///         _ => panic!("expected 2nd argument to be Integer, got: {}", args[1])
+///     };
+///
+///     Expr::from(x + y)
+/// }
+/// # }
+/// ```
+///
+/// ```wolfram
+/// LibraryFunctionLoad["...", "add2", LinkObject, LinkObject]
+/// ```
+impl WstpFunction for fn(Vec<Expr>) -> Expr {
+    unsafe fn call(&self, link: &mut Link) {
+        let args: Vec<Expr> = match get_args_list(link) {
+            Ok(args) => args,
+            Err(message) => panic!("WstpFunction: {}", message),
+        };
+
+        let result: Expr = self(args);
+
+        match link.put_expr(&result) {
+            Ok(()) => (),
+            Err(err) => panic!(
+                "WstpFunction: WSTP error writing return expression to link: {}",
+                err
+            ),
+        }
+    }
+}
+
+impl WstpFunction for fn(Vec<Expr>) {
+    unsafe fn call(&self, link: &mut Link) {
+        let args: Vec<Expr> = match get_args_list(link) {
+            Ok(args) => args,
+            Err(message) => panic!("WstpFunction: {}", message),
+        };
+
+        let _null: () = self(args);
+
+        match link.put_symbol("System`Null") {
+            Ok(()) => (),
+            Err(err) => panic!(
+                "WstpFunction: WSTP error writing return Null expression to link: {}",
+                err
+            ),
+        }
+    }
+}
+
+//----------------------------
+// Utilities
+//----------------------------
+
+fn get_args_list(link: &mut Link) -> Result<Vec<Expr>, String> {
+    let list = match link.get_expr() {
+        Ok(args) => args,
+        Err(err) => {
+            return Err(format!(
+                "WSTP error reading argument List expression: {}",
+                err
+            ))
+        },
+    };
+
+    let list = match list.to_kind() {
+        ExprKind::Normal(list) => list,
+        _ => return Err("expected List expression".to_owned()),
+    };
+
+    if !list.has_head(&Symbol::new("System`List").unwrap()) {
+        return Err("expected List expression".to_owned());
+    }
+
+    Ok(list.contents)
+}
