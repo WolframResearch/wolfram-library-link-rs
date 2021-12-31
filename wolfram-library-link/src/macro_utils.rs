@@ -264,6 +264,9 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
         Err(_) => return sys::LIBRARY_FUNCTION_ERROR,
     };
 
+    // FIXME: This isn't safe! 'a could be 'static, and then the user could store the
+    //        `&mut Link` reference beyond the lifetime of this function.
+    //        E.g. `fn foo(link: &'static mut str) { ... }`
     let args: &[MArgument] = std::slice::from_raw_parts(args, argc);
 
     if panic::catch_unwind(AssertUnwindSafe(move || func.call(args, res))).is_err() {
