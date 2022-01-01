@@ -13,10 +13,7 @@ use crate::{
 // WSTP helpers
 //==================
 
-/// Private. Helper function used to implement [`#[wolfram_library_function]`][wlf] .
-///
-/// [wlf]: attr.wolfram_library_function.html
-pub fn call_wstp_link_wolfram_library_function<
+unsafe fn call_wstp_link_wolfram_library_function<
     F: FnOnce(&mut Link) + std::panic::UnwindSafe,
 >(
     libdata: sys::WolframLibraryData,
@@ -24,17 +21,16 @@ pub fn call_wstp_link_wolfram_library_function<
     function: F,
 ) -> c_uint {
     // Initialize the library.
-    if unsafe { crate::initialize(libdata) }.is_err() {
+    if crate::initialize(libdata).is_err() {
         return sys::LIBRARY_FUNCTION_ERROR;
     }
 
-    let link = unsafe { Link::unchecked_ref_cast_mut(&mut unsafe_link) };
+    let link = Link::unchecked_ref_cast_mut(&mut unsafe_link);
 
-    let result: Result<(), CaughtPanic> = unsafe {
+    let result: Result<(), CaughtPanic> =
         call_and_catch_panic(std::panic::AssertUnwindSafe(|| {
             let _: () = function(link);
-        }))
-    };
+        }));
 
     match result {
         Ok(()) => LIBRARY_NO_ERROR,
@@ -81,7 +77,7 @@ fn write_panic_failure_to_link(
 }
 
 //======================================
-// NativeFunction helpers
+// export! (NativeFunction) and export_wstp! (WstpFunction) helpers
 //======================================
 
 pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
@@ -117,23 +113,22 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
     sys::LIBRARY_NO_ERROR
 }
 
-pub fn call_wstp_wolfram_library_function<F: WstpFunction>(
+pub unsafe fn call_wstp_wolfram_library_function<F: WstpFunction>(
     libdata: sys::WolframLibraryData,
     mut unsafe_link: wstp::sys::WSLINK,
     func: F,
 ) -> c_uint {
     // Initialize the library.
-    if unsafe { crate::initialize(libdata) }.is_err() {
+    if crate::initialize(libdata).is_err() {
         return sys::LIBRARY_FUNCTION_ERROR;
     }
 
-    let link: &mut Link = unsafe { Link::unchecked_ref_cast_mut(&mut unsafe_link) };
+    let link: &mut Link = Link::unchecked_ref_cast_mut(&mut unsafe_link);
 
-    let result: Result<(), CaughtPanic> = unsafe {
+    let result: Result<(), CaughtPanic> =
         call_and_catch_panic(std::panic::AssertUnwindSafe(|| {
             let _: () = func.call(link);
-        }))
-    };
+        }));
 
     match result {
         Ok(()) => LIBRARY_NO_ERROR,

@@ -196,7 +196,7 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
 ///
 /// NOTE: `func` should not set it's own panic hook, or unset the panic hook set upon
 ///       calling it. Doing so would likely interfere with the operation of this function.
-pub unsafe fn call_and_catch_panic<T, F>(func: F) -> Result<T, CaughtPanic>
+pub fn call_and_catch_panic<T, F>(func: F) -> Result<T, CaughtPanic>
 where
     F: FnOnce() -> T + UnwindSafe,
 {
