@@ -18,8 +18,6 @@ ref-cast = "1.0.6"
 inventory = "0.2.1"
 
 [dev-dependencies]
-wl-expr          = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr.git" }
-wl-pattern-match = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-pattern-match.git" }
 
 [features]
 default = []
@@ -71,11 +69,6 @@ crate-type = ["cdylib"]
 [[example]]
 name = "basic_expressions"
 path = "examples/exprs/basic_expressions.rs"
-crate-type = ["cdylib"]
-
-[[example]]
-name = "structured_expressions"
-path = "examples/exprs/structured_expressions.rs"
 crate-type = ["cdylib"]
 
 #---------------

@@ -7,7 +7,7 @@
 
 use std::os::raw::{c_int, c_uint};
 
-use wl_expr::Expr;
+use wl_expr_core::{Expr, Symbol};
 use wolfram_library_link::sys::{
     self as wll_sys, WolframLibraryData, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
 };
@@ -97,9 +97,13 @@ pub extern "C" fn demo_wstp_function_callback(
             unsafe { Link::unchecked_ref_cast_mut(&mut callback_link) };
 
         safe_callback_link
-            .put_expr(&Expr! {
-                EvaluatePacket[Print["Hello, World! --- WSTP"]]
-            })
+            // EvaluatePacket[Print["Hello, World! --- WSTP"]]
+            .put_expr(&Expr::normal(
+                Symbol::new("System`EvaluatePacket").unwrap(),
+                vec![Expr::normal(Symbol::new("System`Print").unwrap(), vec![
+                    Expr::string("Hello, World! --- WSTP"),
+                ])],
+            ))
             .unwrap();
 
         unsafe {
@@ -152,7 +156,15 @@ pub extern "C" fn wstp_expr_function(
             }
 
             let err = Expr::string(err.to_string());
-            let err = Expr! { Failure["WSTP Error", <| "Message" -> 'err |>] };
+            let err = Expr::normal(Symbol::new("System`Failure").unwrap(), vec![
+                Expr::string("WSTP Error"),
+                Expr::normal(Symbol::new("System`Association").unwrap(), vec![
+                    Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+                        Expr::string("Message"),
+                        err,
+                    ]),
+                ]),
+            ]);
             match link.put_expr(&err) {
                 Ok(()) => return LIBRARY_NO_ERROR,
                 Err(_) => return LIBRARY_FUNCTION_ERROR,

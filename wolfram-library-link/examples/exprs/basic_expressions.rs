@@ -1,4 +1,4 @@
-use wl_expr::Expr;
+use wl_expr_core::{Expr, Symbol};
 use wolfram_library_link::{self as wll};
 
 wll::export_wstp![echo_arguments(_)];
@@ -17,7 +17,10 @@ pub fn echo_arguments(args: Vec<Expr>) -> Expr {
     let arg_count = args.len();
 
     for arg in args {
-        wll::evaluate(&Expr! { Echo['arg] });
+        // Echo[<arg>]
+        wll::evaluate(&Expr::normal(Symbol::new("System`Echo").unwrap(), vec![
+            arg,
+        ]));
     }
 
     Expr::string(format!("finished echoing {} argument(s)", arg_count))

@@ -1,6 +1,6 @@
 use std::panic;
 
-use wl_expr::{Expr, Symbol};
+use wl_expr_core::{Expr, Symbol};
 use wolfram_library_link::{self as wll};
 
 wll::export![
