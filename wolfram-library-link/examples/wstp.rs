@@ -4,6 +4,8 @@
 use wl_expr_core::{Expr, ExprKind, Number, Symbol};
 use wolfram_library_link::{self as wll, wstp::Link};
 
+wll::generate_loader!(load_wstp_functions);
+
 //======================================
 // Using `&mut Link`
 //======================================
