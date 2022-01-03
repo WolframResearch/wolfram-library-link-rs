@@ -230,8 +230,12 @@ impl LibraryLinkFunction {
     }
 
     fn loading_code(&self, library: &std::path::PathBuf) -> Result<Expr, String> {
-        let lib_func_load = Symbol::new("System`LibraryFunctionLoad").unwrap();
-        let link_object = Expr::from(Symbol::new("System`LinkObject").unwrap());
+        fn sys(name: &str) -> Symbol {
+            Symbol::new(format!("System`{}", name)).unwrap()
+        }
+
+        let lib_func_load = sys("LibraryFunctionLoad");
+        let link_object = Expr::from(sys("LinkObject"));
         let library = Expr::string(
             library
                 .to_str()
@@ -245,17 +249,64 @@ impl LibraryLinkFunction {
                 Expr::normal(&lib_func_load, vec![
                     library.clone(),
                     Expr::string(*name),
-                    Expr::normal(Symbol::new("System`List").unwrap(), args),
+                    Expr::normal(sys("List"), args),
                     ret,
                 ])
             },
-            // LibraryFunctionLoad[_,]
-            LibraryLinkFunction::Wstp { name } => Expr::normal(&lib_func_load, vec![
-                library.clone(),
-                Expr::string(*name),
-                link_object.clone(),
-                link_object,
-            ]),
+            /*
+                With[{
+                    var = LibraryFunctionLoad[...]
+                },
+                    Function[
+                        (* Note:
+                            Set $Context and $ContextPath to force symbols sent across
+                            the LinkObject to contain the symbol context explicitly.
+                        *)
+                        Block[{$Context = "RustLinkWSTPPrivateContext`", $ContextPath = {}},
+                            var[##]
+                        ]
+                    ]
+                ]
+            */
+            LibraryLinkFunction::Wstp { name } => {
+                let load_call = Expr::normal(&lib_func_load, vec![
+                    library.clone(),
+                    Expr::string(*name),
+                    link_object.clone(),
+                    link_object,
+                ]);
+
+                let var = Expr::from(Symbol::new("RustLink`Private`wstpFunc").unwrap());
+
+                Expr::normal(sys("With"), vec![
+                    Expr::normal(sys("List"), vec![Expr::normal(sys("Set"), vec![
+                        var.clone(),
+                        load_call,
+                    ])]),
+                    Expr::normal(sys("Function"), vec![Expr::normal(
+                        sys("Block"),
+                        vec![
+                            Expr::normal(sys("List"), vec![
+                                // $Context = "RustLinkWSTPPrivateContext`"
+                                Expr::normal(sys("Set"), vec![
+                                    Expr::from(sys("$Context")),
+                                    Expr::string("RustLinkWSTPPrivateContext`"),
+                                ]),
+                                // $ContextPath = {}
+                                Expr::normal(sys("Set"), vec![
+                                    Expr::from(sys("$ContextPath")),
+                                    Expr::normal(sys("List"), vec![]),
+                                ]),
+                            ]),
+                            // var[##]
+                            Expr::normal(var, vec![Expr::normal(
+                                sys("SlotSequence"),
+                                vec![Expr::from(1)],
+                            )]),
+                        ],
+                    )]),
+                ])
+            },
         };
 
         Ok(code)

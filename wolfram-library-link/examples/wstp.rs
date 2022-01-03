@@ -4,6 +4,21 @@
 use wl_expr_core::{Expr, ExprKind, Number, Symbol};
 use wolfram_library_link::{self as wll, wstp::Link};
 
+// Generates a special "loader" function, which returns an Association containing the
+// loaded forms of all functions exported by this library.
+//
+// The loader can be loaded and used by evaluating:
+//
+// ```
+// loadFunctions = LibraryFunctionLoad[
+//     "libwstp_example",
+//     "load_wstp_functions",
+//     LinkObject,
+//     LinkObject
+// ];
+//
+// $functions = loadFunctions["libwstp_example"];
+// ```
 wll::generate_loader!(load_wstp_functions);
 
 //======================================
@@ -19,18 +34,13 @@ wll::export_wstp![square_wstp(&mut Link)];
 /// Define a WSTP function that squares a number.
 ///
 /// ```wolfram
-/// square = LibraryFunctionLoad[
-///     "libwstp_example",
-///     "square_wstp",
-///     LinkObject,
-///     LinkObject
-/// ];
+/// square = $functions["square_wstp"];
 ///
 /// square[4]    (* Returns 16 *)
 /// ```
 fn square_wstp(link: &mut Link) {
     // Get the number of elements in the arguments list.
-    let arg_count: usize = link.test_head("List").unwrap();
+    let arg_count: usize = link.test_head("System`List").unwrap();
 
     if arg_count != 1 {
         panic!("square_wstp: expected to get a single argument");
@@ -55,19 +65,14 @@ wll::export_wstp![count_args(&mut Link)];
 /// The exported LibraryLink function can be loaded and used by evaluating:
 ///
 /// ```wolfram
-/// countArgs = LibraryFunctionLoad[
-///     "libwstp_example",
-///     "count_args",
-///     LinkObject,
-///     LinkObject
-/// ]
+/// countArgs = $functions["count_args"];
 ///
 /// countArgs[a]          (* Returns 1)
 /// countArgs[a, b, c]    (* Returns 3 *)
 /// ```
 fn count_args(link: &mut Link) {
     // Get the number of elements in the arguments list.
-    let arg_count: usize = link.test_head("List").unwrap();
+    let arg_count: usize = link.test_head("System`List").unwrap();
 
     // Discard the remaining argument data.
     link.new_packet().unwrap();
@@ -87,18 +92,13 @@ wll::export_wstp![total_args_i64(&mut Link)];
 /// The exported LibraryLink function can be loaded and used by evaluating:
 ///
 /// ```wolfram
-/// totalArgsI64 = LibraryFunctionLoad[
-///     "libwstp_example",
-///     "total_args_i64",
-///     LinkObject,
-///     LinkObject
-/// ];
+/// totalArgsI64 = $functions["total_args_i64"];
 ///
 /// totalArgsI64[1, 1, 2, 3, 5]    (* Returns 12 *)
 /// ```
 fn total_args_i64(link: &mut Link) {
     // Check that we recieved a functions arguments list, and get the number of arguments.
-    let arg_count: usize = link.test_head("List").unwrap();
+    let arg_count: usize = link.test_head("System`List").unwrap();
 
     let mut total: i64 = 0;
 
@@ -123,12 +123,7 @@ wll::export_wstp![string_join(&mut Link)];
 /// The exported LibraryLink function can be loaded and used by evaluating:
 ///
 /// ```wolfram
-/// stringJoin = LibraryFunctionLoad[
-///     "libwstp_example",
-///     "string_join",
-///     LinkObject,
-///     LinkObject
-/// ];
+/// stringJoin = $functions["string_join"];
 ///
 /// stringJoin["Foo", "Bar"]           (* Returns "FooBar" *)
 /// stringJoin["Foo", "Bar", "Baz"]    (* Returns "FooBarBaz" *)
@@ -137,7 +132,7 @@ wll::export_wstp![string_join(&mut Link)];
 fn string_join(link: &mut Link) {
     use wstp::LinkStr;
 
-    let arg_count = link.test_head("List").unwrap();
+    let arg_count = link.test_head("System`List").unwrap();
 
     let mut buffer = String::new();
 
@@ -160,17 +155,10 @@ wll::export_wstp!(link_expr_identity(&mut Link));
 /// That expression will be a list of the arguments passed to this LibraryFunction[..].
 ///
 /// ```wolfram
-/// linkExprIdentity = LibraryFunctionLoad[
-///     "libwstp_example",
-///     "link_expr_identity",
-///     LinkObject,
-///     LinkObject
-/// ];
+/// linkExprIdentity = $functions["link_expr_identity"];
 ///
-/// Block[{$Context = "UnusedContext`", $ContextPath = {}},
-///     linkExprIdentity[5]      (* Returns {5} *)
-///     linkExprIdentity[a, b]   (* Returns {a, b} *)
-/// ]
+/// linkExprIdentity[5]      (* Returns {5} *)
+/// linkExprIdentity[a, b]   (* Returns {a, b} *)
 /// ```
 fn link_expr_identity(link: &mut Link) {
     let expr = link.get_expr().unwrap();

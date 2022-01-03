@@ -13,14 +13,30 @@ TestMatch[
 
 	Sort[$functions]
 	,
+	(*
+		These functions will typically have a structure similar to the following:
+
+			Function[
+				Block[{$Context = "RustLinkWSTPPrivateContext`", $ContextPath = {}},
+					LibraryFunction["/path/to/libwstp_example.dylib", "count_args", LinkObject][
+						##
+					]
+				]
+			]
+
+		Setting $Context and $ContextPath before each call to the WSTP library
+		function is necessary to force all symbols sent across the link to be
+		formatted with their context name included. See the 'Symbol contexts problem'
+		section in the crate documentation for more information.
+	*)
 	<|
-		"count_args" -> LibraryFunction[_, "count_args", LinkObject],
-		"expr_string_join" -> LibraryFunction[_, "expr_string_join", LinkObject],
-		"link_expr_identity" -> LibraryFunction[_, "link_expr_identity", LinkObject],
-		"square_wstp" -> LibraryFunction[_, "square_wstp", LinkObject],
-		"string_join" -> LibraryFunction[_, "string_join", LinkObject],
-		"total" -> LibraryFunction[_, "total", LinkObject],
-		"total_args_i64" -> LibraryFunction[_, "total_args_i64", LinkObject]
+		"count_args" -> Function[__],
+		"expr_string_join" -> Function[__],
+		"link_expr_identity" -> Function[__],
+		"square_wstp" -> Function[__],
+		"string_join" -> Function[__],
+		"total" -> Function[__],
+		"total_args_i64" -> Function[__]
 	|>
 ]
 
@@ -80,32 +96,21 @@ Test[
 TestMatch[
 	linkExprIdentity = $functions["link_expr_identity"];
 
-	(* Note:
-		Set $Context and $ContextPath to force symbols sent across the LinkObject to
-		contain the symbol context explicitly.
-	*)
-	Block[{$Context = "UnusedContext`", $ContextPath = {}},
-		linkExprIdentity[foo[], bar[baz]]
-	]
+	linkExprIdentity[foo[], bar[baz]]
 	,
 	{foo[], bar[baz]}
 ]
 
 TestMatch[
 	exprStringJoin = $functions["expr_string_join"];
-	(* Note:
-		Set $Context and $ContextPath to force symbols sent across the LinkObject to
-		contain the symbol context explicitly.
-	*)
-	Block[{$Context = "UnusedContext`", $ContextPath = {}},
-		{
-			exprStringJoin[],
-			exprStringJoin["Foo"],
-			exprStringJoin["Foo", "Bar"],
-			exprStringJoin[Sequence @@ CharacterRange["a", "f"]],
-			exprStringJoin[1, 2, 3]
-		}
-	]
+
+	{
+		exprStringJoin[],
+		exprStringJoin["Foo"],
+		exprStringJoin["Foo", "Bar"],
+		exprStringJoin[Sequence @@ CharacterRange["a", "f"]],
+		exprStringJoin[1, 2, 3]
+	}
 	,
 	{
 		"",
@@ -124,20 +129,15 @@ TestMatch[
 
 TestMatch[
 	total = $functions["total"];
-	(* Note:
-		Set $Context and $ContextPath to force symbols sent across the LinkObject to
-		contain the symbol context explicitly.
-	*)
-	Block[{$Context = "UnusedContext`", $ContextPath = {}},
-		{
-			total[],
-			total[1, 2, 3],
-			total[1, 2.5, 7],
-			(* Cause an integer overflow. *)
-			total[2^62, 2^62, 2^62],
-			total[5, "Hello"]
-		}
-	]
+
+	{
+		total[],
+		total[1, 2, 3],
+		total[1, 2.5, 7],
+		(* Cause an integer overflow. *)
+		total[2^62, 2^62, 2^62],
+		total[5, "Hello"]
+	}
 	,
 	{
 		0,
