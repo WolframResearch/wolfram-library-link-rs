@@ -152,7 +152,7 @@ TestMatch[
 		Failure["RustPanic", <|
 			"MessageTemplate" -> "Rust LibraryLink function panic: `message`",
 			"MessageParameters" -> <|
-				"message" -> "expected argument as position 1 to be a number, got \"Hello\""
+				"message" -> "expected argument at position 2 to be a number, got \"Hello\""
 			|>,
 			"SourceLocation" -> s1_?StringQ /; StringStartsQ[s1, "wolfram-library-link/examples/wstp.rs:"],
 			"Backtrace" -> Missing["NotEnabled"]

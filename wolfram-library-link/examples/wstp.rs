@@ -210,8 +210,10 @@ fn total(args: Vec<Expr>) -> Expr {
         let number = match arg.kind() {
             ExprKind::Number(number) => *number,
             _ => panic!(
-                "expected argument as position {} to be a number, got {}",
-                index, arg
+                "expected argument at position {} to be a number, got {}",
+                // Add +1 to display using WL 1-based indexing.
+                index + 1,
+                arg
             ),
         };
 
