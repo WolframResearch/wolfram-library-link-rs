@@ -1,7 +1,9 @@
 use std::panic;
 
-use wl_expr_core::{Expr, Symbol};
-use wolfram_library_link::{self as wll};
+use wolfram_library_link::{
+    self as wll,
+    expr::{Expr, Symbol},
+};
 
 wll::export![
     test_runtime_function_from_main_thread();

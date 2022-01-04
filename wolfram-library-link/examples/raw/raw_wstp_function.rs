@@ -7,13 +7,15 @@
 
 use std::os::raw::{c_int, c_uint};
 
-use wl_expr_core::{Expr, Symbol};
-use wolfram_library_link::sys::{
-    self as wll_sys, WolframLibraryData, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
-};
-use wstp::{
-    sys::{WSGetInteger, WSNewPacket, WSPutInteger, WSTestHead, WSLINK},
-    Link,
+use wolfram_library_link::{
+    expr::{Expr, Symbol},
+    sys::{
+        self as wll_sys, WolframLibraryData, LIBRARY_FUNCTION_ERROR, LIBRARY_NO_ERROR,
+    },
+    wstp::{
+        sys::{WSGetInteger, WSNewPacket, WSPutInteger, WSTestHead, WSLINK},
+        Link,
+    },
 };
 
 /// This function is loaded by evaluating:

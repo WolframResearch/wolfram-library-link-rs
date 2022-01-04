@@ -10,7 +10,7 @@
 //! * Passing data efficiently to and from the Wolfram Language using native data types
 //!   like [`NumericArray`] and [`Image`].
 //! * Passing arbitrary expressions to and from the Wolfram Language using
-//!   [`Expr`][struct@wl_expr_core::Expr] and the [`export_wstp!`][crate::export_wstp]
+//!   [`Expr`][struct@crate::Expr] and the [`export_wstp!`][crate::export_wstp]
 //!   macro.
 //! * Asynchronous events handled by the Wolfram Language, generated using a background
 //!   thread spawned via [`AsyncTaskObject`].
@@ -91,15 +91,16 @@ mod numeric_array;
 pub mod rtl;
 
 
-use std::sync::Mutex;
-
-use once_cell::sync::Lazy;
-
-use wl_expr_core::{Expr, ExprKind, Symbol};
-use wolfram_library_link_sys::mint;
-use wstp::Link;
-
-
+/// Wolfram Language expressions.
+//
+// Note: This is exported as doc(inline) so that it shows up in the 'Modules' section of
+//       the crate docs instead of in the 'Re-exports' section. This is to make way for
+//       the chance that in the future, wolfram-library-link will have it's own expression
+//       type that uses types like NumericArray and Image as variants, which can't be
+//       used in the more general wolfram-expr crate (since NumericArray and Image depend
+//       on the Wolfram RTL, which isn't available in arbitrary Rust code).
+#[doc(inline)]
+pub use wl_expr_core as expr;
 pub use wolfram_library_link_sys as sys;
 pub use wstp;
 
@@ -119,7 +120,16 @@ pub use self::{
     },
 };
 
+
+use std::sync::Mutex;
+
+use once_cell::sync::Lazy;
+
+use wolfram_library_link_sys::mint;
+use wstp::Link;
+
 pub(crate) use self::library_data::assert_main_thread;
+use crate::expr::{Expr, ExprKind, Symbol};
 
 
 const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";

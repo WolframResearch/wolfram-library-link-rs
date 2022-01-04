@@ -1,8 +1,11 @@
 //! This example demonstrates how WSTP links can be used in LibraryLink functions to pass
 //! arbitrary expressions as the function arguments and return value.
 
-use wl_expr_core::{Expr, ExprKind, Number, Symbol};
-use wolfram_library_link::{self as wll, wstp::Link};
+use wolfram_library_link::{
+    self as wll,
+    expr::{Expr, ExprKind, Number, Symbol},
+    wstp::Link,
+};
 
 // Generates a special "loader" function, which returns an Association containing the
 // loaded forms of all functions exported by this library.

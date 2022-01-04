@@ -11,7 +11,7 @@ use std::time::Instant;
 use backtrace::Backtrace;
 use once_cell::sync::Lazy;
 
-use wl_expr_core::{Expr, Number, Symbol};
+use crate::expr::{Expr, Number, Symbol};
 
 static CAUGHT_PANICS: Lazy<Mutex<HashMap<ThreadId, (Instant, CaughtPanic)>>> =
     Lazy::new(|| Default::default());

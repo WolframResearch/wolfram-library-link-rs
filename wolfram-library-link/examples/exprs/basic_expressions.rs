@@ -1,5 +1,7 @@
-use wl_expr_core::{Expr, Symbol};
-use wolfram_library_link::{self as wll};
+use wolfram_library_link::{
+    self as wll,
+    expr::{Expr, Symbol},
+};
 
 wll::export_wstp![echo_arguments(_)];
 

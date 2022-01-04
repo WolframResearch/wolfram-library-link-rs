@@ -1,6 +1,6 @@
-use wl_expr_core::Expr;
 use wolfram_library_link::{
     self as wll,
+    expr::Expr,
     wstp::{self, Link},
 };
 

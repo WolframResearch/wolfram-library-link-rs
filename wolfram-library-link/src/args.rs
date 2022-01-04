@@ -9,9 +9,8 @@ use std::{
 
 use ref_cast::RefCast;
 
-use wl_expr_core::{Expr, ExprKind, Symbol};
-
 use crate::{
+    expr::{Expr, ExprKind, Symbol},
     rtl,
     sys::{self, mint, mreal, MArgument},
     wstp::Link,
@@ -880,8 +879,7 @@ impl WstpFunction for fn(&mut Link) {
 ///
 /// ```
 /// # mod scope {
-/// use wolfram_library_link::{self as wll, wstp::Link};
-/// use wl_expr_core::{Expr, ExprKind, Number};
+/// use wolfram_library_link::{self as wll, wstp::Link, expr::{Expr, ExprKind, Number}};
 ///
 /// wll::export_wstp![add2(_)];
 ///
