@@ -249,8 +249,8 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 
 /// Export the specified functions as native *LibraryLink* functions.
 ///
-/// [`NativeFunction`] must be implemented by the functions
-/// exported by this macro.
+/// To be exported by this macro, the specified function(s) must implement
+/// [`NativeFunction`].
 ///
 /// Functions exported using this macro will automatically:
 ///
@@ -400,8 +400,20 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 ///
 /// # Parameter types
 ///
-/// The following table describes the relationship between Rust types that implement
-/// [`FromArg`] and the compatible Wolfram *LibraryLink* function parameter type(s).
+/// When manually writing the Wolfram
+/// [`LibraryFunctionLoad`][ref/LibraryFunctionLoad]<sub>WL</sub> call necessary to load
+/// a Rust *LibraryLink* function, you must declare the type signature of the function
+/// using the appropriate types.
+///
+/// The following table describes the relationship between Rust types that can be used as
+/// parameter types in a native LibraryLink function (namely: those that implement
+/// [`FromArg`]) and the compatible Wolfram *LibraryLink* function parameter type(s).
+///
+/// [`FromArg::parameter_type()`] can be used to determine the Wolfram library function
+/// parameter type programatically.
+///
+/// If you would prefer to have the Wolfram Language code for loading your library be
+/// generated automatically, use the [`generate_loader!`] macro.
 ///
 /// <h4 style="border-bottom: none; margin-bottom: 4px"> ⚠️ Warning! ⚠️ </h4>
 ///
@@ -429,6 +441,9 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// The following table describes the relationship between Rust types that implement
 /// [`IntoArg`] and the compatible Wolfram *LibraryLink* function return type.
 ///
+/// [`IntoArg::return_type()`] can be used to determine the Wolfram library function
+/// parameter type programatically.
+///
 /// Rust return type                   | Wolfram library function return type
 /// -----------------------------------|---------------------------------------
 /// [`()`][`unit`]                     | `"Void"`
@@ -449,6 +464,7 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 ///       types.
 ///
 /// [ref/NumericArray]: https://reference.wolfram.com/language/ref/NumericArray.html
+/// [ref/LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
 
 // # Design constraints
 //
@@ -573,7 +589,8 @@ macro_rules! export {
 
 /// Export the specified functions as native *LibraryLink* WSTP functions.
 ///
-/// Every function exported by this macro must have the type signature: `fn(&mut Link)`.
+/// To be exported by this macro, the specified function(s) must implement
+/// [`WstpFunction`].
 ///
 /// Functions exported using this macro will automatically:
 ///
