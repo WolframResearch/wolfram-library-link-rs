@@ -11,7 +11,7 @@ wll::export![
 ];
 
 fn test_runtime_function_from_main_thread() -> bool {
-    let expr = Expr::normal(Symbol::new("System`Plus").unwrap(), vec![
+    let expr = Expr::normal(Symbol::new("System`Plus"), vec![
         Expr::from(2),
         Expr::from(2),
     ]);
@@ -26,7 +26,7 @@ fn test_runtime_function_from_non_main_thread() -> String {
         }));
 
         let result = panic::catch_unwind(|| {
-            wll::evaluate(&Expr::normal(Symbol::new("System`Plus").unwrap(), vec![
+            wll::evaluate(&Expr::normal(Symbol::new("System`Plus"), vec![
                 Expr::from(2),
                 Expr::from(2),
             ]))

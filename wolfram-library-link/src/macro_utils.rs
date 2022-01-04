@@ -1,10 +1,10 @@
 use std::os::raw::c_uint;
 
-use wl_expr_core::{Expr, Symbol};
 use wstp::{self, Link};
 
 use crate::{
     catch_panic::{call_and_catch_panic, CaughtPanic},
+    expr::{Expr, Symbol},
     sys::{self, MArgument, LIBRARY_NO_ERROR},
     NativeFunction, WstpFunction,
 };
@@ -204,7 +204,7 @@ pub unsafe fn load_library_functions_impl(
 
 fn library_function_load_expr(library: std::path::PathBuf) -> Expr {
     let mut fields = Vec::new();
-    let rule = Symbol::new("System`Rule").unwrap();
+    let rule = Symbol::new("System`Rule");
 
     for func in inventory::iter::<LibraryLinkFunction> {
         let code = match func.loading_code(&library) {
@@ -218,7 +218,7 @@ fn library_function_load_expr(library: std::path::PathBuf) -> Expr {
         fields.push(Expr::normal(&rule, vec![Expr::string(func.name()), code]));
     }
 
-    Expr::normal(Symbol::new("System`Association").unwrap(), fields)
+    Expr::normal(Symbol::new("System`Association"), fields)
 }
 
 impl LibraryLinkFunction {
@@ -231,7 +231,7 @@ impl LibraryLinkFunction {
 
     fn loading_code(&self, library: &std::path::PathBuf) -> Result<Expr, String> {
         fn sys(name: &str) -> Symbol {
-            Symbol::new(format!("System`{}", name)).unwrap()
+            Symbol::new(&format!("System`{}", name))
         }
 
         let lib_func_load = sys("LibraryFunctionLoad");
@@ -276,7 +276,7 @@ impl LibraryLinkFunction {
                     link_object,
                 ]);
 
-                let var = Expr::from(Symbol::new("RustLink`Private`wstpFunc").unwrap());
+                let var = Expr::from(Symbol::new("RustLink`Private`wstpFunc"));
 
                 Expr::normal(sys("With"), vec![
                     Expr::normal(sys("List"), vec![Expr::normal(sys("Set"), vec![

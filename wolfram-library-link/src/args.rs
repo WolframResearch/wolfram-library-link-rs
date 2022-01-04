@@ -131,7 +131,7 @@ impl FromArg<'_> for mint {
     }
 
     fn parameter_type() -> Expr {
-        Expr::symbol(Symbol::new("System`Integer").unwrap())
+        Expr::symbol(Symbol::new("System`Integer"))
     }
 }
 
@@ -141,7 +141,7 @@ impl FromArg<'_> for mreal {
     }
 
     fn parameter_type() -> Expr {
-        Expr::symbol(Symbol::new("System`Real").unwrap())
+        Expr::symbol(Symbol::new("System`Real"))
     }
 }
 
@@ -151,7 +151,7 @@ impl FromArg<'_> for sys::mcomplex {
     }
 
     fn parameter_type() -> Expr {
-        Expr::symbol(Symbol::new("System`Complex").unwrap())
+        Expr::symbol(Symbol::new("System`Complex"))
     }
 }
 
@@ -178,7 +178,7 @@ impl<'a> FromArg<'a> for CString {
     }
 
     fn parameter_type() -> Expr {
-        Expr::symbol(Symbol::new("System`String").unwrap())
+        Expr::symbol(Symbol::new("System`String"))
     }
 }
 
@@ -202,7 +202,7 @@ impl<'a> FromArg<'a> for String {
     }
 
     fn parameter_type() -> Expr {
-        Expr::symbol(Symbol::new("System`String").unwrap())
+        Expr::symbol(Symbol::new("System`String"))
     }
 }
 
@@ -300,9 +300,9 @@ impl<'a, T: crate::NumericArrayType> FromArg<'a> for &'a NumericArray<T> {
         //   won't mutate the array the Kernel passes in).
 
         // {LibraryDataType[NumericArray, "<T>"], "Constant"}
-        Expr::normal(Symbol::new("System`List").unwrap(), vec![
-            Expr::normal(Symbol::new("System`LibraryDataType").unwrap(), vec![
-                Expr::from(Symbol::new("System`NumericArray").unwrap()),
+        Expr::normal(Symbol::new("System`List"), vec![
+            Expr::normal(Symbol::new("System`LibraryDataType"), vec![
+                Expr::from(Symbol::new("System`NumericArray")),
                 Expr::string(T::TYPE.name()),
             ]),
             Expr::string("Constant"),
@@ -317,9 +317,9 @@ impl<'a, T: crate::NumericArrayType> FromArg<'a> for NumericArray<T> {
 
     fn parameter_type() -> Expr {
         // {LibraryDataType[NumericArray, "<T>"], "Shared"}
-        Expr::normal(Symbol::new("System`List").unwrap(), vec![
-            Expr::normal(Symbol::new("System`LibraryDataType").unwrap(), vec![
-                Expr::from(Symbol::new("System`NumericArray").unwrap()),
+        Expr::normal(Symbol::new("System`List"), vec![
+            Expr::normal(Symbol::new("System`LibraryDataType"), vec![
+                Expr::from(Symbol::new("System`NumericArray")),
                 Expr::string(T::TYPE.name()),
             ]),
             Expr::string("Shared"),
@@ -334,8 +334,8 @@ impl<'a> FromArg<'a> for &'a NumericArray<()> {
 
     fn parameter_type() -> Expr {
         // {NumericArray, "Constant"}
-        Expr::normal(Symbol::new("System`List").unwrap(), vec![
-            Expr::from(Symbol::new("System`NumericArray").unwrap()),
+        Expr::normal(Symbol::new("System`List"), vec![
+            Expr::from(Symbol::new("System`NumericArray")),
             Expr::string("Constant"),
         ])
     }
@@ -348,8 +348,8 @@ impl<'a> FromArg<'a> for NumericArray<()> {
 
     fn parameter_type() -> Expr {
         // {NumericArray, "Shared"}
-        Expr::normal(Symbol::new("System`List").unwrap(), vec![
-            Expr::from(Symbol::new("System`NumericArray").unwrap()),
+        Expr::normal(Symbol::new("System`List"), vec![
+            Expr::from(Symbol::new("System`NumericArray")),
             Expr::string("Shared"),
         ])
     }
@@ -366,11 +366,11 @@ impl<'a, T: crate::ImageData> FromArg<'a> for &'a Image<T> {
 
     fn parameter_type() -> Expr {
         // {LibraryDataType[Image | Image3D, "<T>"], "Constant"}
-        Expr::normal(Symbol::new("System`List").unwrap(), vec![
-            Expr::normal(Symbol::new("System`LibraryDataType").unwrap(), vec![
-                Expr::normal(Symbol::new("System`Alternatives").unwrap(), vec![
-                    Expr::from(Symbol::new("System`Image").unwrap()),
-                    Expr::from(Symbol::new("System`Image3D").unwrap()),
+        Expr::normal(Symbol::new("System`List"), vec![
+            Expr::normal(Symbol::new("System`LibraryDataType"), vec![
+                Expr::normal(Symbol::new("System`Alternatives"), vec![
+                    Expr::from(Symbol::new("System`Image")),
+                    Expr::from(Symbol::new("System`Image3D")),
                 ]),
                 Expr::string(T::TYPE.name()),
             ]),
@@ -386,11 +386,11 @@ impl<'a, T: crate::ImageData> FromArg<'a> for Image<T> {
 
     fn parameter_type() -> Expr {
         // {LibraryDataType[Image | Image3D, "<T>"], "Shared"}
-        Expr::normal(Symbol::new("System`List").unwrap(), vec![
-            Expr::normal(Symbol::new("System`LibraryDataType").unwrap(), vec![
-                Expr::normal(Symbol::new("System`Alternatives").unwrap(), vec![
-                    Expr::from(Symbol::new("System`Image").unwrap()),
-                    Expr::from(Symbol::new("System`Image3D").unwrap()),
+        Expr::normal(Symbol::new("System`List"), vec![
+            Expr::normal(Symbol::new("System`LibraryDataType"), vec![
+                Expr::normal(Symbol::new("System`Alternatives"), vec![
+                    Expr::from(Symbol::new("System`Image")),
+                    Expr::from(Symbol::new("System`Image3D")),
                 ]),
                 Expr::string(T::TYPE.name()),
             ]),
@@ -406,10 +406,10 @@ impl<'a> FromArg<'a> for &'a Image<()> {
 
     fn parameter_type() -> Expr {
         // {Image | Image3D, "Constant"}
-        Expr::normal(Symbol::new("System`List").unwrap(), vec![
-            Expr::normal(Symbol::new("System`Alternatives").unwrap(), vec![
-                Expr::from(Symbol::new("System`Image").unwrap()),
-                Expr::from(Symbol::new("System`Image3D").unwrap()),
+        Expr::normal(Symbol::new("System`List"), vec![
+            Expr::normal(Symbol::new("System`Alternatives"), vec![
+                Expr::from(Symbol::new("System`Image")),
+                Expr::from(Symbol::new("System`Image3D")),
             ]),
             Expr::string("Constant"),
         ])
@@ -423,10 +423,10 @@ impl<'a> FromArg<'a> for Image<()> {
 
     fn parameter_type() -> Expr {
         // {Image | Image3D, "Shared"}
-        Expr::normal(Symbol::new("System`List").unwrap(), vec![
-            Expr::normal(Symbol::new("System`Alternatives").unwrap(), vec![
-                Expr::from(Symbol::new("System`Image").unwrap()),
-                Expr::from(Symbol::new("System`Image3D").unwrap()),
+        Expr::normal(Symbol::new("System`List"), vec![
+            Expr::normal(Symbol::new("System`Alternatives"), vec![
+                Expr::from(Symbol::new("System`Image")),
+                Expr::from(Symbol::new("System`Image3D")),
             ]),
             Expr::string("Shared"),
         ])
@@ -493,7 +493,7 @@ impl IntoArg for mint {
     }
 
     fn return_type() -> Expr {
-        Expr::symbol(Symbol::new("System`Integer").unwrap())
+        Expr::symbol(Symbol::new("System`Integer"))
     }
 }
 
@@ -503,7 +503,7 @@ impl IntoArg for mreal {
     }
 
     fn return_type() -> Expr {
-        Expr::symbol(Symbol::new("System`Real").unwrap())
+        Expr::symbol(Symbol::new("System`Real"))
     }
 }
 
@@ -513,7 +513,7 @@ impl IntoArg for sys::mcomplex {
     }
 
     fn return_type() -> Expr {
-        Expr::symbol(Symbol::new("System`Complex").unwrap())
+        Expr::symbol(Symbol::new("System`Complex"))
     }
 }
 
@@ -527,7 +527,7 @@ impl IntoArg for i8 {
     }
 
     fn return_type() -> Expr {
-        Expr::symbol(Symbol::new("System`Integer").unwrap())
+        Expr::symbol(Symbol::new("System`Integer"))
     }
 }
 
@@ -537,7 +537,7 @@ impl IntoArg for i16 {
     }
 
     fn return_type() -> Expr {
-        Expr::symbol(Symbol::new("System`Integer").unwrap())
+        Expr::symbol(Symbol::new("System`Integer"))
     }
 }
 
@@ -547,7 +547,7 @@ impl IntoArg for i32 {
     }
 
     fn return_type() -> Expr {
-        Expr::symbol(Symbol::new("System`Integer").unwrap())
+        Expr::symbol(Symbol::new("System`Integer"))
     }
 }
 
@@ -557,7 +557,7 @@ impl IntoArg for u8 {
     }
 
     fn return_type() -> Expr {
-        Expr::symbol(Symbol::new("System`Integer").unwrap())
+        Expr::symbol(Symbol::new("System`Integer"))
     }
 }
 
@@ -567,7 +567,7 @@ impl IntoArg for u16 {
     }
 
     fn return_type() -> Expr {
-        Expr::symbol(Symbol::new("System`Integer").unwrap())
+        Expr::symbol(Symbol::new("System`Integer"))
     }
 }
 
@@ -580,7 +580,7 @@ impl IntoArg for u32 {
     }
 
     fn return_type() -> Expr {
-        Expr::symbol(Symbol::new("System`Integer").unwrap())
+        Expr::symbol(Symbol::new("System`Integer"))
     }
 }
 
@@ -626,7 +626,7 @@ impl IntoArg for CString {
     }
 
     fn return_type() -> Expr {
-        Expr::from(Symbol::new("System`String").unwrap())
+        Expr::from(Symbol::new("System`String"))
     }
 }
 
@@ -642,7 +642,7 @@ impl IntoArg for String {
     }
 
     fn return_type() -> Expr {
-        Expr::from(Symbol::new("System`String").unwrap())
+        Expr::from(Symbol::new("System`String"))
     }
 }
 
@@ -657,8 +657,8 @@ impl<T: crate::NumericArrayType> IntoArg for NumericArray<T> {
 
     fn return_type() -> Expr {
         // LibraryDataType[NumericArray, "<T>"]
-        Expr::normal(Symbol::new("System`LibraryDataType").unwrap(), vec![
-            Expr::from(Symbol::new("System`NumericArray").unwrap()),
+        Expr::normal(Symbol::new("System`LibraryDataType"), vec![
+            Expr::from(Symbol::new("System`NumericArray")),
             Expr::string(T::TYPE.name()),
         ])
     }
@@ -671,7 +671,7 @@ impl IntoArg for NumericArray<()> {
 
     fn return_type() -> Expr {
         // NumericArray
-        Expr::from(Symbol::new("System`NumericArray").unwrap())
+        Expr::from(Symbol::new("System`NumericArray"))
     }
 }
 
@@ -682,11 +682,11 @@ impl<T: crate::ImageData> IntoArg for Image<T> {
 
     fn return_type() -> Expr {
         // LibraryDataType[Image | Image3D, "<T>"]
-        Expr::normal(Symbol::new("System`List").unwrap(), vec![
-            Expr::normal(Symbol::new("System`LibraryDataType").unwrap(), vec![
-                Expr::normal(Symbol::new("System`Alternatives").unwrap(), vec![
-                    Expr::from(Symbol::new("System`Image").unwrap()),
-                    Expr::from(Symbol::new("System`Image3D").unwrap()),
+        Expr::normal(Symbol::new("System`List"), vec![
+            Expr::normal(Symbol::new("System`LibraryDataType"), vec![
+                Expr::normal(Symbol::new("System`Alternatives"), vec![
+                    Expr::from(Symbol::new("System`Image")),
+                    Expr::from(Symbol::new("System`Image3D")),
                 ]),
                 Expr::string(T::TYPE.name()),
             ]),
@@ -879,7 +879,7 @@ impl WstpFunction for fn(&mut Link) {
 ///
 /// ```
 /// # mod scope {
-/// use wolfram_library_link::{self as wll, wstp::Link, expr::{Expr, ExprKind, Number}};
+/// use wolfram_library_link::{self as wll, wstp::Link, expr::{Expr, ExprKind}};
 ///
 /// wll::export_wstp![add2(_)];
 ///
@@ -889,11 +889,11 @@ impl WstpFunction for fn(&mut Link) {
 ///     }
 ///
 ///     let x: i64 = match *args[0].kind() {
-///         ExprKind::Number(Number::Integer(value)) => value,
+///         ExprKind::Integer(value) => value,
 ///         _ => panic!("expected 1st argument to be Integer, got: {}", args[0])
 ///     };
 ///     let y: i64 = match *args[1].kind() {
-///         ExprKind::Number(Number::Integer(value)) => value,
+///         ExprKind::Integer(value) => value,
 ///         _ => panic!("expected 2nd argument to be Integer, got: {}", args[1])
 ///     };
 ///
@@ -963,9 +963,9 @@ fn get_args_list(link: &mut Link) -> Result<Vec<Expr>, String> {
         _ => return Err("expected List expression".to_owned()),
     };
 
-    if !list.has_head(&Symbol::new("System`List").unwrap()) {
+    if !list.has_head(&Symbol::new("System`List")) {
         return Err("expected List expression".to_owned());
     }
 
-    Ok(list.contents)
+    Ok(list.into_elements())
 }

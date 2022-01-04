@@ -50,7 +50,7 @@ it expected, or e.g. ``MyOtherPackage`foo``.
 #### The solution
 
 When calling a WSTP function that parses the incoming arguments using the
-[`Expr`][wl_expr_core::Expr] type in some way (e.g. by calling `Link::get_expr()`), use
+[`Expr`][crate::expr::Expr] type in some way (e.g. by calling `Link::get_expr()`), use
 the following idiom:
 
 ```wolfram

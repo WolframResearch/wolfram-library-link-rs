@@ -9,7 +9,7 @@ publish = false
 wolfram-library-link-sys       = { path = "../wolfram-library-link-sys" }
 
 wstp                = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wstp.git" }
-wl-expr-core        = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wl-expr-core.git" }
+wolfram-expr        = { git = "ssh://git@stash.wolfram.com:7999/~connorg/wolfram-expr.git" }
 
 once_cell = "1.8.0"
 backtrace = "^0.3.46"

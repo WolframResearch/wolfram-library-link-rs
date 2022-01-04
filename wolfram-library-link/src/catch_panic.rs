@@ -11,7 +11,7 @@ use std::time::Instant;
 use backtrace::Backtrace;
 use once_cell::sync::Lazy;
 
-use crate::expr::{Expr, Number, Symbol};
+use crate::expr::{Expr, Symbol};
 
 static CAUGHT_PANICS: Lazy<Mutex<HashMap<ThreadId, (Instant, CaughtPanic)>>> =
     Lazy::new(|| Default::default());
@@ -51,27 +51,25 @@ impl CaughtPanic {
         //     "SourceLocation" -> "...",
         //     "Backtrace" -> "..."
         // |>]
-        Expr::normal(Symbol::new("System`Failure").unwrap(), vec![
+        Expr::normal(Symbol::new("System`Failure"), vec![
             Expr::string("RustPanic"),
-            Expr::normal(Symbol::new("System`Association").unwrap(), vec![
-                Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+            Expr::normal(Symbol::new("System`Association"), vec![
+                Expr::normal(Symbol::new("System`Rule"), vec![
                     Expr::string("MessageTemplate"),
                     Expr::string("Rust LibraryLink function panic: `message`"),
                 ]),
-                Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+                Expr::normal(Symbol::new("System`Rule"), vec![
                     Expr::string("MessageParameters"),
-                    Expr::normal(Symbol::new("System`Association").unwrap(), vec![
-                        Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
-                            Expr::string("message"),
-                            message,
-                        ]),
-                    ]),
+                    Expr::normal(Symbol::new("System`Association"), vec![Expr::normal(
+                        Symbol::new("System`Rule"),
+                        vec![Expr::string("message"), message],
+                    )]),
                 ]),
-                Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+                Expr::normal(Symbol::new("System`Rule"), vec![
                     Expr::string("SourceLocation"),
                     location,
                 ]),
-                Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
+                Expr::normal(Symbol::new("System`Rule"), vec![
                     Expr::string("Backtrace"),
                     backtrace,
                 ]),
@@ -89,7 +87,7 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
     // This avoids calling `.resolve()` below, which can sometimes be very slow (100s of
     // millisends).
     if !should_show_backtrace() {
-        return Expr::normal(Symbol::new("System`Missing").unwrap(), vec![Expr::string(
+        return Expr::normal(Symbol::new("System`Missing"), vec![Expr::string(
             "NotEnabled",
         )]);
     }
@@ -134,28 +132,29 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
             //     'file_and_line,
             //     'name
             // }]
-            frames.push(Expr::normal(Symbol::new("System`Row").unwrap(), vec![
-                Expr::normal(Symbol::new("System`List").unwrap(), vec![
+            frames.push(Expr::normal(Symbol::new("System`Row"), vec![Expr::normal(
+                Symbol::new("System`List"),
+                vec![
                     Expr::string(index.to_string()),
                     Expr::string(": "),
                     Expr::string(file_and_line),
                     Expr::string(name),
-                ]),
-            ]));
+                ],
+            )]));
         }
 
-        let frames = Expr::normal(Symbol::new("System`List").unwrap(), frames);
+        let frames = Expr::normal(Symbol::new("System`List"), frames);
         // Set ImageSize so that the lines don't wordwrap for very long function names,
         // which makes the backtrace hard to read.
 
         // Column['frames, ImageSize -> {1200, Automatic}]
-        Expr::normal(Symbol::new("System`Column").unwrap(), vec![
+        Expr::normal(Symbol::new("System`Column"), vec![
             frames,
-            Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
-                Expr::symbol(Symbol::new("System`ImageSize").unwrap()),
-                Expr::normal(Symbol::new("System`List").unwrap(), vec![
-                    Expr::number(Number::Integer(1200)),
-                    Expr::symbol(Symbol::new("System`Automatic").unwrap()),
+            Expr::normal(Symbol::new("System`Rule"), vec![
+                Expr::symbol(Symbol::new("System`ImageSize")),
+                Expr::normal(Symbol::new("System`List"), vec![
+                    Expr::from(1200i64),
+                    Expr::symbol(Symbol::new("System`Automatic")),
                 ]),
             ]),
         ])
@@ -168,22 +167,22 @@ fn display_backtrace(bt: Option<Backtrace>) -> Expr {
     //     ": ",
     //     Style['bt, FontSize -> 13, FontFamily -> "Source Code Pro"]
     // }]
-    Expr::normal(Symbol::new("System`Row").unwrap(), vec![Expr::normal(
-        Symbol::new("System`List").unwrap(),
+    Expr::normal(Symbol::new("System`Row"), vec![Expr::normal(
+        Symbol::new("System`List"),
         vec![
-            Expr::normal(Symbol::new("System`Style").unwrap(), vec![
+            Expr::normal(Symbol::new("System`Style"), vec![
                 Expr::string("Backtrace"),
-                Expr::symbol(Symbol::new("System`Bold").unwrap()),
+                Expr::symbol(Symbol::new("System`Bold")),
             ]),
             Expr::string(": "),
-            Expr::normal(Symbol::new("System`Style").unwrap(), vec![
+            Expr::normal(Symbol::new("System`Style"), vec![
                 bt,
-                Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
-                    Expr::symbol(Symbol::new("System`FontSize").unwrap()),
-                    Expr::number(Number::Integer(13)),
+                Expr::normal(Symbol::new("System`Rule"), vec![
+                    Expr::symbol(Symbol::new("System`FontSize")),
+                    Expr::from(13i16),
                 ]),
-                Expr::normal(Symbol::new("System`Rule").unwrap(), vec![
-                    Expr::symbol(Symbol::new("System`FontFamily").unwrap()),
+                Expr::normal(Symbol::new("System`Rule"), vec![
+                    Expr::symbol(Symbol::new("System`FontFamily")),
                     Expr::string("Source Code Pro"),
                 ]),
             ]),

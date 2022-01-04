@@ -91,8 +91,6 @@ mod numeric_array;
 pub mod rtl;
 
 
-/// Wolfram Language expressions.
-//
 // Note: This is exported as doc(inline) so that it shows up in the 'Modules' section of
 //       the crate docs instead of in the 'Re-exports' section. This is to make way for
 //       the chance that in the future, wolfram-library-link will have it's own expression
@@ -100,7 +98,7 @@ pub mod rtl;
 //       used in the more general wolfram-expr crate (since NumericArray and Image depend
 //       on the Wolfram RTL, which isn't available in arbitrary Rust code).
 #[doc(inline)]
-pub use wl_expr_core as expr;
+pub use wolfram_expr as expr;
 pub use wolfram_library_link_sys as sys;
 pub use wstp;
 
@@ -159,10 +157,9 @@ pub fn try_evaluate(expr: &Expr) -> Result<Expr, String> {
         // Send an EvaluatePacket['expr].
         let _: () = link
             // .put_expr(&Expr! { EvaluatePacket['expr] })
-            .put_expr(&Expr::normal(
-                Symbol::new("System`EvaluatePacket").unwrap(),
-                vec![expr.clone()],
-            ))
+            .put_expr(&Expr::normal(Symbol::new("System`EvaluatePacket"), vec![
+                expr.clone(),
+            ]))
             .map_err(|e| e.to_string())?;
 
         let _: () = process_wstp_link(link)?;
@@ -171,11 +168,9 @@ pub fn try_evaluate(expr: &Expr) -> Result<Expr, String> {
 
         let returned_expr = match return_packet.kind() {
             ExprKind::Normal(normal) => {
-                debug_assert!(
-                    normal.has_head(&Symbol::new("System`ReturnPacket").unwrap())
-                );
-                debug_assert!(normal.contents.len() == 1);
-                normal.contents[0].clone()
+                debug_assert!(normal.has_head(&Symbol::new("System`ReturnPacket")));
+                debug_assert!(normal.elements().len() == 1);
+                normal.elements()[0].clone()
             },
             _ => {
                 return Err(format!(
@@ -617,8 +612,7 @@ macro_rules! export {
 ///
 /// ```
 /// # mod scope {
-/// # use wolfram_library_link::{export_wstp, wstp::Link};
-/// # use wl_expr_core::Expr;
+/// # use wolfram_library_link::{export_wstp, wstp::Link, expr::Expr};
 /// # fn square(args: Vec<Expr>) -> Expr { todo!() }
 /// export_wstp![square(_)];
 /// # }
@@ -629,8 +623,7 @@ macro_rules! export {
 ///
 /// ```
 /// # mod scope {
-/// # use wolfram_library_link::{export_wstp, wstp::Link};
-/// # use wl_expr_core::Expr;
+/// # use wolfram_library_link::{export_wstp, wstp::Link, expr::Expr};
 /// # fn square(args: Vec<Expr>) -> Expr { todo!() }
 /// export_wstp![square(_) as WL_square];
 /// # }
@@ -641,8 +634,7 @@ macro_rules! export {
 ///
 /// ```
 /// # mod scope {
-/// # use wolfram_library_link::{export_wstp, wstp::Link};
-/// # use wl_expr_core::Expr;
+/// # use wolfram_library_link::{export_wstp, wstp::Link, expr::Expr};
 /// # fn square(args: Vec<Expr>) { }
 /// # fn add_two(args: Vec<Expr>) { }
 /// export_wstp![
@@ -828,7 +820,7 @@ macro_rules! export_wstp {
 ///
 ///     let duration = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
 ///
-///     Expr::normal(Symbol::new("System`Quantity").unwrap(), vec![
+///     Expr::normal(Symbol::new("System`Quantity"), vec![
 ///         Expr::number(Number::real(duration.as_secs_f64())),
 ///         Expr::string("Seconds")
 ///     ])

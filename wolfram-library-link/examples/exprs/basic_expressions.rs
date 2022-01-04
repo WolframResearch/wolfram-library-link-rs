@@ -20,9 +20,7 @@ pub fn echo_arguments(args: Vec<Expr>) -> Expr {
 
     for arg in args {
         // Echo[<arg>]
-        wll::evaluate(&Expr::normal(Symbol::new("System`Echo").unwrap(), vec![
-            arg,
-        ]));
+        wll::evaluate(&Expr::normal(Symbol::new("System`Echo"), vec![arg]));
     }
 
     Expr::string(format!("finished echoing {} argument(s)", arg_count))

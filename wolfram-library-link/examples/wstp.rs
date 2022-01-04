@@ -183,10 +183,10 @@ fn expr_string_join(link: &mut Link) {
     let expr = link.get_expr().unwrap();
 
     let list = expr.try_normal().unwrap();
-    assert!(list.has_head(&Symbol::new("System`List").unwrap()));
+    assert!(list.has_head(&Symbol::new("System`List")));
 
     let mut buffer = String::new();
-    for elem in &list.contents {
+    for elem in list.elements() {
         match elem.kind() {
             ExprKind::String(str) => buffer.push_str(str),
             _ => panic!("expected String argument, got: {:?}", elem),
@@ -210,9 +210,9 @@ fn total(args: Vec<Expr>) -> Expr {
     let mut total = Number::Integer(0);
 
     for (index, arg) in args.into_iter().enumerate() {
-        let number = match arg.kind() {
-            ExprKind::Number(number) => *number,
-            _ => panic!(
+        let number = match arg.try_number() {
+            Some(number) => number,
+            None => panic!(
                 "expected argument at position {} to be a number, got {}",
                 // Add +1 to display using WL 1-based indexing.
                 index + 1,
