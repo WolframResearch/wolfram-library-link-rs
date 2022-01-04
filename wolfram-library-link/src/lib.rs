@@ -50,9 +50,9 @@
 //!
 //! ## Show backtrace when a panic occurs
 //!
-//! Functions backed by a WSTP [`Link`] (using [`export_wstp![]`][crate::export_wstp] will
+//! Functions backed by a WSTP [`Link`] (using [`export_wstp![]`][crate::export_wstp]) will
 //! automatically catch any
-//! Rust panic's which occur in the wrapped code, and return a [`Failure`][failure] object
+//! Rust panics that occur in the wrapped code, and return a [`Failure`][failure] object
 //! with the panic message and source file/line number. It also can optionally show the
 //! backtrace. This is configured by the `"LIBRARY_LINK_RUST_BACKTRACE"` environment
 //! variable. Enable it by evaluating:
