@@ -9,8 +9,8 @@ LibraryLink family of functions, specifically by
 
 #### Features
 
-  * Call Rust functions from the Wolfram language.
-  * Pass general Wolfram language expressions to and from Rust code.
+  * Efficiently call Rust functions from the Wolfram language.
+  * Pass arbitrary Wolfram language expressions to and from Rust code.
   * Evaluate Wolfram expressions from Rust code.
   * Check for and respond to Wolfram language aborts while in Rust code.
   * Safe API for the Wolfram Symbolic Transport Protocol, using the [`wstp`][wstp] crate.
@@ -24,8 +24,8 @@ safety, high-level features, and more.
 ## Quick Examples
 
 The examples in this section are written with two back-to-back code blocks. The first
-shows the Rust code, the second shows the Wolfram Language code needed to load and use the
-related Rust function(s).
+shows the Rust code, and the second shows the Wolfram Language code needed to load and use
+the related Rust function(s).
 
 #### Basic data types
 
@@ -129,5 +129,20 @@ environment variable. See [Configuring wolfram-app-discovery] (**TODO**) for det
 
 ## Related Links
 
+#### Related crates
+
+* [`wstp`] — bindings to the Wolfram Symbolic Transport Protocol, used for passing arbitrary
+  Wolfram expressions between programs.
+* [`wolfram-expr`] — native Rust representation of Wolfram Language expressions.
+* [`wolfram-app-discovery`] — utility for locating local installations of Wolfram
+  applications and the Wolfram Language.
+
+#### Related documentation
+
 * [*Wolfram LibraryLink User Guide*](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
 * [*Introducing C++ and the Wolfram Language with LibraryLinkUtilities*](https://community.wolfram.com/groups/-/m/t/2133603), a C++ wrapper around the *LibraryLink* API.
+
+## Developer Notes
+
+See [**Maintenance.md**](./docs/Maintenance.md) for instructions on how to keep `wolfram-library-link` up to date
+as new versions of the Wolfram Language are released.
