@@ -21,16 +21,12 @@ for the current platform. The new bindings will automatically be placed in the a
 sub-directory, and should be commited to this repository. The script will need to be run
 on each supported platform.
 
-TODO: Mention usage of `RUST_WOLFRAM_LOCATION` env variable used by wolfram-app-discovery
-to configure the Wolfram Engine (Wolfram Engine/Wolfram Desktop/Mathematica products)
-location to use.
-
 #### Example
 
 From the `RustLink` repository root directory:
 
 ```
-$ export RUST_WOLFRAM_LOCATION=/Applications/Wolfram/12.2.x/Mathematica-12.2.0.app/Contents/
+$ export WOLFRAM_APP_DIRECTORY=/Applications/Wolfram/12.2.x/Mathematica-12.2.0.app
 $ cargo make gen-bindings
 ```
 
