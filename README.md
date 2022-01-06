@@ -116,6 +116,19 @@ the Wolfram Language unit testing logic that loads and calls the test functions.
 [ref/LibraryDataType]: https://reference.wolfram.com/language/ref/LibraryDataType.html
 [ref/NumericArray]: https://reference.wolfram.com/language/ref/NumericArray.html
 
+## Building `wolfram-library-link`
+
+`wolfram-library-link` depends on the [`wstp`] crate for bindings to the Wolfram
+Symbolic Transport Protocol (WSTP). Building the `wstp` crate requires access to the
+WSTP SDK, which provides the WSTP static library. `wstp` uses [`wolfram-app-discovery`] to
+locate a local installation of the Wolfram Language that contains a suitable copy of the
+WSTP SDK. If the WSTP SDK cannot be located, `wstp` will fail to build, and consequently,
+so will `wolfram-library-link`.
+
+If you have installed the Wolfram Language to a location unknown to `wolfram-app-discovery`,
+you may specify the installed location manually by setting the `WOLFRAM_APP_DISCOVERY`
+environment variable. See [Configuring wolfram-app-discovery] (**TODO**) for details.
+
 ## Related Links
 
 * [*Wolfram LibraryLink User Guide*](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
