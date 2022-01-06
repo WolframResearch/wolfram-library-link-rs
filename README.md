@@ -13,8 +13,6 @@ LibraryLink family of functions, specifically by
   * Pass general Wolfram language expressions to and from Rust code.
   * Evaluate Wolfram expressions from Rust code.
   * Check for and respond to Wolfram language aborts while in Rust code.
-  * Seamlessly construct native Rust datastructures from expressions using the pattern
-    language via `derive(FromExpr)`.
   * Safe API for the Wolfram Symbolic Transport Protocol, using the [`wstp`][wstp] crate.
 
 Follow the [**Quick Start**](./docs/QuickStart.md) guide to begin using `wolfram-library-link`.
