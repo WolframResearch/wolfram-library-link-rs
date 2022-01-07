@@ -124,7 +124,7 @@ WSTP SDK. If the WSTP SDK cannot be located, `wstp` will fail to build, and cons
 so will `wolfram-library-link`.
 
 If you have installed the Wolfram Language to a location unknown to `wolfram-app-discovery`,
-you may specify the installed location manually by setting the `WOLFRAM_APP_DISCOVERY`
+you may specify the installed location manually by setting the `WOLFRAM_APP_DIRECTORY`
 environment variable. See [Configuring wolfram-app-discovery] (**TODO**) for details.
 
 ## Related Links
