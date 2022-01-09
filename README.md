@@ -144,6 +144,9 @@ environment variable. See [Configuring wolfram-app-discovery] (**TODO**) for det
 
 ## Developer Notes
 
+See [**Development.md**](./docs/Development.md) for instructions on how to perform common
+development tasks when contributing to the `wolfram-library-link` crate.
+
 See [**Maintenance.md**](./docs/Maintenance.md) for instructions on how to keep `wolfram-library-link` up to date
 as new versions of the Wolfram Language are released.
 
