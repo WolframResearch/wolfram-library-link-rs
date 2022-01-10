@@ -112,22 +112,24 @@ the Wolfram Language unit testing logic that loads and calls the test functions.
 [wolfram-app-discovery]: https://github.com/WolframResearch/wolfram-app-discovery-rs
 [library-link]: https://reference.wolfram.com/language/guide/LibraryLink.html
 
+[wad-configuration]: https://github.com/WolframResearch/wolfram-app-discovery-rs#configuration
+
 [ref/LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
 [ref/LibraryDataType]: https://reference.wolfram.com/language/ref/LibraryDataType.html
 [ref/NumericArray]: https://reference.wolfram.com/language/ref/NumericArray.html
 
 ## Building `wolfram-library-link`
 
-`wolfram-library-link` depends on the [`wstp`] crate for bindings to the Wolfram
+`wolfram-library-link` depends on the [`wstp`][wstp] crate for bindings to the Wolfram
 Symbolic Transport Protocol (WSTP). Building the `wstp` crate requires access to the
-WSTP SDK, which provides the WSTP static library. `wstp` uses [`wolfram-app-discovery`] to
+WSTP SDK, which provides the WSTP static library. `wstp` uses [`wolfram-app-discovery`][wolfram-app-discovery] to
 locate a local installation of the Wolfram Language that contains a suitable copy of the
 WSTP SDK. If the WSTP SDK cannot be located, `wstp` will fail to build, and consequently,
 so will `wolfram-library-link`.
 
 If you have installed the Wolfram Language to a location unknown to `wolfram-app-discovery`,
 you may specify the installed location manually by setting the `WOLFRAM_APP_DIRECTORY`
-environment variable. See [Configuring wolfram-app-discovery] (**TODO**) for details.
+environment variable. See [Configuring wolfram-app-discovery][wad-configuration] for details.
 
 ## Related Links
 
