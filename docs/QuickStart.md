@@ -146,4 +146,3 @@ square[5]
 ```
 
 [cargo-manifest-docs]: https://doc.rust-lang.org/cargo/reference/manifest.html
-[cargo-paclet]: https://stash.wolfram.com/users/connorg/repos/cargo-paclet/browse
