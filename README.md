@@ -107,7 +107,9 @@ contains test code for a more exhaustive range of functionality and behavior, an
 useful additional reference. The [RustLink/Tests/](./RustLink/Tests/) directory contains
 the Wolfram Language unit testing logic that loads and calls the test functions.
 
-[wstp]: https://stash.wolfram.com/users/connorg/repos/wstp/browse
+[wstp]: https://github.com/WolframResearch/wstp-rs
+[wolfram-expr]: https://github.com/WolframResearch/wolfram-expr-rs
+[wolfram-app-discovery]: https://github.com/WolframResearch/wolfram-app-discovery-rs
 [library-link]: https://reference.wolfram.com/language/guide/LibraryLink.html
 
 [ref/LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
@@ -131,11 +133,12 @@ environment variable. See [Configuring wolfram-app-discovery] (**TODO**) for det
 
 #### Related crates
 
-* [`wstp`] — bindings to the Wolfram Symbolic Transport Protocol, used for passing arbitrary
-  Wolfram expressions between programs.
-* [`wolfram-expr`] — native Rust representation of Wolfram Language expressions.
-* [`wolfram-app-discovery`] — utility for locating local installations of Wolfram
-  applications and the Wolfram Language.
+* [`wstp`][wstp] — bindings to the Wolfram Symbolic Transport Protocol, used for passing
+  arbitrary Wolfram expressions between programs.
+* [`wolfram-expr`][wolfram-expr] — native Rust representation of Wolfram Language
+  expressions.
+* [`wolfram-app-discovery`][wolfram-app-discovery] — utility for locating local
+  installations of Wolfram applications and the Wolfram Language.
 
 #### Related documentation
 
@@ -161,8 +164,9 @@ Licensed under either of
 
 at your option.
 
-Note: Licensing of the WSTP library linked by the [wstp] crate is covered by the terms of
-the [MathLink License Agreement](https://www.wolfram.com/legal/agreements/mathlink.html).
+Note: Licensing of the WSTP library linked by the [wstp][wstp] crate is covered by the
+terms of the
+[MathLink License Agreement](https://www.wolfram.com/legal/agreements/mathlink.html).
 
 ## Contribution
 

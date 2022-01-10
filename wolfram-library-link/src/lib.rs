@@ -17,7 +17,7 @@
 //!
 //! #### Related Links
 //!
-//! * [*LibraryLink for Rust Quick Start*][QuickStart] &nbsp;&nbsp;<small>[[TODO: Update to public link]]</small>
+//! * [*LibraryLink for Rust Quick Start*][QuickStart]
 //! * [*Wolfram LibraryLink User Guide*](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
 //!
 //! # Examples
@@ -46,7 +46,7 @@
 //! func[5]   (* Returns 25 *)
 //! ```
 //!
-//! [QuickStart]: https://stash.wolfram.com/users/connorg/repos/rustlink/browse/docs/QuickStart.md
+//! [QuickStart]: https://github.com/WolframResearch/wolfram-library-link-rs/blob/master/docs/QuickStart.md
 //!
 //! ## Show backtrace when a panic occurs
 //!
