@@ -1,19 +1,19 @@
-//! A safe and convenient wrapper around Wolfram [LibraryLink][library-link-guide].
+//! A safe and ergonomic wrapper around Wolfram [LibraryLink][library-link-guide].
 //!
-//! Wolfram LibraryLink is framework for authoring dynamic libraries that can be
+//! Wolfram LibraryLink is an interface for dynamic libraries that can be
 //! [dynamically loaded][library-function-load] by the [Wolfram Language][WL]. This crate
 //! provides idiomatic Rust bindings around the lower-level LibraryLink C interface.
 //!
 //! This library provides functionality for:
 //!
-//! * Calling Rust functions from the Wolfram Language.
-//! * Passing data efficiently to and from the Wolfram Language using native data types
+//! * Calling Rust functions from Wolfram code.
+//! * Passing data efficiently between Rust and Wolfram code using native data types
 //!   like [`NumericArray`] and [`Image`].
-//! * Passing arbitrary expressions to and from the Wolfram Language using
+//! * Passing arbitrary expressions between Rust and Wolfram code using
 //!   [`Expr`][struct@crate::Expr] and the [`export_wstp!`][crate::export_wstp]
 //!   macro.
-//! * Asynchronous events handled by the Wolfram Language, generated using a background
-//!   thread spawned via [`AsyncTaskObject`].
+//! * Asynchronous events handled by the Wolfram Language, using an [`AsyncTaskObject`]
+//!   background thread.
 //!
 //! #### Related Links
 //!
