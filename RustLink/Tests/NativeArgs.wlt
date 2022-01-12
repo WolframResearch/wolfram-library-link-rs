@@ -136,6 +136,23 @@ Test[
 	11
 ]
 
+(*---------*)
+(* Panics  *)
+(*---------*)
+
+Test[
+	LibraryFunctionLoad[
+		"liblibrary_tests",
+		"test_panic",
+		{},
+		"Void"
+	][]
+	,
+	LibraryFunctionError["LIBRARY_USER_ERROR", 1002]
+	,
+	{LibraryFunction::rterr}
+]
+
 (*----------------*)
 (* NumericArray's *)
 (*----------------*)

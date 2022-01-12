@@ -23,6 +23,7 @@ wll::export![
     // test_str(_);
     test_string(_);
     test_c_string(_);
+    test_panic();
 ];
 
 fn test_no_args() -> i64 {
@@ -92,6 +93,14 @@ fn test_string(string: String) -> String {
 
 fn test_c_string(string: CString) -> i64 {
     i64::try_from(string.as_bytes().len()).expect("string len usize overflows i64")
+}
+
+//-------
+// Panics
+//-------
+
+fn test_panic() {
+    panic!("this function panicked");
 }
 
 //======================================

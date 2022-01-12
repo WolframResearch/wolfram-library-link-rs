@@ -112,7 +112,7 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
     res: MArgument,
     func: F,
 ) -> c_uint {
-    use std::panic::{self, AssertUnwindSafe};
+    use std::panic::AssertUnwindSafe;
 
     // Initialize the library.
     if crate::initialize(lib_data).is_err() {
@@ -129,7 +129,7 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
     //        E.g. `fn foo(link: &'static mut str) { ... }`
     let args: &[MArgument] = std::slice::from_raw_parts(args, argc);
 
-    if panic::catch_unwind(AssertUnwindSafe(move || func.call(args, res))).is_err() {
+    if call_and_catch_panic(AssertUnwindSafe(move || func.call(args, res))).is_err() {
         // TODO: Store the panic into a "LAST_ERROR" static, and provide an accessor to
         //       get it from WL? E.g. RustLink`GetLastError[<optional func name>].
         return error_code::FAILED_WITH_PANIC;
