@@ -153,8 +153,8 @@ pub fn register_library_expression_manager(
 /// than 8 types can use `rtl::registerLibraryExpressionManager` directly as a workaround.
 ///
 /// TODO: Also store the "name" of this manager, and pass it to the user function?
-static SLOTS: Lazy<Mutex<[Option<fn(ManagedExpressionEvent)>; 4]>> =
-    Lazy::new(|| Mutex::new([None, None, None, None]));
+static SLOTS: Lazy<Mutex<[Option<fn(ManagedExpressionEvent)>; 8]>> =
+    Lazy::new(|| Mutex::new([None; 8]));
 
 fn register_using_next_slot(name: &str, manage_instance: fn(ManagedExpressionEvent)) {
     let name_cstr = CString::new(name).expect("failed to allocate C string");
