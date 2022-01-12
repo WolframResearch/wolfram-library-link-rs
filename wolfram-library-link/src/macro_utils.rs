@@ -9,6 +9,31 @@ use crate::{
     NativeFunction, WstpFunction,
 };
 
+/// Error codes returned by macro-generated wrapper code.
+///
+/// If no error occured, [`sys::LIBRARY_NO_ERROR`] is returned.
+///
+/// Using separate error codes for macro-generated code makes the source of the error
+/// clearer when something goes wrong in wrapper code.
+//
+// TODO: Make this module public somewhere and document these error code in export!,
+//       export_wstp!, and Overview.md.
+mod error_code {
+    use std::os::raw::c_uint;
+
+    // Chosen arbitrarily. Avoids clashing with `LIBRARY_FUNCTION_ERROR` and related
+    // error codes.
+    const OFFSET: c_uint = 1000;
+
+    /// A call to [initialize()][crate::initialize] failed.
+    pub const FAILED_TO_INIT: c_uint = OFFSET + 1;
+
+    /// The library code panicked.
+    //
+    // TODO: Wherever this code is set, also set a $LastError-like variable.
+    pub const FAILED_WITH_PANIC: c_uint = OFFSET + 2;
+}
+
 //==================
 // WSTP helpers
 //==================
@@ -22,7 +47,7 @@ unsafe fn call_wstp_link_wolfram_library_function<
 ) -> c_uint {
     // Initialize the library.
     if crate::initialize(libdata).is_err() {
-        return sys::LIBRARY_FUNCTION_ERROR;
+        return error_code::FAILED_TO_INIT;
     }
 
     let link = Link::unchecked_ref_cast_mut(&mut unsafe_link);
@@ -91,7 +116,7 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
 
     // Initialize the library.
     if crate::initialize(lib_data).is_err() {
-        return sys::LIBRARY_FUNCTION_ERROR;
+        return error_code::FAILED_TO_INIT;
     }
 
     let argc = match usize::try_from(argc) {
@@ -107,7 +132,7 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
     if panic::catch_unwind(AssertUnwindSafe(move || func.call(args, res))).is_err() {
         // TODO: Store the panic into a "LAST_ERROR" static, and provide an accessor to
         //       get it from WL? E.g. RustLink`GetLastError[<optional func name>].
-        return sys::LIBRARY_FUNCTION_ERROR;
+        return error_code::FAILED_WITH_PANIC;
     };
 
     sys::LIBRARY_NO_ERROR
