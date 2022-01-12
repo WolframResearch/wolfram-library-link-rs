@@ -126,6 +126,10 @@ pub fn register_library_expression_manager(
 /// case, because their is no way to pass a custom argument to the callback expected by
 /// registerLibraryExpressionManager().
 ///
+/// In both the (1.) and (2.) strategies, the solution is to create a single wrapper
+/// function for each user function, which is hard-coded to call the user function that
+/// it wraps.
+///
 /// The technique used here is a third strategy:
 ///
 /// 3. Store the user-provided function pointer into a static array, and, instead of
