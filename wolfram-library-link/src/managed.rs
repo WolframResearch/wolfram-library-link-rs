@@ -244,10 +244,7 @@ fn call_callback_in_slot(slot: usize, mode: sys::mbool, id: sys::mint) {
         _ => panic!("unknown managed expression 'mode' value: {}", mode),
     };
 
-    if let Err(_) = crate::catch_panic::call_and_catch_panic(|| user_fn(action)) {
-        // Do nothing.
-        // TODO: Set something like "RustLink`$LibraryLastError" with this panic?
-    }
+    user_fn(action)
 }
 
 macro_rules! def_slot_fn {
@@ -258,7 +255,14 @@ macro_rules! def_slot_fn {
             mode: sys::mbool,
             id: sys::mint,
         ) {
-            call_callback_in_slot($index, mode, id)
+            let result = crate::catch_panic::call_and_catch_panic(|| {
+                call_callback_in_slot($index, mode, id)
+            });
+
+            if let Err(_) = result {
+                // Do nothing.
+                // TODO: Set something like "RustLink`$LibraryLastError" with this panic?
+            }
         }
     };
 }
