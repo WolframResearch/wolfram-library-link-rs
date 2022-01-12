@@ -215,10 +215,10 @@ fn register_using_slot(name_cstr: CString, index: usize) -> Result<(), ()> {
 // Static slot_<X> functions
 //--------------------------
 
-fn call_using_slot<const SLOT: usize>(mode: sys::mbool, id: sys::mint) {
+fn call_callback_in_slot(slot: usize, mode: sys::mbool, id: sys::mint) {
     let slots = SLOTS.lock().unwrap();
 
-    let user_fn: fn(ManagedExpressionEvent) = match slots[SLOT] {
+    let user_fn: fn(ManagedExpressionEvent) = match slots[slot] {
         Some(func) => func,
         // TODO: Set something like "RustLink`$LibraryLastError" with a descriptive error?
         None => return,
@@ -254,7 +254,7 @@ macro_rules! def_slot_fn {
             mode: sys::mbool,
             id: sys::mint,
         ) {
-            call_using_slot::<$index>(mode, id)
+            call_callback_in_slot($index, mode, id)
         }
     };
 }
