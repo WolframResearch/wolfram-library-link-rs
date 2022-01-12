@@ -31,6 +31,7 @@ Scan[
 		"libbasic_types.dylib",
 		"libraw_wstp_function.dylib",
 		"libbasic_expressions.dylib",
+		"libmanaged_exprs.dylib",
 		"libstructured_expressions.dylib",
 		"libnumeric_arrays.dylib",
 		"libraw_librarylink_function.dylib",
