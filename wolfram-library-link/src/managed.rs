@@ -105,7 +105,7 @@ pub fn register_library_expression_manager(
 ///
 /// This specific problem is an instance of the more general problem of how to expose a
 /// user-provided function/closure (non-`extern "C"`) as-if it actually were an
-/// `extern "C"` function. one common strategy is to use a "trampline" function
+/// `extern "C"` function.
 ///
 /// There are two common ways we could concievably do this:
 ///
@@ -129,24 +129,24 @@ pub fn register_library_expression_manager(
 /// The technique used here is a third strategy:
 ///
 /// 3. Store the user-provided function pointer into a static array, and, instead of
-///    having a single `extern "C"` wrapper functions, have multiple `extern "C"` wrapper
+///    having a single `extern "C"` wrapper function, have multiple `extern "C"` wrapper
 ///    functions, each of which statically access a different index in the static array.
 ///
-///    By having different `extern "C"` functions that access different static data, we
+///    By using different `extern "C"` functions that access different static data, we
 ///    can essentially "fake" having an extra function argument that we control.
 ///
 ///    This depends on the observation that the callback function pointer is itself a
 ///    value we control.
 ///
 ///    This technique is limited by the fact that the static function pointers must be
-///    declared ahead of time, and so we must place a somewhat arbitrary limit on
-///    how many callbacks can be registered at a time.
+///    declared ahead of time (see `def_slot_fn!` below), and so practically there is a
+///    somewhat arbitrary limit on how many callbacks can be registered at a time.
 ///
-/// In our case, the *only* data we can register is the static function pointer itself;
-/// so strategy (3.) is the way to go.
+/// In our case, the *only* data we are able pass through the C API is the static function
+/// pointer we are registering; so strategy (3.) is the way to go.
 ///
-/// SLOTS has 8 elements, and we define 8 `extern "C" fn slot_<X>(..)` functions which
-/// access only the corresponding element in SLOTS.
+/// `SLOTS` has 8 elements, and we define 8 `extern "C" fn slot_<X>(..)` functions that
+/// access only the corresponding element in `SLOTS`.
 ///
 /// 8 was picked arbitrarily, on the assumption that 8 different registered types should
 /// be sufficient for the vast majority of libraries. Libraries that want to register more
@@ -171,6 +171,7 @@ fn register_using_next_slot(name: &str, manage_instance: fn(ManagedExpressionEve
         *slot = Some(manage_instance);
         register_using_slot(name_cstr, index)
     } else {
+        // Drop `slots` to avoid poisoning SLOTS when we panic.
         drop(slots);
         panic!("maxiumum number of library expression managers have been registered");
     };
