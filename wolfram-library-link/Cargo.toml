@@ -71,6 +71,11 @@ name = "basic_expressions"
 path = "examples/exprs/basic_expressions.rs"
 crate-type = ["cdylib"]
 
+[[example]]
+name = "managed_exprs"
+path = "examples/exprs/managed.rs"
+crate-type = ["cdylib"]
+
 #---------------
 # Async examples
 #---------------
