@@ -120,6 +120,7 @@ pub use self::{
 };
 
 
+
 use std::sync::Mutex;
 
 use once_cell::sync::Lazy;
@@ -130,6 +131,53 @@ use wstp::Link;
 pub(crate) use self::library_data::assert_main_thread;
 use crate::expr::{Expr, ExprKind, Symbol};
 
+//--------------------------------------
+// Re-exported items
+//--------------------------------------
+
+/// Designate an initialization function to run when this library is loaded via Wolfram
+/// LibraryLink.
+///
+/// `#[init]` can be applied to at most one function in a library.
+///
+/// The function annotated with `#[init]` will automatically call [`initialize()`].
+///
+/// LibraryLink libraries are not required to define an initialization function.
+///
+/// # Panics
+///
+/// Any panics thrown during the executation of `#[init]` will automatically be caught,
+/// and an error code will be returned to the Wolfram Kernel.
+///
+// TODO: Mention which error code specifically:
+//         `macro_utils::error_code::FAILED_WITH_PANIC`.
+///
+/// If the initialization function panics, the Kernel will prevent other LibraryLink
+/// functions exported from that library from being loaded.
+///
+/// # Example
+///
+/// Define an initialization function:
+///
+/// ```rust
+/// use wolfram_library_link as wll;
+///
+/// #[wll::init]
+/// fn init_my_library() {
+///     println!("library is now initialized");
+/// }
+/// ```
+///
+/// # Behavior
+///
+/// If a library exports a function [called `WolframLibrary_initialize()`][lib-init], that
+/// function will automatically be called by the Wolfram Kernel when the library is
+/// loaded.
+///
+/// `#[init]` works by generating a definition for `WolframLibrary_initialize()`.
+///
+/// [lib-init]: https://reference.wolfram.com/language/LibraryLink/tutorial/LibraryStructure.html#280210622
+pub use wll_proc_macros::init;
 
 const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 

@@ -27,7 +27,8 @@ static LIBRARY_DATA: OnceCell<Data> = OnceCell::new();
 
 /// Initialize static data for the current Wolfram library.
 ///
-/// This function should be called during the execution of the [`WolframLibrary_initialize()` hook][lib-init]
+/// This function should be called during the execution of the
+/// [`WolframLibrary_initialize()` hook][lib-init]
 /// provided by this library.
 ///
 /// This function initializes the lazy Wolfram Runtime Library bindings in the
@@ -42,7 +43,16 @@ static LIBRARY_DATA: OnceCell<Data> = OnceCell::new();
 /// * The call to `initialize()` must happen from the main Kernel thread. This is true for
 ///   all LibraryLink functions called directly by the Kernel.
 ///
+/// # Relation to [`#[init]`][crate::init]
+///
+/// If the [`#[init]`][crate::init] annotation is used to designate a library
+/// initialization function, `initialize()` will be called automatically.
+///
 /// # Example
+///
+/// *Note: Prefer to use [`#[init]`][crate::init] to designate an initialization function,
+/// instead of manually defining an unsafe initialization function as shown in this
+/// example.*
 ///
 /// When a dynamic library is loaded by the Wolfram Language (for example, via
 /// [`LibraryFunctionLoad`](https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html)),

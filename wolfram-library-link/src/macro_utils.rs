@@ -1,4 +1,4 @@
-use std::os::raw::c_uint;
+use std::os::raw::{c_int, c_uint};
 
 use wstp::{self, Link};
 
@@ -8,6 +8,31 @@ use crate::{
     sys::{self, MArgument, LIBRARY_NO_ERROR},
     NativeFunction, WstpFunction,
 };
+
+/// Error codes returned by macro-generated wrapper code.
+///
+/// If no error occured, [`sys::LIBRARY_NO_ERROR`] is returned.
+///
+/// Using separate error codes for macro-generated code makes the source of the error
+/// clearer when something goes wrong in wrapper code.
+//
+// TODO: Make this module public somewhere and document these error code in export!,
+//       export_wstp!, and Overview.md.
+mod error_code {
+    use std::os::raw::c_uint;
+
+    // Chosen arbitrarily. Avoids clashing with `LIBRARY_FUNCTION_ERROR` and related
+    // error codes.
+    const OFFSET: c_uint = 1000;
+
+    /// A call to [initialize()][crate::initialize] failed.
+    pub const FAILED_TO_INIT: c_uint = OFFSET + 1;
+
+    /// The library code panicked.
+    //
+    // TODO: Wherever this code is set, also set a $LastError-like variable.
+    pub const FAILED_WITH_PANIC: c_uint = OFFSET + 2;
+}
 
 //==================
 // WSTP helpers
@@ -22,7 +47,7 @@ unsafe fn call_wstp_link_wolfram_library_function<
 ) -> c_uint {
     // Initialize the library.
     if crate::initialize(libdata).is_err() {
-        return sys::LIBRARY_FUNCTION_ERROR;
+        return error_code::FAILED_TO_INIT;
     }
 
     let link = Link::unchecked_ref_cast_mut(&mut unsafe_link);
@@ -87,11 +112,11 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
     res: MArgument,
     func: F,
 ) -> c_uint {
-    use std::panic::{self, AssertUnwindSafe};
+    use std::panic::AssertUnwindSafe;
 
     // Initialize the library.
     if crate::initialize(lib_data).is_err() {
-        return sys::LIBRARY_FUNCTION_ERROR;
+        return error_code::FAILED_TO_INIT;
     }
 
     let argc = match usize::try_from(argc) {
@@ -104,10 +129,10 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
     //        E.g. `fn foo(link: &'static mut str) { ... }`
     let args: &[MArgument] = std::slice::from_raw_parts(args, argc);
 
-    if panic::catch_unwind(AssertUnwindSafe(move || func.call(args, res))).is_err() {
+    if call_and_catch_panic(AssertUnwindSafe(move || func.call(args, res))).is_err() {
         // TODO: Store the panic into a "LAST_ERROR" static, and provide an accessor to
         //       get it from WL? E.g. RustLink`GetLastError[<optional func name>].
-        return sys::LIBRARY_FUNCTION_ERROR;
+        return error_code::FAILED_WITH_PANIC;
     };
 
     sys::LIBRARY_NO_ERROR
@@ -310,5 +335,24 @@ impl LibraryLinkFunction {
         };
 
         Ok(code)
+    }
+}
+
+//======================================
+// Initialization
+//======================================
+
+pub unsafe fn init_with_user_function(
+    lib: sys::WolframLibraryData,
+    user_init_func: fn(),
+) -> c_int {
+    if let Err(()) = crate::initialize(lib) {
+        return error_code::FAILED_TO_INIT as c_int;
+    }
+
+    if let Err(_) = call_and_catch_panic(user_init_func) {
+        error_code::FAILED_WITH_PANIC as c_int
+    } else {
+        sys::LIBRARY_NO_ERROR as c_int
     }
 }

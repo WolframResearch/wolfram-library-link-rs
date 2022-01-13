@@ -95,13 +95,17 @@ pub fn register_library_expression_manager(
 ///
 /// `registerLibraryExpressionManager()` expects a callback function of the type:
 ///
-///     unsafe extern "C"(WolframLibraryData, mbool, mint)
+/// ```ignore
+///     unsafe extern "C" fn(WolframLibraryData, mbool, mint)
+/// ```
 ///
 /// however, for the purpose of providing a more ergonomic and safe wrapper to the user,
 /// we want the user to be able to pass `register_library_expression_manager()` a callback
 /// function with the type:
 ///
+/// ```ignore
 ///     fn(ManagedExpressionAction)
+/// ```
 ///
 /// This specific problem is an instance of the more general problem of how to expose a
 /// user-provided function/closure (non-`extern "C"`) as-if it actually were an
@@ -244,10 +248,7 @@ fn call_callback_in_slot(slot: usize, mode: sys::mbool, id: sys::mint) {
         _ => panic!("unknown managed expression 'mode' value: {}", mode),
     };
 
-    if let Err(_) = crate::catch_panic::call_and_catch_panic(|| user_fn(action)) {
-        // Do nothing.
-        // TODO: Set something like "RustLink`$LibraryLastError" with this panic?
-    }
+    user_fn(action)
 }
 
 macro_rules! def_slot_fn {
@@ -258,7 +259,14 @@ macro_rules! def_slot_fn {
             mode: sys::mbool,
             id: sys::mint,
         ) {
-            call_callback_in_slot($index, mode, id)
+            let result = crate::catch_panic::call_and_catch_panic(|| {
+                call_callback_in_slot($index, mode, id)
+            });
+
+            if let Err(_) = result {
+                // Do nothing.
+                // TODO: Set something like "RustLink`$LibraryLastError" with this panic?
+            }
         }
     };
 }
