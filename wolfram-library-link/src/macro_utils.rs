@@ -1,4 +1,4 @@
-use std::os::raw::c_uint;
+use std::os::raw::{c_int, c_uint};
 
 use wstp::{self, Link};
 
@@ -335,5 +335,24 @@ impl LibraryLinkFunction {
         };
 
         Ok(code)
+    }
+}
+
+//======================================
+// Initialization
+//======================================
+
+pub unsafe fn init_with_user_function(
+    lib: sys::WolframLibraryData,
+    user_init_func: fn(),
+) -> c_int {
+    if let Err(()) = crate::initialize(lib) {
+        return error_code::FAILED_TO_INIT as c_int;
+    }
+
+    if let Err(_) = call_and_catch_panic(user_init_func) {
+        error_code::FAILED_WITH_PANIC as c_int
+    } else {
+        sys::LIBRARY_NO_ERROR as c_int
     }
 }

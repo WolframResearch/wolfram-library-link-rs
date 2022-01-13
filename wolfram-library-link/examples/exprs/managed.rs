@@ -1,4 +1,4 @@
-use std::{collections::HashMap, os::raw::c_int, sync::Mutex};
+use std::{collections::HashMap, sync::Mutex};
 
 use once_cell::sync::Lazy;
 
@@ -6,7 +6,6 @@ use wolfram_library_link::{
     self as wll,
     expr::{Expr, ExprKind, Symbol},
     managed::{Id, ManagedExpressionEvent},
-    sys,
 };
 
 wll::export_wstp![
@@ -26,20 +25,12 @@ struct MyObject {
     value: String,
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn WolframLibrary_initialize(
-    lib: sys::WolframLibraryData,
-) -> c_int {
-    if let Err(()) = wll::initialize(lib) {
-        return 1;
-    }
-
+#[wll::init]
+fn init() {
     // Register `manage_instance()` as the handler for managed expressions created using:
     //
     //     CreateManagedLibraryExpression["my_object", _]
     wll::managed::register_library_expression_manager("my_object", manage_instance);
-
-    return 0;
 }
 
 fn manage_instance(action: ManagedExpressionEvent) {
