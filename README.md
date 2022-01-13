@@ -13,7 +13,7 @@ LibraryLink family of functions, specifically by
   * Pass arbitrary Wolfram expressions to and from Rust code.
   * Evaluate Wolfram expressions from Rust code.
   * Respond to Wolfram [abort][interrupts] requests while in Rust code.
-  * Safe API for the Wolfram Symbolic Transport Protocol, using the [`wstp`][wstp] crate.
+  * Safe API for the Wolfram Symbolic Transfer Protocol, using the [`wstp`][wstp] crate.
 
 Follow the [**Quick Start**](./docs/QuickStart.md) guide to begin using `wolfram-library-link`.
 
@@ -124,7 +124,7 @@ the Wolfram Language unit testing logic that loads and calls the test functions.
 ## Building `wolfram-library-link`
 
 `wolfram-library-link` depends on the [`wstp`][wstp] crate for bindings to the Wolfram
-Symbolic Transport Protocol (WSTP). Building the `wstp` crate requires access to the
+Symbolic Transfer Protocol (WSTP). Building the `wstp` crate requires access to the
 WSTP SDK, which provides the WSTP static library. `wstp` uses [`wolfram-app-discovery`][wolfram-app-discovery] to
 locate a local installation of the Wolfram Language that contains a suitable copy of the
 WSTP SDK. If the WSTP SDK cannot be located, `wstp` will fail to build, and consequently,
@@ -138,7 +138,7 @@ environment variable. See [Configuring wolfram-app-discovery][wad-configuration]
 
 #### Related crates
 
-* [`wstp`][wstp] — bindings to the Wolfram Symbolic Transport Protocol, used for passing
+* [`wstp`][wstp] — bindings to the Wolfram Symbolic Transfer Protocol, used for passing
   arbitrary Wolfram expressions between programs.
 * [`wolfram-expr`][wolfram-expr] — native Rust representation of Wolfram Language
   expressions.
