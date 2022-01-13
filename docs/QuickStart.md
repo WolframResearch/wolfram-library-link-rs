@@ -21,6 +21,11 @@ Instructions for installing and setting up Rust can be found at:
 
 &nbsp;&nbsp;&nbsp;&nbsp;<https://www.rust-lang.org/tools/install>
 
+If you do not have the Wolfram Language installed, instructions for downloading the
+free Wolfram Engine can be found at:
+
+&nbsp;&nbsp;&nbsp;&nbsp;<https://www.wolfram.com/engine>
+
 [ref/LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
 
 ## Create a new library crate
