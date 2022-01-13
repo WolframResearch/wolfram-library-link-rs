@@ -95,13 +95,17 @@ pub fn register_library_expression_manager(
 ///
 /// `registerLibraryExpressionManager()` expects a callback function of the type:
 ///
-///     unsafe extern "C"(WolframLibraryData, mbool, mint)
+/// ```ignore
+///     unsafe extern "C" fn(WolframLibraryData, mbool, mint)
+/// ```
 ///
 /// however, for the purpose of providing a more ergonomic and safe wrapper to the user,
 /// we want the user to be able to pass `register_library_expression_manager()` a callback
 /// function with the type:
 ///
+/// ```ignore
 ///     fn(ManagedExpressionAction)
+/// ```
 ///
 /// This specific problem is an instance of the more general problem of how to expose a
 /// user-provided function/closure (non-`extern "C"`) as-if it actually were an
