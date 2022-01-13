@@ -112,7 +112,7 @@ type Setter<T> = unsafe extern "C" fn(sys::MImage, *mut mint, mint, T) -> c_int;
 /// # Safety
 ///
 /// This trait is already implemented for all types that can legally be stored in an
-/// [`Image`] implementing this trait for other types may lead to undefined behavior.
+/// [`Image`]. Implementing this trait for other types may lead to undefined behavior.
 pub unsafe trait ImageData: Copy + Default {
     /// The type of the data that is *physically* stored in the [`Image`] buffer.
     ///
