@@ -1,5 +1,17 @@
 # wolfram-library-link
 
+[![Crates.io](https://img.shields.io/crates/v/wolfram-library-link.svg)](https://crates.io/crates/wolfram-library-link)
+![License](https://img.shields.io/crates/l/wolfram-library-link.svg)
+[![Documentation](https://docs.rs/wolfram-library-link/badge.svg)](https://docs.rs/wolfram-library-link)
+
+<h4>
+  <a href="https://docs.rs/wolfram-library-link">API Documentation</a>
+  <span> | </span>
+  <a href="https://github.com/WolframResearch/wolfram-library-link-rs/blob/master/docs/CHANGELOG.md">Changelog</a>
+  <span> | </span>
+  <a href="https://github.com/WolframResearch/wolfram-library-link-rs/blob/master/docs/CONTRIBUTING.md">Contributing</a>
+</h4>
+
 Bindings to the Wolfram LibraryLink interface, making it possible to call Rust code
 from the Wolfram Language.
 
@@ -179,4 +191,4 @@ Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
 dual licensed as above, without any additional terms or conditions.
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
+See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for more information.
