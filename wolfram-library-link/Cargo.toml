@@ -11,9 +11,9 @@ keywords = ["wolfram-library-link", "wstp", "wolfram", "wolfram-language", "wolf
 categories = ["external-ffi-bindings", "development-tools::ffi"]
 
 [dependencies]
-wolfram-library-link-macros    = { path = "./wolfram-library-link-macros" }
+wolfram-library-link-macros    = { version = "0.1.1", path = "./wolfram-library-link-macros" }
 
-wolfram-library-link-sys       = { path = "../wolfram-library-link-sys" }
+wolfram-library-link-sys       = { version = "0.1.1", path = "../wolfram-library-link-sys" }
 
 wstp         = "0.1.3"
 wolfram-expr = "0.1.0"
