@@ -49,6 +49,6 @@ caused by bugs present in early versions of `wolfram-app-discovery` and `wstp-sy
 <!-- This needs to be updated for each tagged release. -->
 [Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.1.2...HEAD
 
-[0.1.2]: https://github.com/WolframResearch/wolfram-library-link-rs/releases/tag/v0.1.2
-[0.1.1]: https://github.com/WolframResearch/wolfram-library-link-rs/releases/tag/v0.1.1
+[0.1.2]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/WolframResearch/wolfram-library-link-rs/releases/tag/v0.1.0
