@@ -4,6 +4,11 @@ version = "0.1.1"
 authors = ["Connor Gray <code@connorgray.com>"]
 license = "MIT OR Apache-2.0"
 edition = "2021"
+readme = "README.md"
+repository = "https://github.com/WolframResearch/wolfram-library-link-rs"
+description = "Bindings to Wolfram LibraryLink"
+keywords = ["wolfram-library-link", "wstp", "wolfram", "wolfram-language", "wolfram-engine"]
+categories = ["external-ffi-bindings", "development-tools::ffi"]
 
 [dependencies]
 wolfram-library-link-macros    = { path = "./wolfram-library-link-macros" }
