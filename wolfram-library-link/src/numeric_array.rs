@@ -60,7 +60,7 @@ assert_not_impl_any!(UninitNumericArray<i64>: Copy);
 // Traits
 //======================================
 
-/// Marker trait to denote the types that can be stored in a [`NumericArray`].
+/// Trait implemented for types that can be stored in a [`NumericArray`].
 ///
 /// Those types are:
 ///

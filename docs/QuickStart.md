@@ -21,6 +21,11 @@ Instructions for installing and setting up Rust can be found at:
 
 &nbsp;&nbsp;&nbsp;&nbsp;<https://www.rust-lang.org/tools/install>
 
+If you do not have the Wolfram Language installed, instructions for downloading the
+free Wolfram Engine can be found at:
+
+&nbsp;&nbsp;&nbsp;&nbsp;<https://www.wolfram.com/engine>
+
 [ref/LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
 
 ## Create a new library crate
@@ -109,7 +114,7 @@ This is all that is needed to expose a basic Rust function to the Wolfram Langua
 the *LibraryLink* interface. The `export![]` macro automatically generates an efficient
 wrapper function that uses the low-level interface expected by *LibraryLink*.
 
-## Building and using the library
+## Build and load the library
 
 Now that we've written a basic library, we can compile it from the command line by
 running:
