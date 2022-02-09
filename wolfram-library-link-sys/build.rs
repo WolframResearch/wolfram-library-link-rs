@@ -3,6 +3,23 @@ use std::path::PathBuf;
 use wolfram_app_discovery::WolframApp;
 
 fn main() {
+    // This crate is being built by docs.rs. Skip trying to locate a WolframApp.
+    // See: https://docs.rs/about/builds#detecting-docsrs
+    if std::env::var("DOCS_RS").is_ok() {
+        // Force docs.rs to use the bindings generated for this version / system.
+        let bindings_path = make_bindings_path("13.0.0", "MacOSX-x86-64");
+
+        // This environment variable is included using `env!()`. wstp-sys will fail to
+        // build if it is not set correctly.
+        println!(
+            "cargo:rustc-env=CRATE_WOLFRAM_LIBRARYLINK_SYS_BINDINGS={}",
+            bindings_path.display()
+        );
+
+        return;
+    }
+
+
     let app = WolframApp::try_default().expect("unable to locate WolframApp");
 
     //---------------------------------------------------------------
@@ -21,11 +38,7 @@ fn main() {
     // FIXME: Check that this file actually exists, and generate a nicer error if it
     //        doesn't.
 
-    // Path (relative to the crate root directory) to the bindings file.
-    let bindings_path = PathBuf::from("generated")
-        .join(&wolfram_version.to_string())
-        .join(system_id)
-        .join("LibraryLink_bindings.rs");
+    let bindings_path = make_bindings_path(&wolfram_version.to_string(), system_id);
 
     println!("cargo:rerun-if-changed={}", bindings_path.display());
 
@@ -57,4 +70,15 @@ fn main() {
         "cargo:rustc-env=CRATE_WOLFRAM_LIBRARYLINK_SYS_BINDINGS={}",
         bindings_path.display()
     );
+}
+
+/// Path (relative to the crate root directory) to the bindings file.
+fn make_bindings_path(wolfram_version: &str, system_id: &str) -> PathBuf {
+    // Path (relative to the crate root directory) to the bindings file.
+    let bindings_path = PathBuf::from("generated")
+        .join(wolfram_version)
+        .join(system_id)
+        .join("LibraryLink_bindings.rs");
+
+    bindings_path
 }

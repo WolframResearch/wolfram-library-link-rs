@@ -32,3 +32,14 @@ $ cargo make gen-bindings
 
 will re-generate the `wolfram-library-link-sys/generated/12.2.0/MacOSX-x86-64/LibraryLink_bindings.rs`
 file.
+
+## Updating build.rs bindings to use on docs.rs
+
+When `wolfram-library-link-sys` is built in the <docs.rs> environment, some special logic
+is required to work around the fact that no Wolfram applications are available to query
+for the Wolfram version number.
+
+At the moment, the [`wolfram-library-link-sys/build.rs`](../wolfram-library-link-sys/build.rs)
+file hard-codes a Wolfram version number and System ID to use as the bindings to display
+on docs.rs. That version number should be updated each time new `wolfram-library-link-sys`
+bindings are generated.
