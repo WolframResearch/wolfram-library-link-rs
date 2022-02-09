@@ -1,0 +1,17 @@
+[package]
+name = "wolfram-library-link-macros"
+version = "0.1.1"
+license = "MIT OR Apache-2.0"
+edition = "2021"
+repository = "https://github.com/WolframResearch/wolfram-library-link-rs"
+description = "Procedural macros used by wolfram-library-link"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.36"
+syn = { version = "1.0.85", features = ["full"] }
+quote = "1.0.14"

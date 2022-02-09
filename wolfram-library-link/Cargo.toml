@@ -4,14 +4,19 @@ version = "0.1.1"
 authors = ["Connor Gray <code@connorgray.com>"]
 license = "MIT OR Apache-2.0"
 edition = "2021"
+readme = "README.md"
+repository = "https://github.com/WolframResearch/wolfram-library-link-rs"
+description = "Bindings to Wolfram LibraryLink"
+keywords = ["wolfram-library-link", "wstp", "wolfram", "wolfram-language", "wolfram-engine"]
+categories = ["external-ffi-bindings", "development-tools::ffi"]
 
 [dependencies]
-wll-proc-macros                = { path = "./wll-proc-macros" }
+wolfram-library-link-macros    = { version = "0.1.1", path = "./wolfram-library-link-macros" }
 
-wolfram-library-link-sys       = { path = "../wolfram-library-link-sys" }
+wolfram-library-link-sys       = { version = "0.1.1", path = "../wolfram-library-link-sys" }
 
-wstp         = { git = "https://github.com/WolframResearch/wstp-rs" }
-wolfram-expr = { git = "https://github.com/WolframResearch/wolfram-expr-rs" }
+wstp         = "0.1.3"
+wolfram-expr = "0.1.0"
 
 once_cell = "1.8.0"
 backtrace = "^0.3.46"
