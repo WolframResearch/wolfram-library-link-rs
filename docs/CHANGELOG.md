@@ -29,16 +29,6 @@ Initial release. `wolfram-library-link-sys` was the only crate published in this
 due to a [docs.rs build failure](https://docs.rs/crate/wolfram-library-link-sys/0.1.0)
 caused by bugs present in early versions of `wolfram-app-discovery` and `wstp-sys`.
 
-### Added
-
-* [`Link`](https://docs.rs/wstp/0.1.3/wstp/struct.Link.html) struct that represents a
-  WSTP link endpoint, and provides methods for reading and writing symbolic Wolfram
-  Language expressions.
-
-* [`LinkServer`](https://docs.rs/wstp/0.1.3/wstp/struct.LinkServer.html) struct that
-  represents a WSTP TCPIP link server, which binds to a port, listens for incoming
-  connections, and creates a new `Link` for each connection.
-
 
 
 
