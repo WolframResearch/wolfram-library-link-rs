@@ -6,7 +6,7 @@ license = "MIT OR Apache-2.0"
 edition = "2021"
 
 [dependencies]
-wll-proc-macros                = { path = "./wll-proc-macros" }
+wolfram-library-link-macros    = { path = "./wolfram-library-link-macros" }
 
 wolfram-library-link-sys       = { path = "../wolfram-library-link-sys" }
 

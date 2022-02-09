@@ -177,7 +177,7 @@ use crate::expr::{Expr, ExprKind, Symbol};
 /// `#[init]` works by generating a definition for `WolframLibrary_initialize()`.
 ///
 /// [lib-init]: https://reference.wolfram.com/language/LibraryLink/tutorial/LibraryStructure.html#280210622
-pub use wll_proc_macros::init;
+pub use wolfram_library_link_macros::init;
 
 const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 
