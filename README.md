@@ -110,9 +110,9 @@ contains test code for a more exhaustive range of functionality and behavior, an
 useful additional reference. The [RustLink/Tests/](./RustLink/Tests/) directory contains
 the Wolfram Language unit testing logic that loads and calls the test functions.
 
-[wstp]: https://github.com/WolframResearch/wstp-rs
-[wolfram-expr]: https://github.com/WolframResearch/wolfram-expr-rs
-[wolfram-app-discovery]: https://github.com/WolframResearch/wolfram-app-discovery-rs
+[wstp]: https://crates.io/crates/wstp
+[wolfram-expr]: https://crates.io/crates/wolfram-expr
+[wolfram-app-discovery]: https://crates.io/crates/wolfram-app-discovery
 [library-link]: https://reference.wolfram.com/language/guide/LibraryLink.html
 
 [wad-configuration]: https://github.com/WolframResearch/wolfram-app-discovery-rs#configuration
