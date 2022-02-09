@@ -10,8 +10,8 @@ wolfram-library-link-macros    = { path = "./wolfram-library-link-macros" }
 
 wolfram-library-link-sys       = { path = "../wolfram-library-link-sys" }
 
-wstp         = { git = "https://github.com/WolframResearch/wstp-rs" }
-wolfram-expr = { git = "https://github.com/WolframResearch/wolfram-expr-rs" }
+wstp         = "0.1.3"
+wolfram-expr = "0.1.0"
 
 once_cell = "1.8.0"
 backtrace = "^0.3.46"

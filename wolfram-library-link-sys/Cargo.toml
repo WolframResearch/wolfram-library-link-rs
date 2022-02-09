@@ -16,4 +16,4 @@ categories = ["external-ffi-bindings", "development-tools::ffi"]
 [dependencies]
 
 [build-dependencies]
-wolfram-app-discovery = "0.1.1"
+wolfram-app-discovery = "0.1.2"
