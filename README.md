@@ -162,14 +162,6 @@ environment variable. See [Configuring wolfram-app-discovery][wad-configuration]
 * [*Wolfram LibraryLink User Guide*](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
 * [*Introducing C++ and the Wolfram Language with LibraryLinkUtilities*](https://community.wolfram.com/groups/-/m/t/2133603), a C++ wrapper around the *LibraryLink* API.
 
-## Developer Notes
-
-See [**Development.md**](./docs/Development.md) for instructions on how to perform common
-development tasks when contributing to the `wolfram-library-link` crate.
-
-See [**Maintenance.md**](./docs/Maintenance.md) for instructions on how to keep `wolfram-library-link` up to date
-as new versions of the Wolfram Language are released.
-
 ## License
 
 Licensed under either of
@@ -192,3 +184,11 @@ for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
 dual licensed as above, without any additional terms or conditions.
 
 See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for more information.
+
+### Developer Notes
+
+See [**Development.md**](./docs/Development.md) for instructions on how to perform common
+development tasks when contributing to the `wolfram-library-link` crate.
+
+See [**Maintenance.md**](./docs/Maintenance.md) for instructions on how to keep
+`wolfram-library-link` up to date as new versions of the Wolfram Language are released.
