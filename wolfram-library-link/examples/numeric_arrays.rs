@@ -1,10 +1,5 @@
 use wolfram_library_link::{self as wll, NumericArray, NumericArrayKind};
 
-wll::export![
-    sum_int_numeric_array(_);
-    sum_real_numeric_array(_);
-];
-
 /// This function is loaded by evaluating:
 ///
 /// ```wolfram
@@ -15,6 +10,7 @@ wll::export![
 ///     Integer
 /// ]
 /// ```
+#[wll::export]
 fn sum_int_numeric_array(na: &NumericArray) -> i64 {
     #[rustfmt::skip]
     let sum: i64 = match na.kind() {
@@ -43,6 +39,7 @@ fn sum_int_numeric_array(na: &NumericArray) -> i64 {
     sum
 }
 
+#[wll::export]
 fn sum_real_numeric_array(na: &NumericArray) -> f64 {
     let sum: f64 = match na.kind() {
         NumericArrayKind::Real32(na) => {

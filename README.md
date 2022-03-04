@@ -44,10 +44,9 @@ the related Rust function(s).
 #### Basic data types
 
 ```rust
-use wolfram_library_link::export;
+use wolfram_library_link as wll;
 
-export![square(_)];
-
+#[wll::export]
 fn square(x: i64) -> i64 {
     x * x
 }
@@ -67,10 +66,9 @@ Create an array of a million integers in Wolfram Language and compute the total 
 Rust:
 
 ```rust
-use wolfram_library_link::{export, NumericArray};
+use wolfram_library_link::{self as wll, NumericArray};
 
-export![total(_)];
-
+#[wll::export]
 fn total(array: &NumericArray<i64>) -> i64 {
     array.as_slice().into_iter().sum()
 }

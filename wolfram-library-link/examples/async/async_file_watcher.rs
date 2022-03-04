@@ -6,11 +6,10 @@ use std::{
 
 use wolfram_library_link::{self as wll, sys::mint, AsyncTaskObject, DataStore};
 
-wll::export![start_file_watcher(_, _)];
-
 /// Start an asynchronous task that will watch for modifications to a file.
 ///
 /// See `RustLink/Tests/AsyncExamples.wlt` for example usage of this function.
+#[wll::export]
 fn start_file_watcher(pause_interval_ms: mint, path: String) -> mint {
     let pause_interval_ms =
         u64::try_from(pause_interval_ms).expect("mint interval overflows u64");

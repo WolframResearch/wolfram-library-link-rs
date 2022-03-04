@@ -101,17 +101,16 @@ The `cargo new` command used to create the crate will have automatically created
 the following Rust code:
 
 ```rust
-use wolfram_library_link::export;
+use wolfram_library_link as wll;
 
-export![square(_)];
-
+#[wll::export]
 fn square(x: i64) -> i64 {
     x * x
 }
 ```
 
 This is all that is needed to expose a basic Rust function to the Wolfram Language via
-the *LibraryLink* interface. The `export![]` macro automatically generates an efficient
+the *LibraryLink* interface. The `#[export]` macro automatically generates an efficient
 wrapper function that uses the low-level interface expected by *LibraryLink*.
 
 ## Build and load the library

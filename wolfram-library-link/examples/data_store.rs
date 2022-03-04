@@ -17,8 +17,6 @@ use wolfram_library_link::{self as wll, DataStore, DataStoreNodeValue};
 // string_join()
 //--------------
 
-wll::export![string_join(_)];
-
 /// Join the strings in a `DataStore`.
 ///
 /// This function may be called by evaluating:
@@ -29,6 +27,7 @@ wll::export![string_join(_)];
 /// (* Evaluates to: "hello world" *)
 /// stringJoin[Developer`DataStore["hello", " ", "world"]]
 /// ```
+#[wll::export]
 fn string_join(store: DataStore) -> String {
     let mut buffer = String::new();
 

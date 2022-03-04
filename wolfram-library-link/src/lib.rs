@@ -29,8 +29,7 @@
 //! # mod scope {
 //! use wolfram_library_link::export;
 //!
-//! export![square(_)];
-//!
+//! #[export]
 //! fn square(x: i64) -> i64 {
 //!     x * x
 //! }
@@ -103,7 +102,7 @@ pub use wolfram_expr as expr;
 pub use wolfram_library_link_sys as sys;
 pub use wstp;
 
-// Used by the export!/export_wstp! macro implementations.
+// Used by the #[export]/export_wstp! macro implementations.
 #[doc(hidden)]
 pub use inventory;
 
@@ -179,127 +178,6 @@ use crate::expr::{Expr, ExprKind, Symbol};
 /// [lib-init]: https://reference.wolfram.com/language/LibraryLink/tutorial/LibraryStructure.html#280210622
 pub use wolfram_library_link_macros::init;
 
-const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
-
-//======================================
-// Callbacks to the Wolfram Kernel
-//======================================
-
-/// Evaluate `expr` by calling back into the Wolfram Kernel.
-///
-/// TODO: Specify and document what happens if the evaluation of `expr` triggers a
-///       kernel abort (such as a `Throw[]` in the code).
-pub fn evaluate(expr: &Expr) -> Expr {
-    match try_evaluate(expr) {
-        Ok(returned) => returned,
-        Err(msg) => panic!(
-            "evaluate(): evaluation of expression failed: {}: \n\texpression: {}",
-            msg, expr
-        ),
-    }
-}
-
-/// Attempt to evaluate `expr`, returning an error if a WSTP transport error occurred
-/// or evaluation failed.
-pub fn try_evaluate(expr: &Expr) -> Result<Expr, String> {
-    with_link(|link: &mut Link| {
-        // Send an EvaluatePacket['expr].
-        let _: () = link
-            // .put_expr(&Expr! { EvaluatePacket['expr] })
-            .put_expr(&Expr::normal(Symbol::new("System`EvaluatePacket"), vec![
-                expr.clone(),
-            ]))
-            .map_err(|e| e.to_string())?;
-
-        let _: () = process_wstp_link(link)?;
-
-        let return_packet: Expr = link.get_expr().map_err(|e| e.to_string())?;
-
-        let returned_expr = match return_packet.kind() {
-            ExprKind::Normal(normal) => {
-                debug_assert!(normal.has_head(&Symbol::new("System`ReturnPacket")));
-                debug_assert!(normal.elements().len() == 1);
-                normal.elements()[0].clone()
-            },
-            _ => {
-                return Err(format!(
-                    "try_evaluate(): returned expression was not ReturnPacket: {}",
-                    return_packet
-                ))
-            },
-        };
-
-        Ok(returned_expr)
-    })
-}
-
-/// Returns `true` if the user has requested that the current evaluation be aborted.
-///
-/// Programs should finish what they are doing and return control of this thread to
-/// to the kernel as quickly as possible. They should not exit the process or
-/// otherwise terminate execution, simply return up the call stack.
-///
-/// Within Rust functions exported using [`export!`][crate::export] or
-/// [`export_wstp!`][export_wstp!] (which generate a wrapper function that catches panics),
-/// `panic!()` can be used to quickly unwind the call stack to the appropriate place.
-/// Note that this will not work if the current library is built with
-/// `panic = "abort"`. See the [`panic`][panic-option] profile configuration option
-/// for more information.
-///
-/// [panic-option]: https://doc.rust-lang.org/cargo/reference/profiles.html#panic
-pub fn aborted() -> bool {
-    // TODO: Is this function thread safe? Can it be called from a thread other than the
-    //       one the LibraryLink wrapper was originally invoked from?
-    let val: mint = unsafe { rtl::AbortQ() };
-    // TODO: What values can `val` be?
-    val == 1
-}
-
-fn process_wstp_link(link: &mut Link) -> Result<(), String> {
-    assert_main_thread();
-
-    let raw_link = unsafe { link.raw_link() };
-
-    // Process the packet on the link.
-    let code: i32 = unsafe { rtl::processWSLINK(raw_link as *mut _) };
-
-    if code == 0 {
-        let error_message = link
-            .error_message()
-            .unwrap_or_else(|| "unknown error occurred on WSTP Link".into());
-
-        return Err(error_message);
-    }
-
-    Ok(())
-}
-
-/// Enforce exclusive access to the link returned by `getWSLINK()`.
-fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
-    assert_main_thread();
-
-    static LOCK: Lazy<Mutex<()>> = Lazy::new(|| Default::default());
-
-    let _guard = LOCK.lock().expect("failed to acquire LINK lock");
-
-    let lib = get_library_data().raw_library_data;
-
-    let unsafe_link: sys::WSLINK = unsafe { rtl::getWSLINK(lib) };
-    let mut unsafe_link: wstp::sys::WSLINK = unsafe_link as wstp::sys::WSLINK;
-
-    // Safety:
-    //      By using LOCK to ensure exclusive access to the `getWSLINK()` value within
-    //      safe code, we can be confident that this `&mut Link` will not alias with
-    //      other references to the underling link object.
-    let link = unsafe { Link::unchecked_ref_cast_mut(&mut unsafe_link) };
-
-    f(link)
-}
-
-#[inline]
-fn bool_from_mbool(boole: sys::mbool) -> bool {
-    boole != 0
-}
 
 /// Export the specified functions as native *LibraryLink* functions.
 ///
@@ -318,13 +196,13 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 ///
 /// # Syntax
 ///
-/// Export a function with a single argument.
+/// Export a function.
 ///
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::export;
+/// #[export]
 /// # fn square(x: i64) -> i64 { x }
-/// export![square(_)];
 /// # }
 /// ```
 ///
@@ -333,33 +211,10 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::export;
+/// #[export(name = "WL_square")]
 /// # fn square(x: i64) -> i64 { x }
-/// export![square(_) as WL_square];
 /// # }
 /// ```
-///
-/// Export multiple functions with one `export!` invocation. This is purely for convenience.
-///
-/// ```
-/// # mod scope {
-/// # use wolfram_library_link::export;
-/// # fn square(x: i64) -> i64 { x }
-/// # fn add_two(a: i64, b: i64) -> i64 { a + b }
-/// export![
-///     square(_);
-///     add_two(_, _) as AddTwo;
-/// ];
-/// # }
-/// ```
-///
-// TODO: Remove this feature? If someone wants to export the low-level function, they
-//       should do `pub use square::square as ...` instead of exposing the hidden module
-//       (which is just an implementation detail of `export![]` anyway).
-// Make public the `mod` module that contains the low-level wrapper function.
-//
-// ```
-// export![pub square(_)];
-// ```
 ///
 /// # Examples
 ///
@@ -370,11 +225,10 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::export;
+/// #[export]
 /// fn square(x: i64) -> i64 {
 ///     x * x
 /// }
-///
-/// export![square(_)];
 /// # }
 /// ```
 ///
@@ -387,11 +241,10 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::export;
+/// #[export]
 /// fn reverse_string(string: String) -> String {
 ///     string.chars().rev().collect()
 /// }
-///
-/// export![reverse_string(_)];
 /// # }
 /// ```
 ///
@@ -404,11 +257,10 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::export;
+/// #[export]
 /// fn times(a: f64, b: f64) -> f64 {
 ///     a * b
 /// }
-///
-/// export![times(_, _)];
 /// # }
 /// ```
 ///
@@ -423,11 +275,10 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::{export, NumericArray};
+/// #[export]
 /// fn total_i64(list: &NumericArray<i64>) -> i64 {
 ///     list.as_slice().into_iter().sum()
 /// }
-///
-/// export![total_i64(_)];
 /// # }
 /// ```
 ///
@@ -519,126 +370,128 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 ///
 /// [ref/NumericArray]: https://reference.wolfram.com/language/ref/NumericArray.html
 /// [ref/LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
+pub use wolfram_library_link_macros::export;
 
-// # Design constraints
-//
-// The current design of this macro is intended to accommodate the following constraints:
-//
-// 1. Support automatic generation of wrapper functions without using procedural macros,
-//    and with minimal code duplication. Procedural macros require external dependencies,
-//    and can significantly increase compile times.
-//
-//      1a. Don't depend on the entire function definition to be contained within the
-//          macro invocation, which leads to unergonomic rightward drift. E.g. don't
-//          require something like:
-//
-//          export![
-//              fn foo(x: i64) { ... }
-//          ]
-//
-//      1b. Don't depend on the entire function declaration to be repeated in the
-//          macro invocation. E.g. don't require:
-//
-//              fn foo(x: i64) -> i64 {...}
-//
-//              export![
-//                  fn foo(x: i64) -> i64;
-//              ]
-//
-// 2. The name of the function in Rust should match the name of the function that appears
-//    in the WL LibraryFunctionLoad call. E.g. needing different `foo` and `foo__wrapper`
-//    named must be avoided.
-//
-// To satisfy constraint 1, it's necessary to depend on the type system rather than
-// clever macro operations. This leads naturally to the creation of the `NativeFunction`
-// trait, which is implemented for all suitable `fn(..) -> _` types.
-//
-// Constraint 1b is unable to be met completely by the current implementation due to
-// limitations with Rust's coercion from `fn(A, B, ..) -> C {some_name}` to
-// `fn(A, B, ..) -> C`. The coercion requires that the number of parameters (`foo(_, _)`)
-// be made explicit, even if their types can be elided. If eliding the number of fn(..)
-// arguments were permitted, `export![foo]` could work.
-//
-// To satisfy constraint 2, this implementation creates a private module with the same
-// name as the function that is being wrapped. This is required because in Rust (as in
-// many languages), it's illegal for two different functions with the same name to exist
-// within the same module:
-//
-// ```
-// fn foo { ... }
-//
-// #[no_mangle]
-// pub extern "C" fn foo { ... } // Error: conflicts with the other foo()
-// ```
-//
-// This means that the export![] macro cannot simply generate a wrapper function
-// with the same name as the wrapped function, because they would conflict.
-//
-// However, it *is* legal for a module to contain a function and a child module that
-// have the same name. Because `#[no_mangle]` functions are exported from the crate no
-// matter where they appear in the module heirarchy, this offers an effective workaround
-// for the name clash issue, while satisfy constraint 2's requirement that the original
-// function and the wrapper function have the same name:
-//
-// ```
-// fn foo() { ... } // This does not conflict with the `foo` module.
-//
-// mod foo {
-//     #[no_mangle]
-//     pub extern "C" fn foo(..) { ... } // This does not conflict with super::foo().
-// }
-// ```
-#[macro_export]
-macro_rules! export {
-    ($vis:vis $name:ident($($argc:ty),*) as $exported:ident) => {
-        $vis mod $name {
-            #[no_mangle]
-            pub unsafe extern "C" fn $exported(
-                lib: $crate::sys::WolframLibraryData,
-                argc: $crate::sys::mint,
-                args: *mut $crate::sys::MArgument,
-                res: $crate::sys::MArgument,
-            ) -> std::os::raw::c_uint {
-                // Cast away the unique `fn(...) {some_name}` function type to get the
-                // generic `fn(...)` type.
-                // The number of `$argc` is required for type inference of the variadic
-                // `fn(..) -> _` type to work. See constraint 2a.
-                let func: fn($($argc),*) -> _ = super::$name;
+const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 
-                $crate::macro_utils::call_native_wolfram_library_function(
-                    lib,
-                    args,
-                    argc,
-                    res,
-                    func
-                )
-            }
-        }
+//======================================
+// Callbacks to the Wolfram Kernel
+//======================================
 
-        // Register this exported function.
-        $crate::inventory::submit! {
-            $crate::macro_utils::LibraryLinkFunction::Native {
-                name: stringify!($exported),
-                signature: || {
-                    let func: fn($($argc),*) -> _ = $name;
-                    let func: &dyn $crate::NativeFunction<'_> = &func;
+/// Evaluate `expr` by calling back into the Wolfram Kernel.
+///
+/// TODO: Specify and document what happens if the evaluation of `expr` triggers a
+///       kernel abort (such as a `Throw[]` in the code).
+pub fn evaluate(expr: &Expr) -> Expr {
+    match try_evaluate(expr) {
+        Ok(returned) => returned,
+        Err(msg) => panic!(
+            "evaluate(): evaluation of expression failed: {}: \n\texpression: {}",
+            msg, expr
+        ),
+    }
+}
 
-                    func.signature()
-                }
-            }
-        }
-    };
+/// Attempt to evaluate `expr`, returning an error if a WSTP transport error occurred
+/// or evaluation failed.
+pub fn try_evaluate(expr: &Expr) -> Result<Expr, String> {
+    with_link(|link: &mut Link| {
+        // Send an EvaluatePacket['expr].
+        let _: () = link
+            // .put_expr(&Expr! { EvaluatePacket['expr] })
+            .put_expr(&Expr::normal(Symbol::new("System`EvaluatePacket"), vec![
+                expr.clone(),
+            ]))
+            .map_err(|e| e.to_string())?;
 
-    // Convert export![name(..)] to export![name(..) as name].
-    ($vis:vis $name:ident($($argc:ty),*)) => {
-        $crate::export![$vis $name($($argc),*) as $name];
-    };
+        let _: () = process_wstp_link(link)?;
 
-    ($($vis:vis $name:ident($($argc:ty),*) $(as $exported:ident)?);* $(;)?) => {
-        $(
-            $crate::export![$vis $name($($argc),*) $(as $exported)?];
-        )*
-    };
+        let return_packet: Expr = link.get_expr().map_err(|e| e.to_string())?;
+
+        let returned_expr = match return_packet.kind() {
+            ExprKind::Normal(normal) => {
+                debug_assert!(normal.has_head(&Symbol::new("System`ReturnPacket")));
+                debug_assert!(normal.elements().len() == 1);
+                normal.elements()[0].clone()
+            },
+            _ => {
+                return Err(format!(
+                    "try_evaluate(): returned expression was not ReturnPacket: {}",
+                    return_packet
+                ))
+            },
+        };
+
+        Ok(returned_expr)
+    })
+}
+
+/// Returns `true` if the user has requested that the current evaluation be aborted.
+///
+/// Programs should finish what they are doing and return control of this thread to
+/// to the kernel as quickly as possible. They should not exit the process or
+/// otherwise terminate execution, simply return up the call stack.
+///
+/// Within Rust functions exported using [`#[export]`][crate::export] or
+/// [`export_wstp!`][export_wstp!] (which generate a wrapper function that catches panics),
+/// `panic!()` can be used to quickly unwind the call stack to the appropriate place.
+/// Note that this will not work if the current library is built with
+/// `panic = "abort"`. See the [`panic`][panic-option] profile configuration option
+/// for more information.
+///
+/// [panic-option]: https://doc.rust-lang.org/cargo/reference/profiles.html#panic
+pub fn aborted() -> bool {
+    // TODO: Is this function thread safe? Can it be called from a thread other than the
+    //       one the LibraryLink wrapper was originally invoked from?
+    let val: mint = unsafe { rtl::AbortQ() };
+    // TODO: What values can `val` be?
+    val == 1
+}
+
+fn process_wstp_link(link: &mut Link) -> Result<(), String> {
+    assert_main_thread();
+
+    let raw_link = unsafe { link.raw_link() };
+
+    // Process the packet on the link.
+    let code: i32 = unsafe { rtl::processWSLINK(raw_link as *mut _) };
+
+    if code == 0 {
+        let error_message = link
+            .error_message()
+            .unwrap_or_else(|| "unknown error occurred on WSTP Link".into());
+
+        return Err(error_message);
+    }
+
+    Ok(())
+}
+
+/// Enforce exclusive access to the link returned by `getWSLINK()`.
+fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
+    assert_main_thread();
+
+    static LOCK: Lazy<Mutex<()>> = Lazy::new(|| Default::default());
+
+    let _guard = LOCK.lock().expect("failed to acquire LINK lock");
+
+    let lib = get_library_data().raw_library_data;
+
+    let unsafe_link: sys::WSLINK = unsafe { rtl::getWSLINK(lib) };
+    let mut unsafe_link: wstp::sys::WSLINK = unsafe_link as wstp::sys::WSLINK;
+
+    // Safety:
+    //      By using LOCK to ensure exclusive access to the `getWSLINK()` value within
+    //      safe code, we can be confident that this `&mut Link` will not alias with
+    //      other references to the underling link object.
+    let link = unsafe { Link::unchecked_ref_cast_mut(&mut unsafe_link) };
+
+    f(link)
+}
+
+#[inline]
+fn bool_from_mbool(boole: sys::mbool) -> bool {
+    boole != 0
 }
 
 /// Export the specified functions as native *LibraryLink* WSTP functions.
@@ -693,13 +546,6 @@ macro_rules! export {
 /// # }
 /// ```
 ///
-// TODO: Remove this feature? If someone wants to export the low-level function, they
-//       should do `pub use square::square as ...` instead of exposing the hidden module
-//       (which is just an implementation detail of `export![]` anyway).
-// Make public the `mod` module that contains the low-level wrapper function.
-//
-// ```
-// export![pub square(_)];
 // ```
 ///
 /// # Examples
@@ -817,7 +663,7 @@ macro_rules! export_wstp {
 /// Generate and export a "loader" function, which returns an Association containing the
 /// names and loaded forms of all functions exported by this library.
 ///
-/// All functions exported by the [`export!`] and [`export_wstp!`] macros will
+/// All functions exported by the [`#[export]`][crate::export] and [`export_wstp!`] macros will
 /// automatically be included in the Association returned by this function.
 ///
 /// # Syntax
@@ -837,7 +683,7 @@ macro_rules! export_wstp {
 /// * `flat_total_i64`
 /// * `time_since_epoch`
 ///
-/// These functions are exported from the library using the [`export!`] and
+/// These functions are exported from the library using the [`#[export]`][crate::export] and
 /// [`export_wstp!`] macros. This makes them loadable using
 /// [`LibraryFunctionLoad`][ref/LibraryFunctionLoad]<sub>WL</sub>.
 ///
@@ -848,16 +694,14 @@ macro_rules! export_wstp {
 ///
 /// wll::generate_loader![load_my_library_functions];
 ///
-/// wll::export![
-///     add2(_, _);
-///     flat_total_i64(_);
-/// ];
 /// wll::export_wstp![time_since_epoch(_)];
 ///
+/// #[wll::export]
 /// fn add2(x: i64, y: i64) -> i64 {
 ///     x + y
 /// }
 ///
+/// #[wll::export]
 /// fn flat_total_i64(list: &NumericArray<i64>) -> i64 {
 ///     list.as_slice().into_iter().sum()
 /// }
@@ -936,7 +780,7 @@ macro_rules! export_wstp {
 #[macro_export]
 macro_rules! generate_loader {
     ($name:ident) => {
-        // TODO: Use this anonymous `const` trick in export! and export_wstp! too.
+        // TODO: Use this anonymous `const` trick in #[export] and export_wstp! too.
         const _: () = {
             #[no_mangle]
             pub unsafe extern "C" fn $name(

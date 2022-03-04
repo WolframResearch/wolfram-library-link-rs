@@ -16,7 +16,7 @@ use crate::{
 /// Using separate error codes for macro-generated code makes the source of the error
 /// clearer when something goes wrong in wrapper code.
 //
-// TODO: Make this module public somewhere and document these error code in export!,
+// TODO: Make this module public somewhere and document these error code in #[export],
 //       export_wstp!, and Overview.md.
 mod error_code {
     use std::os::raw::c_uint;
@@ -102,7 +102,7 @@ fn write_panic_failure_to_link(
 }
 
 //======================================
-// export! (NativeFunction) and export_wstp! (WstpFunction) helpers
+// #[export] (NativeFunction) and export_wstp! (WstpFunction) helpers
 //======================================
 
 pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(

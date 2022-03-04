@@ -6,10 +6,7 @@ fn from_slice<T: wll::NumericArrayType>(slice: &[T]) -> NumericArray<T> {
     NumericArray::from_slice(slice)
 }
 
-wll::export![
-    test_na_conversions();
-];
-
+#[wll::export]
 fn test_na_conversions() {
     //
     // i16 -> i8 conversions

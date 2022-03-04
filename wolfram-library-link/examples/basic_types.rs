@@ -21,40 +21,36 @@ wll::generate_loader!(load_basic_types_functions);
 /// square = LibraryFunctionLoad["libbasic_types", "square", {Integer}, Integer];
 /// square[2]
 /// ```
+//
+// Export the `square` function via LibraryLink. This will generate a "wrapper" function
+// that correctly implements the lightweight LibraryLink <=> Rust conversion.
+#[wll::export]
 fn square(x: i64) -> i64 {
     x * x
 }
-
-// Export the `square` function via LibraryLink. This will generate a "wrapper" function
-// that correctly implements the lightweight LibraryLink <=> Rust conversion.
-wll::export![square(_)];
 
 //-----------------
 // reverse_string()
 //-----------------
 
+#[wll::export]
 fn reverse_string(string: String) -> String {
     string.chars().rev().collect()
 }
-
-wll::export![reverse_string(_)];
 
 //------------------
 // add2() and add3()
 //------------------
 
+#[wll::export]
 fn add2(x: i64, y: i64) -> i64 {
     x + y
 }
 
+#[wll::export]
 fn add3(x: i64, y: i64, z: i64) -> i64 {
     x + y + z
 }
-
-wll::export![
-    add2(_, _);
-    add3(_, _, _);
-];
 
 //======================================
 // NumericArray's
@@ -76,11 +72,10 @@ wll::export![
 //
 // total[NumericArray[Range[100], "Integer64"]]
 // ```
+#[wll::export]
 fn total_i64(list: &NumericArray<i64>) -> i64 {
     list.as_slice().into_iter().sum()
 }
-
-wll::export![total_i64(_)];
 
 //---------------
 // positive_i64()
@@ -89,6 +84,7 @@ wll::export![total_i64(_)];
 /// Get the sign of every element in `list` as a numeric array of 0's and 1's.
 ///
 /// The returned array will have the same dimensions as `list`.
+#[wll::export]
 fn positive_i64(list: &NumericArray<i64>) -> NumericArray<u8> {
     let mut bools: UninitNumericArray<u8> =
         UninitNumericArray::from_dimensions(list.dimensions());
@@ -101,8 +97,6 @@ fn positive_i64(list: &NumericArray<i64>) -> NumericArray<u8> {
 
     unsafe { bools.assume_init() }
 }
-
-wll::export![positive_i64(_)];
 
 //======================================
 // get_random_number()
@@ -119,6 +113,7 @@ wll::export![positive_i64(_)];
 // ];
 // randomNumber[]
 // ```
+#[wll::export(name = "xkcd_get_random_number")]
 fn get_random_number() -> i64 {
     // chosen by fair dice roll.
     // guaranteed to be random.
@@ -126,12 +121,11 @@ fn get_random_number() -> i64 {
     4
 }
 
-wll::export![get_random_number() as xkcd_get_random_number];
-
 //======================================
 // raw_square()
 //======================================
 
+#[wll::export]
 fn raw_square(args: &[wll::sys::MArgument], ret: wll::sys::MArgument) {
     if args.len() != 1 {
         panic!("unexpected number of arguments");
@@ -143,5 +137,3 @@ fn raw_square(args: &[wll::sys::MArgument], ret: wll::sys::MArgument) {
         *ret.integer = x * x;
     }
 }
-
-wll::export![raw_square(_, _)];
