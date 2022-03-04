@@ -15,7 +15,7 @@ wolfram-library-link-macros    = { version = "0.1.2", path = "./wolfram-library-
 
 wolfram-library-link-sys       = { version = "0.1.2", path = "../wolfram-library-link-sys" }
 
-wstp         = "0.1.3"
+wstp         = "0.2.1"
 wolfram-expr = "0.1.0"
 
 once_cell = "1.8.0"
