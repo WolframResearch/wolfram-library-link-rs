@@ -89,7 +89,10 @@ pub(crate) fn export(
     // Parse the `#[export(<attrs>)]` attribute arguments.
     //----------------------------------------------------
 
-    let ExportArgs { exported_name } = parse_export_attribute_args(attrs)?;
+    let ExportArgs {
+        use_wstp,
+        exported_name,
+    } = parse_export_attribute_args(attrs)?;
 
     //--------------------------------------------------------------------
     // Validate that this attribute was applied to a `fn(..) { .. }` item.
@@ -135,12 +138,35 @@ pub(crate) fn export(
     };
 
     let params = func.sig.inputs.clone();
-    let params = vec![quote! { _ }; params.len()];
+
+    let wrapper = if use_wstp {
+        export_wstp_function(&name, &exported_name, params)
+    } else {
+        export_native_function(&name, &exported_name, params.len())
+    };
 
     let output = quote! {
         // Include the users function in the output unchanged.
         #func
 
+        #wrapper
+    };
+
+    Ok(output)
+}
+
+//--------------------------------------
+// #[export]: export NativeFunction
+//--------------------------------------
+
+fn export_native_function(
+    name: &Ident,
+    exported_name: &Ident,
+    parameter_count: usize,
+) -> TokenStream2 {
+    let params = vec![quote! { _ }; parameter_count];
+
+    quote! {
         mod #name {
             #[no_mangle]
             pub unsafe extern "C" fn #exported_name(
@@ -175,22 +201,86 @@ pub(crate) fn export(
                 }
             }
         }
-    };
-
-    Ok(output)
+    }
 }
+
+//--------------------------------------
+// #[export(wstp): export WstpFunction
+//--------------------------------------
+
+fn export_wstp_function(
+    name: &Ident,
+    exported_name: &Ident,
+    parameter_tys: syn::punctuated::Punctuated<syn::FnArg, syn::token::Comma>,
+) -> TokenStream2 {
+    // let params = vec![quote! { _ }; parameter_count];
+
+    quote! {
+        mod #name {
+            // Ensure that types imported into the enclosing parent module can be used in
+            // the expansion of $argc. Always `Link` or `Vec<Expr>` at the moment.
+            use super::*;
+
+            #[no_mangle]
+            pub unsafe extern "C" fn #exported_name(
+                lib: ::wolfram_library_link::sys::WolframLibraryData,
+                raw_link: ::wolfram_library_link::wstp::sys::WSLINK,
+            ) -> std::os::raw::c_uint {
+                // Cast away the unique `fn(...) {some_name}` function type to get the
+                // generic `fn(...)` type.
+                // The number of arguments is required for type inference of the variadic
+                // `fn(..) -> _` type to work. See constraint 2a.
+                let func: fn(#parameter_tys) -> _ = super::#name;
+
+                // TODO: Why does this code work:
+                //   let func: fn(&mut _) = super::$name;
+                // but this does not:
+                //   let func: fn(_) = super::$name;
+
+                ::wolfram_library_link::macro_utils::call_wstp_wolfram_library_function(
+                    lib,
+                    raw_link,
+                    func
+                )
+            }
+
+            // Register this exported function.
+            ::wolfram_library_link::inventory::submit! {
+                ::wolfram_library_link::macro_utils::LibraryLinkFunction::Wstp { name: stringify!(#exported_name) }
+            }
+        }
+    }
+}
+
+//======================================
+// Parse `#[export(<attrs>)]` arguments
+//======================================
 
 /// Attribute arguments recognized by the `#[export(...)]` macro.
 struct ExportArgs {
+    /// `#[export(wstp)]`
+    use_wstp: bool,
+    /// `#[export(name = "...")]`
     exported_name: Option<Ident>,
 }
 
 fn parse_export_attribute_args(attrs: syn::AttributeArgs) -> Result<ExportArgs, Error> {
+    let mut use_wstp = false;
     let mut exported_name: Option<Ident> = None;
 
     for attr in attrs {
         match attr {
             NestedMeta::Meta(ref meta) => match meta {
+                Meta::Path(path) if path.is_ident("wstp") => {
+                    if use_wstp {
+                        return Err(Error::new(
+                            attr.span(),
+                            "duplicate export `wstp` attribute argument",
+                        ));
+                    }
+
+                    use_wstp = true;
+                },
                 Meta::List(_) | Meta::Path(_) => {
                     return Err(Error::new(
                         attr.span(),
@@ -243,5 +333,8 @@ fn parse_export_attribute_args(attrs: syn::AttributeArgs) -> Result<ExportArgs, 
         }
     }
 
-    Ok(ExportArgs { exported_name })
+    Ok(ExportArgs {
+        use_wstp,
+        exported_name,
+    })
 }

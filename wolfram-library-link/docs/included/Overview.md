@@ -78,8 +78,7 @@ will be returned to the Wolfram Language.
 # mod scope {
 use wolfram_library_link::{self as wll, wstp::Link};
 
-wll::export_wstp![sqrt];
-
+#[wll::export(wstp)]
 fn sqrt(link: &mut Link) {
     let arg_count = link.test_head("List").unwrap();
 

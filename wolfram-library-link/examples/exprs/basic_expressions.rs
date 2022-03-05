@@ -3,8 +3,6 @@ use wolfram_library_link::{
     expr::{Expr, Symbol},
 };
 
-wll::export_wstp![echo_arguments(_)];
-
 /// This function is loaded by evaluating:
 ///
 /// ```wolfram
@@ -15,6 +13,7 @@ wll::export_wstp![echo_arguments(_)];
 ///     LinkObject
 /// ]
 /// ```
+#[wll::export(wstp)]
 pub fn echo_arguments(args: Vec<Expr>) -> Expr {
     let arg_count = args.len();
 

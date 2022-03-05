@@ -10,7 +10,7 @@
 //! * Passing data efficiently between Rust and Wolfram code using native data types
 //!   like [`NumericArray`] and [`Image`].
 //! * Passing arbitrary expressions between Rust and Wolfram code using
-//!   [`Expr`][struct@crate::Expr] and the [`export_wstp!`][crate::export_wstp]
+//!   [`Expr`][struct@crate::Expr] and the [`export(wstp)`][crate::export#exportwstp]
 //!   macro.
 //! * Asynchronous events handled by the Wolfram Language, using an [`AsyncTaskObject`]
 //!   background thread.
@@ -49,7 +49,7 @@
 //!
 //! ## Show backtrace when a panic occurs
 //!
-//! Functions backed by a WSTP [`Link`] (using [`export_wstp![]`][crate::export_wstp]) will
+//! Functions backed by a WSTP [`Link`] (using [`#[export(wstp)]`][crate::export#exportwstp]) will
 //! automatically catch any
 //! Rust panics that occur in the wrapped code, and return a [`Failure`][failure] object
 //! with the panic message and source file/line number. It also can optionally show the
@@ -102,7 +102,7 @@ pub use wolfram_expr as expr;
 pub use wolfram_library_link_sys as sys;
 pub use wstp;
 
-// Used by the #[export]/export_wstp! macro implementations.
+// Used by the #[export]/#[export(wstp)] macro implementations.
 #[doc(hidden)]
 pub use inventory;
 
@@ -370,6 +370,108 @@ pub use wolfram_library_link_macros::init;
 ///
 /// [ref/NumericArray]: https://reference.wolfram.com/language/ref/NumericArray.html
 /// [ref/LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
+///
+///
+///
+/// <br/><br/><br/>
+///
+/// # `#[export(wstp)]`
+///
+/// Export the specified functions as native *LibraryLink* WSTP functions.
+///
+/// To be exported by this macro, the specified function(s) must implement
+/// [`WstpFunction`].
+///
+/// Functions exported using this macro will automatically:
+///
+/// * Call [`initialize()`][crate::initialize] to initialize this library.
+/// * Catch any panics that occur.
+///   - If a panic does occur, it will be returned as a [`Failure[...]`][ref/Failure]
+///     expression.
+///
+/// [ref/Failure]: https://reference.wolfram.com/language/ref/Failure.html
+///
+/// # Syntax
+///
+/// Export a LibraryLink WSTP function.
+///
+/// ```
+/// # mod scope {
+/// # use wolfram_library_link::{export, wstp::Link, expr::Expr};
+/// #[export(wstp)]
+/// # fn square(args: Vec<Expr>) -> Expr { todo!() }
+/// # }
+/// ```
+///
+/// Export a LibraryLink WSTP function using the specified low-level shared library symbol
+/// name.
+///
+/// ```
+/// # mod scope {
+/// # use wolfram_library_link::{export, wstp::Link, expr::Expr};
+/// #[export(wstp, name = "WL_square")]
+/// # fn square(args: Vec<Expr>) -> Expr { todo!() }
+/// # }
+/// ```
+///
+/// # Examples
+///
+/// ##### WSTP function that squares a single integer argument:
+///
+/// ```
+/// # mod scope {
+/// use wolfram_library_link::{export, wstp::Link};
+///
+/// #[export(wstp)]
+/// fn square_wstp(link: &mut Link) {
+///     // Get the number of elements in the arguments list.
+///     let arg_count = link.test_head("List").unwrap();
+///
+///     if arg_count != 1 {
+///         panic!("square_wstp: expected to get a single argument");
+///     }
+///
+///     // Get the argument value.
+///     let x = link.get_i64().expect("expected Integer argument");
+///
+///     // Write the return value.
+///     link.put_i64(x * x).unwrap();
+/// }
+/// # }
+/// ```
+///
+/// ```wolfram
+/// LibraryFunctionLoad["...", "square_wstp", LinkObject, LinkObject]
+/// ```
+///
+/// ##### WSTP function that computes the sum of a variable number of arguments:
+///
+/// ```
+/// # mod scope {
+/// use wolfram_library_link::{export, wstp::Link};
+///
+/// #[export(wstp)]
+/// fn total_args_i64(link: &mut Link) {
+///     // Check that we recieved a functions arguments list, and get the number of arguments.
+///     let arg_count: usize = link.test_head("List").unwrap();
+///
+///     let mut total: i64 = 0;
+///
+///     // Get each argument, assuming that they are all integers, and add it to the total.
+///     for _ in 0..arg_count {
+///         let term = link.get_i64().expect("expected Integer argument");
+///         total += term;
+///     }
+///
+///     // Write the return value to the link.
+///     link.put_i64(total).unwrap();
+/// }
+/// # }
+/// ```
+///
+/// ```wolfram
+/// LibraryFunctionLoad["...", "total_args_i64", LinkObject, LinkObject]
+/// ```
 pub use wolfram_library_link_macros::export;
 
 const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
@@ -433,8 +535,9 @@ pub fn try_evaluate(expr: &Expr) -> Result<Expr, String> {
 /// otherwise terminate execution, simply return up the call stack.
 ///
 /// Within Rust functions exported using [`#[export]`][crate::export] or
-/// [`export_wstp!`][export_wstp!] (which generate a wrapper function that catches panics),
-/// `panic!()` can be used to quickly unwind the call stack to the appropriate place.
+/// [`#[export(wstp)]`][crate::export#exportwstp] (which generate a wrapper function that
+/// catches panics), `panic!()` can be used to quickly unwind the call stack to the
+/// appropriate place.
 /// Note that this will not work if the current library is built with
 /// `panic = "abort"`. See the [`panic`][panic-option] profile configuration option
 /// for more information.
@@ -494,176 +597,13 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
     boole != 0
 }
 
-/// Export the specified functions as native *LibraryLink* WSTP functions.
-///
-/// To be exported by this macro, the specified function(s) must implement
-/// [`WstpFunction`].
-///
-/// Functions exported using this macro will automatically:
-///
-/// * Call [`initialize()`][crate::initialize] to initialize this library.
-/// * Catch any panics that occur.
-///   - If a panic does occur, it will be returned as a [`Failure[...]`][ref/Failure]
-///     expression.
-///
-/// [ref/Failure]: https://reference.wolfram.com/language/ref/Failure.html
-///
-/// # Syntax
-///
-/// Export a LibraryLink WSTP function.
-///
-/// ```
-/// # mod scope {
-/// # use wolfram_library_link::{export_wstp, wstp::Link, expr::Expr};
-/// # fn square(args: Vec<Expr>) -> Expr { todo!() }
-/// export_wstp![square(_)];
-/// # }
-/// ```
-///
-/// Export a LibraryLink WSTP function using the specified low-level shared library symbol
-/// name.
-///
-/// ```
-/// # mod scope {
-/// # use wolfram_library_link::{export_wstp, wstp::Link, expr::Expr};
-/// # fn square(args: Vec<Expr>) -> Expr { todo!() }
-/// export_wstp![square(_) as WL_square];
-/// # }
-/// ```
-///
-/// Export multiple functions with one `export_wstp!` invocation. This is purely for
-/// convenience.
-///
-/// ```
-/// # mod scope {
-/// # use wolfram_library_link::{export_wstp, wstp::Link, expr::Expr};
-/// # fn square(args: Vec<Expr>) { }
-/// # fn add_two(args: Vec<Expr>) { }
-/// export_wstp![
-///     square(_);
-///     add_two(_) as AddTwo;
-/// ];
-/// # }
-/// ```
-///
-// ```
-///
-/// # Examples
-///
-/// ##### WSTP function that squares a single integer argument:
-///
-/// ```
-/// # mod scope {
-/// use wolfram_library_link::{export_wstp, wstp::Link};
-///
-/// fn square_wstp(link: &mut Link) {
-///     // Get the number of elements in the arguments list.
-///     let arg_count = link.test_head("List").unwrap();
-///
-///     if arg_count != 1 {
-///         panic!("square_wstp: expected to get a single argument");
-///     }
-///
-///     // Get the argument value.
-///     let x = link.get_i64().expect("expected Integer argument");
-///
-///     // Write the return value.
-///     link.put_i64(x * x).unwrap();
-/// }
-///
-/// export_wstp![square_wstp(&mut Link)];
-/// # }
-/// ```
-///
-/// ```wolfram
-/// LibraryFunctionLoad["...", "square_wstp", LinkObject, LinkObject]
-/// ```
-///
-/// ##### WSTP function that computes the sum of a variable number of arguments:
-///
-/// ```
-/// # mod scope {
-/// use wolfram_library_link::{export_wstp, wstp::Link};
-///
-/// fn total_args_i64(link: &mut Link) {
-///     // Check that we recieved a functions arguments list, and get the number of arguments.
-///     let arg_count: usize = link.test_head("List").unwrap();
-///
-///     let mut total: i64 = 0;
-///
-///     // Get each argument, assuming that they are all integers, and add it to the total.
-///     for _ in 0..arg_count {
-///         let term = link.get_i64().expect("expected Integer argument");
-///         total += term;
-///     }
-///
-///     // Write the return value to the link.
-///     link.put_i64(total).unwrap();
-/// }
-///
-/// export_wstp![total_args_i64(&mut Link)];
-/// # }
-/// ```
-///
-/// ```wolfram
-/// LibraryFunctionLoad["...", "total_args_i64", LinkObject, LinkObject]
-/// ```
-#[macro_export]
-macro_rules! export_wstp {
-    ($vis:vis $name:ident($($argc:ty),*) as $exported:ident) => {
-        $vis mod $name {
-            // Ensure that types imported into the enclosing parent module can be used in
-            // the expansion of $argc. Always `Link` or `Vec<Expr>` at the moment.
-            use super::*;
-
-            #[no_mangle]
-            pub unsafe extern "C" fn $exported(
-                lib: $crate::sys::WolframLibraryData,
-                raw_link: $crate::wstp::sys::WSLINK,
-            ) -> std::os::raw::c_uint {
-                // Cast away the unique `fn(...) {some_name}` function type to get the
-                // generic `fn(...)` type.
-                // The number of `$argc` is required for type inference of the variadic
-                // `fn(..) -> _` type to work. See constraint 2a.
-                let func: fn($($argc),*) -> _ = super::$name;
-
-                // TODO: Why does this code work:
-                //   let func: fn(&mut _) = super::$name;
-                // but this does not:
-                //   let func: fn(_) = super::$name;
-
-                $crate::macro_utils::call_wstp_wolfram_library_function(
-                    lib,
-                    raw_link,
-                    func
-                )
-            }
-
-            // Register this exported function.
-            $crate::inventory::submit! {
-                $crate::macro_utils::LibraryLinkFunction::Wstp { name: stringify!($exported) }
-            }
-        }
-    };
-
-    // Convert export![name(..)] to export![name(..) as name].
-    ($vis:vis $name:ident($($argc:ty),*)) => {
-        $crate::export_wstp![$vis $name($($argc),*) as $name];
-    };
-
-    ($($vis:vis $name:ident($($argc:ty),*) $(as $exported:ident)?);* $(;)?) => {
-        $(
-            $crate::export_wstp![$vis $name($($argc),*) $(as $exported)?];
-        )*
-    };
-}
 
 // TODO: Allow any type which implements FromExpr in wrapper parameter lists?
 
 /// Generate and export a "loader" function, which returns an Association containing the
 /// names and loaded forms of all functions exported by this library.
 ///
-/// All functions exported by the [`#[export]`][crate::export] and [`export_wstp!`] macros will
+/// All functions exported by the [`#[export(..)]`][crate::export] macro will
 /// automatically be included in the Association returned by this function.
 ///
 /// # Syntax
@@ -683,8 +623,8 @@ macro_rules! export_wstp {
 /// * `flat_total_i64`
 /// * `time_since_epoch`
 ///
-/// These functions are exported from the library using the [`#[export]`][crate::export] and
-/// [`export_wstp!`] macros. This makes them loadable using
+/// These functions are exported from the library using the
+/// [`#[export(..)]`][crate::export] macro. This makes them loadable using
 /// [`LibraryFunctionLoad`][ref/LibraryFunctionLoad]<sub>WL</sub>.
 ///
 ///
@@ -693,8 +633,6 @@ macro_rules! export_wstp {
 /// use wolfram_library_link::{self as wll, NumericArray, expr::{Expr, Symbol, Number}};
 ///
 /// wll::generate_loader![load_my_library_functions];
-///
-/// wll::export_wstp![time_since_epoch(_)];
 ///
 /// #[wll::export]
 /// fn add2(x: i64, y: i64) -> i64 {
@@ -706,6 +644,7 @@ macro_rules! export_wstp {
 ///     list.as_slice().into_iter().sum()
 /// }
 ///
+/// #[wll::export(wstp)]
 /// fn time_since_epoch(args: Vec<Expr>) -> Expr {
 ///     use std::time::{SystemTime, UNIX_EPOCH};
 ///
@@ -780,7 +719,7 @@ macro_rules! export_wstp {
 #[macro_export]
 macro_rules! generate_loader {
     ($name:ident) => {
-        // TODO: Use this anonymous `const` trick in #[export] and export_wstp! too.
+        // TODO: Use this anonymous `const` trick in #[export(..)] too.
         const _: () = {
             #[no_mangle]
             pub unsafe extern "C" fn $name(
