@@ -17,8 +17,8 @@
 //!
 //! #### Related Links
 //!
-//! * [*LibraryLink for Rust Quick Start*][QuickStart]
-//! * [*Wolfram LibraryLink User Guide*](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
+//! * [LibraryLink for Rust Quick Start][QuickStart]
+//! * [Wolfram LibraryLink User Guide](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
 //!
 //! # Examples
 //!
