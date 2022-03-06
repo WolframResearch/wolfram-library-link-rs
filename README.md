@@ -46,8 +46,7 @@ the related Rust function(s).
 ```rust
 use wolfram_library_link::export;
 
-export![square(_)];
-
+#[export]
 fn square(x: i64) -> i64 {
     x * x
 }
@@ -69,8 +68,7 @@ Rust:
 ```rust
 use wolfram_library_link::{export, NumericArray};
 
-export![total(_)];
-
+#[export]
 fn total(array: &NumericArray<i64>) -> i64 {
     array.as_slice().into_iter().sum()
 }

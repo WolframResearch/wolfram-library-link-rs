@@ -1,37 +1,29 @@
 use wolfram_library_link::{self as wll, DataStore, NumericArray};
 
-wll::export![
-    test_na_automatic_count(_);
-    test_na_constant_count(_);
-    test_na_manual_count(_);
-    test_na_shared_count(_);
-    //
-    test_na_constant_are_ptr_eq(_, _);
-    test_na_manual_are_not_ptr_eq(_, _);
-    test_na_shared_are_ptr_eq(_, _);
-    // Test cloning NumericArray's
-    test_na_clone();
-    test_na_shared_clone(_);
-];
 
+#[wll::export]
 fn test_na_automatic_count(array: &NumericArray) -> i64 {
     array.share_count() as i64
 }
 
+#[wll::export]
 fn test_na_constant_count(array: &NumericArray) -> i64 {
     array.share_count() as i64
 }
 
+#[wll::export]
 fn test_na_manual_count(array: NumericArray) -> i64 {
     array.share_count() as i64
 }
 
+#[wll::export]
 fn test_na_shared_count(array: NumericArray) -> i64 {
     array.share_count() as i64
 }
 
 //
 
+#[wll::export]
 fn test_na_constant_are_ptr_eq(
     array1: &NumericArray<i64>,
     array2: &NumericArray<i64>,
@@ -42,6 +34,7 @@ fn test_na_constant_are_ptr_eq(
     data
 }
 
+#[wll::export]
 fn test_na_manual_are_not_ptr_eq(
     mut array1: NumericArray<i64>,
     array2: NumericArray<i64>,
@@ -53,6 +46,7 @@ fn test_na_manual_are_not_ptr_eq(
     data
 }
 
+#[wll::export]
 fn test_na_shared_are_ptr_eq(
     mut array1: NumericArray<i64>,
     array2: NumericArray<i64>,
@@ -68,6 +62,7 @@ fn test_na_shared_are_ptr_eq(
 // Test cloning NumericArray's
 //----------------------------
 
+#[wll::export]
 fn test_na_clone() -> bool {
     let array = NumericArray::<i64>::from_slice(&[1, 2, 3]);
 
@@ -83,6 +78,7 @@ fn test_na_clone() -> bool {
     true
 }
 
+#[wll::export]
 fn test_na_shared_clone(array: NumericArray<i64>) -> bool {
     assert!(array.share_count() == 1);
 

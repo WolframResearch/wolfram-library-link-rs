@@ -8,11 +8,6 @@ use wolfram_library_link::{
     managed::{Id, ManagedExpressionEvent},
 };
 
-wll::export_wstp![
-    set_instance_value(_);
-    get_instance_data(_);
-];
-
 wll::generate_loader![load_managed_exprs_functions];
 
 /// Storage for all instances of [`MyObject`] associated with managed expressions
@@ -52,6 +47,7 @@ fn manage_instance(action: ManagedExpressionEvent) {
 }
 
 /// Set the `MyObject.value` field for the specified instance ID.
+#[wll::export(wstp)]
 fn set_instance_value(args: Vec<Expr>) {
     assert!(args.len() == 2, "set_instance_value: expected 2 arguments");
 
@@ -70,6 +66,7 @@ fn set_instance_value(args: Vec<Expr>) {
 }
 
 /// Get the fields of the `MyObject` instance for the specified instance ID.
+#[wll::export(wstp)]
 fn get_instance_data(args: Vec<Expr>) -> Expr {
     assert!(args.len() == 1, "get_instance_data: expected 1 argument");
 

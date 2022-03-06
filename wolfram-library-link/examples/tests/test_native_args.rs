@@ -10,26 +10,12 @@ use wolfram_library_link::{
 // Primitive data types
 //======================================
 
-wll::export![
-    test_no_args();
-    test_ret_void();
-    test_mint(_);
-    test_raw_mint(_, _);
-    test_mint_mint(_, _);
-    test_mreal(_);
-    test_i64(_);
-    test_i64_i64(_, _);
-    test_f64(_);
-    // test_str(_);
-    test_string(_);
-    test_c_string(_);
-    test_panic();
-];
-
+#[wll::export]
 fn test_no_args() -> i64 {
     4
 }
 
+#[wll::export]
 fn test_ret_void() {
     // Do nothing.
 }
@@ -38,11 +24,13 @@ fn test_ret_void() {
 // mint, mreal
 //------------
 
+#[wll::export]
 fn test_mint(x: mint) -> mint {
     x * x
 }
 
 // Test NativeFunction impl for raw function using raw MArguments.
+#[wll::export]
 fn test_raw_mint(args: &[wll::sys::MArgument], ret: wll::sys::MArgument) {
     if args.len() != 1 {
         panic!("unexpected number of arguments");
@@ -55,10 +43,12 @@ fn test_raw_mint(args: &[wll::sys::MArgument], ret: wll::sys::MArgument) {
     }
 }
 
+#[wll::export]
 fn test_mint_mint(x: mint, y: mint) -> mint {
     x + y
 }
 
+#[wll::export]
 fn test_mreal(x: mreal) -> mreal {
     x * x
 }
@@ -67,14 +57,17 @@ fn test_mreal(x: mreal) -> mreal {
 // i64, f64
 //------------
 
+#[wll::export]
 fn test_i64(x: i64) -> i64 {
     x * x
 }
 
+#[wll::export]
 fn test_i64_i64(x: i64, y: i64) -> i64 {
     x + y
 }
 
+#[wll::export]
 fn test_f64(x: f64) -> f64 {
     x * x
 }
@@ -87,10 +80,12 @@ fn test_f64(x: f64) -> f64 {
 //     string.chars().rev().collect()
 // }
 
+#[wll::export]
 fn test_string(string: String) -> String {
     string.chars().rev().collect()
 }
 
+#[wll::export]
 fn test_c_string(string: CString) -> i64 {
     i64::try_from(string.as_bytes().len()).expect("string len usize overflows i64")
 }
@@ -99,6 +94,7 @@ fn test_c_string(string: CString) -> i64 {
 // Panics
 //-------
 
+#[wll::export]
 fn test_panic() {
     panic!("this function panicked");
 }
@@ -107,11 +103,7 @@ fn test_panic() {
 // NumericArray's
 //======================================
 
-wll::export![
-    total_i64(_);
-    positive_i64(_);
-];
-
+#[wll::export]
 fn total_i64(list: &NumericArray<i64>) -> i64 {
     list.as_slice().into_iter().sum()
 }
@@ -119,6 +111,7 @@ fn total_i64(list: &NumericArray<i64>) -> i64 {
 /// Get the sign of every element in `list` as a numeric array of 0's and 1's.
 ///
 /// The returned array will have the same dimensions as `list`.
+#[wll::export]
 fn positive_i64(list: &NumericArray<i64>) -> NumericArray<u8> {
     let mut bools: UninitNumericArray<u8> =
         UninitNumericArray::from_dimensions(list.dimensions());

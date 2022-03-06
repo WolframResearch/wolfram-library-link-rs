@@ -5,11 +5,7 @@ use wolfram_library_link::{
     expr::{Expr, Symbol},
 };
 
-wll::export![
-    test_runtime_function_from_main_thread();
-    test_runtime_function_from_non_main_thread();
-];
-
+#[wll::export]
 fn test_runtime_function_from_main_thread() -> bool {
     let expr = Expr::normal(Symbol::new("System`Plus"), vec![
         Expr::from(2),
@@ -19,6 +15,7 @@ fn test_runtime_function_from_main_thread() -> bool {
     wll::evaluate(&expr) == Expr::from(4)
 }
 
+#[wll::export]
 fn test_runtime_function_from_non_main_thread() -> String {
     let child = std::thread::spawn(|| {
         panic::set_hook(Box::new(|_| {

@@ -1,3 +1,6 @@
+mod export;
+
+
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 
@@ -90,4 +93,21 @@ fn init_(attr: TokenStream2, item: TokenStream) -> Result<TokenStream2, Error> {
     };
 
     Ok(output)
+}
+
+//======================================
+// #[wolfram_library_link::export]
+//======================================
+
+#[proc_macro_attribute]
+pub fn export(
+    attrs: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    let attrs: syn::AttributeArgs = syn::parse_macro_input!(attrs);
+
+    match self::export::export(attrs, item) {
+        Ok(tokens) => tokens.into(),
+        Err(err) => err.into_compile_error().into(),
+    }
 }

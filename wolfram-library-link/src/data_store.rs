@@ -21,7 +21,7 @@ use crate::{
 /// `DataStore` can be used to pass expression-like structures via *LibraryLink* functions.
 ///
 /// `DataStore` can be used as an argument or return type in a *LibraryLink* function
-/// exposed via [`export![]`][crate::export].
+/// exposed via [`#[export]`][crate::export].
 ///
 /// Use [`DataStore::nodes()`] to get an iterator over the [`DataStoreNode`]s contained
 /// in this `DataStore`.

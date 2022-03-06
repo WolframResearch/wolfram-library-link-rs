@@ -2,14 +2,8 @@ use wolfram_library_link::{
     self as wll, ColorSpace, Image, NumericArray, Pixel, UninitImage, UninitNumericArray,
 };
 
-wll::export![
-    test_image_arg(_);
-    // test_image_manual_arg(_);
-    test_create_bitmap_image();
-    test_create_color_rgb_u8_image();
-    test_create_color_rgb_f32_image();
-];
 
+#[wll::export]
 fn test_image_arg(image: &Image<bool>) -> NumericArray<i8> {
     let mut array = UninitNumericArray::from_dimensions(&[image.flattened_length()]);
 
@@ -31,6 +25,7 @@ fn test_image_arg(image: &Image<bool>) -> NumericArray<i8> {
 //     todo!("")
 // }
 
+#[wll::export]
 fn test_create_bitmap_image() -> Image<bool> {
     let width = 2;
     let height = 2;
@@ -55,6 +50,7 @@ fn test_create_bitmap_image() -> Image<bool> {
 /// Create an image with four pixels, where the top left image is red, the top right
 /// pixel is green, the bottom left pixel is blue, and the bottom right pixel is light
 /// gray.
+#[wll::export]
 fn test_create_color_rgb_u8_image() -> Image<u8> {
     let width = 2;
     let height = 2;
@@ -88,6 +84,7 @@ fn test_create_color_rgb_u8_image() -> Image<u8> {
 /// Create an image with four pixels, where the top left image is red, the top right
 /// pixel is green, the bottom left pixel is blue, and the bottom right pixel is light
 /// gray.
+#[wll::export]
 fn test_create_color_rgb_f32_image() -> Image<f32> {
     let width = 2;
     let height = 2;

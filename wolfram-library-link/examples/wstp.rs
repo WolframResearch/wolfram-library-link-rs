@@ -32,8 +32,6 @@ wll::generate_loader!(load_wstp_functions);
 // square_wstp()
 //------------------
 
-wll::export_wstp![square_wstp(&mut Link)];
-
 /// Define a WSTP function that squares a number.
 ///
 /// ```wolfram
@@ -41,6 +39,7 @@ wll::export_wstp![square_wstp(&mut Link)];
 ///
 /// square[4]    (* Returns 16 *)
 /// ```
+#[wll::export(wstp)]
 fn square_wstp(link: &mut Link) {
     // Get the number of elements in the arguments list.
     let arg_count: usize = link.test_head("System`List").unwrap();
@@ -60,8 +59,6 @@ fn square_wstp(link: &mut Link) {
 // count_args()
 //------------------
 
-wll::export_wstp![count_args(&mut Link)];
-
 /// Define a function that returns an integer count of the number of arguments it was
 /// given.
 ///
@@ -73,6 +70,7 @@ wll::export_wstp![count_args(&mut Link)];
 /// countArgs[a]          (* Returns 1)
 /// countArgs[a, b, c]    (* Returns 3 *)
 /// ```
+#[wll::export(wstp)]
 fn count_args(link: &mut Link) {
     // Get the number of elements in the arguments list.
     let arg_count: usize = link.test_head("System`List").unwrap();
@@ -88,8 +86,6 @@ fn count_args(link: &mut Link) {
 // total_args_i64()
 //------------------
 
-wll::export_wstp![total_args_i64(&mut Link)];
-
 /// Define a function that returns the sum of it's integer arguments.
 ///
 /// The exported LibraryLink function can be loaded and used by evaluating:
@@ -99,6 +95,7 @@ wll::export_wstp![total_args_i64(&mut Link)];
 ///
 /// totalArgsI64[1, 1, 2, 3, 5]    (* Returns 12 *)
 /// ```
+#[wll::export(wstp)]
 fn total_args_i64(link: &mut Link) {
     // Check that we recieved a functions arguments list, and get the number of arguments.
     let arg_count: usize = link.test_head("System`List").unwrap();
@@ -119,8 +116,6 @@ fn total_args_i64(link: &mut Link) {
 // string_join()
 //------------------
 
-wll::export_wstp![string_join(&mut Link)];
-
 /// Define a function that will join its string arguments into a single string.
 ///
 /// The exported LibraryLink function can be loaded and used by evaluating:
@@ -132,6 +127,7 @@ wll::export_wstp![string_join(&mut Link)];
 /// stringJoin["Foo", "Bar", "Baz"]    (* Returns "FooBarBaz" *)
 /// stringJoin[]                       (* Returns "" *)
 /// ```
+#[wll::export(wstp)]
 fn string_join(link: &mut Link) {
     use wstp::LinkStr;
 
@@ -152,8 +148,6 @@ fn string_join(link: &mut Link) {
 // link_expr_identity()
 //------------------
 
-wll::export_wstp!(link_expr_identity(&mut Link));
-
 /// Define a function that returns the argument expression that was sent over the link.
 /// That expression will be a list of the arguments passed to this LibraryFunction[..].
 ///
@@ -163,6 +157,7 @@ wll::export_wstp!(link_expr_identity(&mut Link));
 /// linkExprIdentity[5]      (* Returns {5} *)
 /// linkExprIdentity[a, b]   (* Returns {a, b} *)
 /// ```
+#[wll::export(wstp)]
 fn link_expr_identity(link: &mut Link) {
     let expr = link.get_expr().unwrap();
     assert!(!link.is_ready());
@@ -173,12 +168,11 @@ fn link_expr_identity(link: &mut Link) {
 // expr_string_join()
 //------------------
 
-wll::export_wstp![expr_string_join(&mut Link)];
-
 /// This example is an alternative to the `string_join()` example.
 ///
 /// This example shows using the `Expr` and `ExprKind` types to process expressions on
 /// the WSTP link.
+#[wll::export(wstp)]
 fn expr_string_join(link: &mut Link) {
     let expr = link.get_expr().unwrap();
 
@@ -204,8 +198,7 @@ fn expr_string_join(link: &mut Link) {
 // total()
 //------------------
 
-wll::export_wstp![total(_)];
-
+#[wll::export(wstp)]
 fn total(args: Vec<Expr>) -> Expr {
     let mut total = Number::Integer(0);
 

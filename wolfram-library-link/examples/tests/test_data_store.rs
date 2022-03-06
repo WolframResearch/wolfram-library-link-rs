@@ -14,24 +14,12 @@ pub unsafe extern "C" fn WolframLibrary_initialize(lib: WolframLibraryData) -> c
     }
 }
 
-wll::export![
-    test_empty_data_store();
-    test_single_int_data_store();
-    test_multiple_int_data_store();
-    test_unnamed_heterogenous_data_store();
-    test_named_heterogenous_data_store();
-    test_named_and_unnamed_heterogenous_data_store();
-    test_named_numeric_array_data_store();
-    test_nested_data_store();
-    test_iterated_nested_data_store();
-    test_data_store_arg(_);
-    test_data_store_nodes();
-];
-
+#[wll::export]
 fn test_empty_data_store() -> DataStore {
     DataStore::new()
 }
 
+#[wll::export]
 fn test_single_int_data_store() -> DataStore {
     let mut data = DataStore::new();
     data.add_i64(1);
@@ -39,6 +27,7 @@ fn test_single_int_data_store() -> DataStore {
     data
 }
 
+#[wll::export]
 fn test_multiple_int_data_store() -> DataStore {
     let mut data = DataStore::new();
     data.add_i64(1);
@@ -48,6 +37,7 @@ fn test_multiple_int_data_store() -> DataStore {
     data
 }
 
+#[wll::export]
 fn test_unnamed_heterogenous_data_store() -> DataStore {
     let mut data = DataStore::new();
     data.add_i64(1);
@@ -57,6 +47,7 @@ fn test_unnamed_heterogenous_data_store() -> DataStore {
     data
 }
 
+#[wll::export]
 fn test_named_heterogenous_data_store() -> DataStore {
     let mut data = DataStore::new();
     data.add_named_i64("an i64", 1);
@@ -66,6 +57,7 @@ fn test_named_heterogenous_data_store() -> DataStore {
     data
 }
 
+#[wll::export]
 fn test_named_and_unnamed_heterogenous_data_store() -> DataStore {
     let mut data = DataStore::new();
     data.add_i64(1);
@@ -79,6 +71,7 @@ fn test_named_and_unnamed_heterogenous_data_store() -> DataStore {
 // Non-atomic types
 //======================================
 
+#[wll::export]
 fn test_named_numeric_array_data_store() -> DataStore {
     let array = NumericArray::<i64>::from_slice(&[1, 2, 3]).into_generic();
 
@@ -88,6 +81,7 @@ fn test_named_numeric_array_data_store() -> DataStore {
     data
 }
 
+#[wll::export]
 fn test_nested_data_store() -> DataStore {
     let mut inner = DataStore::new();
     inner.add_named_bool("is_inner", true);
@@ -99,6 +93,7 @@ fn test_nested_data_store() -> DataStore {
     outer
 }
 
+#[wll::export]
 fn test_iterated_nested_data_store() -> DataStore {
     let mut store = DataStore::new();
 
@@ -116,6 +111,7 @@ fn test_iterated_nested_data_store() -> DataStore {
 // DataStore arguments
 //======================================
 
+#[wll::export]
 fn test_data_store_arg(ds: DataStore) -> i64 {
     ds.len() as i64
 }
@@ -124,6 +120,7 @@ fn test_data_store_arg(ds: DataStore) -> i64 {
 // DataStore nodes
 //======================================
 
+#[wll::export]
 fn test_data_store_nodes() {
     {
         let mut data = DataStore::new();

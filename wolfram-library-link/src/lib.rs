@@ -1,61 +1,182 @@
 //! A safe and ergonomic wrapper around Wolfram [LibraryLink][library-link-guide].
 //!
 //! Wolfram LibraryLink is an interface for dynamic libraries that can be
-//! [dynamically loaded][library-function-load] by the [Wolfram Language][WL]. This crate
+//! [dynamically loaded][LibraryFunctionLoad] by the [Wolfram Language][WL]. This crate
 //! provides idiomatic Rust bindings around the lower-level LibraryLink C interface.
 //!
-//! This library provides functionality for:
+//! **Features:**
 //!
-//! * Calling Rust functions from Wolfram code.
-//! * Passing data efficiently between Rust and Wolfram code using native data types
+//! * Call Rust functions from Wolfram code.
+//! * Pass data efficiently between Rust and Wolfram code using native data types
 //!   like [`NumericArray`] and [`Image`].
-//! * Passing arbitrary expressions between Rust and Wolfram code using
-//!   [`Expr`][struct@crate::Expr] and the [`export_wstp!`][crate::export_wstp]
+//! * Pass arbitrary expressions between Rust and Wolfram code using
+//!   [`Expr`][struct@crate::Expr] and the [`#[export(wstp)]`][crate::export#exportwstp]
 //!   macro.
-//! * Asynchronous events handled by the Wolfram Language, using an [`AsyncTaskObject`]
+//! * Generate asynchronous events handled by the Wolfram Language, using an [`AsyncTaskObject`]
 //!   background thread.
 //!
-//! #### Related Links
 //!
-//! * [*LibraryLink for Rust Quick Start*][QuickStart]
-//! * [*Wolfram LibraryLink User Guide*](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
+//!
+//!
+//! # What is Wolfram LibraryLink?
+//!
+//! > Wolfram LibraryLink provides a powerful way to connect external code to the Wolfram
+//! > Language, enabling high-speed and memory-efficient execution. It does this by
+//! > allowing dynamic libraries to be directly loaded into the Wolfram Language kernel so
+//! > that functions in the libraries can be immediately called from the Wolfram Language.
+//! >
+//! > &nbsp;&nbsp;&nbsp;&nbsp;— [Wolfram LibraryLink User Guide](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
+//!
+//! ## Library function types
+//!
+//! The Wolfram LibraryLink interface supports two different types of library function:
+//!
+//! * Native functions
+//! * WSTP functions
+//!
+//! The two function types differ in how their arguments and return value are passed
+//! between the Wolfram Language and the compiled library function.
+//!
+//! Native functions pass their values using efficient native data types, like machine sized
+//! integers, floating point numbers, C strings, or [`NumericArray`]s. Calling a native
+//! function is efficient, but they are unable to pass more complicated values
+//! (like general Wolfram Language expressions).
+//!
+//! WSTP functions pass their values using WSTP [`Link`] objects. A `Link` object can
+//! be used to pass arbitrary Wolfram Language expressions to or from the library
+//! function. However, WSTP links are less efficient for passing basic numeric arguments.
+//!
+//!
+//!
 //!
 //! # Examples
 //!
-//! Writing a Rust function that can be called from the Wolfram Language is as easy as
-//! writing:
+//! **Example programs:** In addition to the basic example programs show below, the
+//! wolfram-library-link repository contains
+//! [example programs](https://github.com/WolframResearch/wolfram-library-link-rs#example-programs)
+//! demonstrating the major features of this crate.
+//!
+//! **Quick Start**: The [LibraryLink for Rust Quick Start][QuickStart] is a complete tutorial
+//! covering how to create a new Rust library, compile it, and call into it from the
+//! Wolfram Language.
+//!
+//! ## Native functions
+//!
+//! Rust functions can be exported for use from the Wolfram Language using the
+//! [`#[export]`][crate::export] macro:
 //!
 //! ```
 //! # mod scope {
 //! use wolfram_library_link::export;
 //!
-//! export![square(_)];
-//!
+//! #[export]
 //! fn square(x: i64) -> i64 {
 //!     x * x
 //! }
 //! # }
 //! ```
 //!
-//! [building your dynamic library][QuickStart], and loading the function into the Wolfram Language
-//! using [`LibraryFunctionLoad`][library-function-load]:
+//! Then, after building the Rust code into a dynamic library, the function can be loaded
+//! into the Wolfram Language using [`LibraryFunctionLoad`][LibraryFunctionLoad]:
 //!
 //! ```wolfram
-//! func = LibraryFunctionLoad["library_name", "square", {Integer}, Integer];
+//! square = LibraryFunctionLoad["<library name>", "square", {Integer}, Integer];
+//! ```
 //!
-//! func[5]   (* Returns 25 *)
+//! After being loaded, a library function can be called like any other Wolfram Language
+//! function:
+//!
+//! ```wolfram
+//! square[5]   (* Returns 25 *)
 //! ```
 //!
 //! [QuickStart]: https://github.com/WolframResearch/wolfram-library-link-rs/blob/master/docs/QuickStart.md
 //!
-//! ## Show backtrace when a panic occurs
+//! ## WSTP Functions
 //!
-//! Functions backed by a WSTP [`Link`] (using [`export_wstp![]`][crate::export_wstp]) will
-//! automatically catch any
+//! Rust WSTP functions can be exported for use from the Wolfram Language using the
+//! [`#[export(wstp)]`][crate::export#exportwstp] macro:
+//!
+//! ```
+//! # mod scope {
+//! use wolfram_library_link::{export, wstp::Link};
+//!
+//! #[export(wstp)]
+//! fn square(link: &mut Link) {
+//!     // WSTP function arguments are passed as a List expression: {...}
+//!     let arg_count = link.test_head("System`List").unwrap();
+//!
+//!     // Get that the argument list contains a single element.
+//!     if arg_count != 1 {
+//!         panic!("square: expected one argument")
+//!     }
+//!
+//!     // Check that the argument is an integer, and get it's value.
+//!     let x: i64 = link.get_i64().expect("expected Integer argument");
+//!
+//!     // Write the return value.
+//!     link.put_i64(x * x).unwrap();
+//! }
+//! # }
+//! ```
+//!
+//!
+//!
+//!
+//! # Additional Features
+//!
+//! ### Non-primitive native types
+//!
+//! Native functions support passing primitive types like [`bool`], [`i64`], [`f64`],
+//! and strings. Additionally, they also support a small number of non-primitive types
+//! that can be used to efficiently pass more complicated data structures between the
+//! Wolfram Langauge and compiled code, without requiring the full generality of using a
+//! WSTP function.
+//!
+//! The set of currently supported non-primitive native types includes:
+//!
+//! * [`NumericArray`]
+//! * [`Image`]
+//! * [`DataStore`]
+//!
+//! ### Cooperative computation abort handling
+//!
+//! The Wolfram Language supports the ability for the user to abort an in-progress
+//! computation, without ending the process and losing their current state. This is
+//! accomplished by code that checks if an abort has been triggered — and if so, performs an early return
+//! — which is placed at important points in the Wolfram Language kernel
+//! evaluation process.
+//!
+//! User libraries can cooperatively include abort checking logic in their library using
+//! the [`aborted()`] function. This enables LibraryLink libraries to provide the same
+//! user experience as built in Wolfram Language functions. LibraryLink libraries that may
+//! perform long computations are especially encouraged to do abort checking within loops
+//! that may run for a long time.
+//!
+//! ```no_run
+//! use wolfram_library_link as wll;
+//!
+//! if wll::aborted() {
+//!     // The user aborted this computation, so it doesn't matter what we return.
+//!     panic!("Wolfram abort");
+//! }
+//! ```
+//!
+//! *Note: The Wolfram Language 'abort' command is not at all related to the
+//! C/Rust [`abort()`][std::process::abort] function. The `abort()` function is typically used
+//! when an unrecoverable error occurs, at a point determined by the programmer. The
+//! Wolfram 'abort' command can be issued by the user at any point, and is commonly used
+//! to end long-running computations the user no longer wishes to wait for.*
+//!
+//! ### Show backtrace when a panic occurs
+//!
+//! [WSTP functions](#wstp-functions) will automatically catch any
 //! Rust panics that occur in the wrapped code, and return a [`Failure`][failure] object
-//! with the panic message and source file/line number. It also can optionally show the
-//! backtrace. This is configured by the `"LIBRARY_LINK_RUST_BACKTRACE"` environment
-//! variable. Enable it by evaluating:
+//! with the panic message and source file/line number. The failure can optionally include
+//! a backtrace showing the location of the panic.
+//!
+//! This is configured by the `"LIBRARY_LINK_RUST_BACKTRACE"` environment variable. Enable
+//! it by evaluating:
 //!
 //! ```wolfram
 //! SetEnvironment["LIBRARY_LINK_RUST_BACKTRACE" -> "True"]
@@ -63,12 +184,23 @@
 //!
 //! Now the error shown when a panic occurs will include a backtrace.
 //!
-//! Note that the error message may include more information if the `"nightly"`
-//! [feature][cargo-features] of `wolfram-library-link` is enabled.
+//! *The error message may include more information if the `"nightly"`
+//! [feature][cargo-features] of `wolfram-library-link` is enabled.*
+//!
+//!
+//!
+//!
+//! # Related Links
+//!
+//! * [LibraryLink for Rust Quick Start][QuickStart]
+//! * [Wolfram LibraryLink User Guide](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
+//!
+//!
+//!
 //!
 //! [WL]: https://wolfram.com/language
 //! [library-link-guide]: https://reference.wolfram.com/language/guide/LibraryLink.html
-//! [library-function-load]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
+//! [LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
 //! [failure]: https://reference.wolfram.com/language/ref/Failure.html
 //! [cargo-features]: https://doc.rust-lang.org/cargo/reference/features.html
 // #![doc = include_str!("../docs/included/Overview.md")]
@@ -103,7 +235,7 @@ pub use wolfram_expr as expr;
 pub use wolfram_library_link_sys as sys;
 pub use wstp;
 
-// Used by the export!/export_wstp! macro implementations.
+// Used by the #[export]/#[export(wstp)] macro implementations.
 #[doc(hidden)]
 pub use inventory;
 
@@ -179,127 +311,6 @@ use crate::expr::{Expr, ExprKind, Symbol};
 /// [lib-init]: https://reference.wolfram.com/language/LibraryLink/tutorial/LibraryStructure.html#280210622
 pub use wolfram_library_link_macros::init;
 
-const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
-
-//======================================
-// Callbacks to the Wolfram Kernel
-//======================================
-
-/// Evaluate `expr` by calling back into the Wolfram Kernel.
-///
-/// TODO: Specify and document what happens if the evaluation of `expr` triggers a
-///       kernel abort (such as a `Throw[]` in the code).
-pub fn evaluate(expr: &Expr) -> Expr {
-    match try_evaluate(expr) {
-        Ok(returned) => returned,
-        Err(msg) => panic!(
-            "evaluate(): evaluation of expression failed: {}: \n\texpression: {}",
-            msg, expr
-        ),
-    }
-}
-
-/// Attempt to evaluate `expr`, returning an error if a WSTP transport error occurred
-/// or evaluation failed.
-pub fn try_evaluate(expr: &Expr) -> Result<Expr, String> {
-    with_link(|link: &mut Link| {
-        // Send an EvaluatePacket['expr].
-        let _: () = link
-            // .put_expr(&Expr! { EvaluatePacket['expr] })
-            .put_expr(&Expr::normal(Symbol::new("System`EvaluatePacket"), vec![
-                expr.clone(),
-            ]))
-            .map_err(|e| e.to_string())?;
-
-        let _: () = process_wstp_link(link)?;
-
-        let return_packet: Expr = link.get_expr().map_err(|e| e.to_string())?;
-
-        let returned_expr = match return_packet.kind() {
-            ExprKind::Normal(normal) => {
-                debug_assert!(normal.has_head(&Symbol::new("System`ReturnPacket")));
-                debug_assert!(normal.elements().len() == 1);
-                normal.elements()[0].clone()
-            },
-            _ => {
-                return Err(format!(
-                    "try_evaluate(): returned expression was not ReturnPacket: {}",
-                    return_packet
-                ))
-            },
-        };
-
-        Ok(returned_expr)
-    })
-}
-
-/// Returns `true` if the user has requested that the current evaluation be aborted.
-///
-/// Programs should finish what they are doing and return control of this thread to
-/// to the kernel as quickly as possible. They should not exit the process or
-/// otherwise terminate execution, simply return up the call stack.
-///
-/// Within Rust functions exported using [`export!`][crate::export] or
-/// [`export_wstp!`][export_wstp!] (which generate a wrapper function that catches panics),
-/// `panic!()` can be used to quickly unwind the call stack to the appropriate place.
-/// Note that this will not work if the current library is built with
-/// `panic = "abort"`. See the [`panic`][panic-option] profile configuration option
-/// for more information.
-///
-/// [panic-option]: https://doc.rust-lang.org/cargo/reference/profiles.html#panic
-pub fn aborted() -> bool {
-    // TODO: Is this function thread safe? Can it be called from a thread other than the
-    //       one the LibraryLink wrapper was originally invoked from?
-    let val: mint = unsafe { rtl::AbortQ() };
-    // TODO: What values can `val` be?
-    val == 1
-}
-
-fn process_wstp_link(link: &mut Link) -> Result<(), String> {
-    assert_main_thread();
-
-    let raw_link = unsafe { link.raw_link() };
-
-    // Process the packet on the link.
-    let code: i32 = unsafe { rtl::processWSLINK(raw_link as *mut _) };
-
-    if code == 0 {
-        let error_message = link
-            .error_message()
-            .unwrap_or_else(|| "unknown error occurred on WSTP Link".into());
-
-        return Err(error_message);
-    }
-
-    Ok(())
-}
-
-/// Enforce exclusive access to the link returned by `getWSLINK()`.
-fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
-    assert_main_thread();
-
-    static LOCK: Lazy<Mutex<()>> = Lazy::new(|| Default::default());
-
-    let _guard = LOCK.lock().expect("failed to acquire LINK lock");
-
-    let lib = get_library_data().raw_library_data;
-
-    let unsafe_link: sys::WSLINK = unsafe { rtl::getWSLINK(lib) };
-    let mut unsafe_link: wstp::sys::WSLINK = unsafe_link as wstp::sys::WSLINK;
-
-    // Safety:
-    //      By using LOCK to ensure exclusive access to the `getWSLINK()` value within
-    //      safe code, we can be confident that this `&mut Link` will not alias with
-    //      other references to the underling link object.
-    let link = unsafe { Link::unchecked_ref_cast_mut(&mut unsafe_link) };
-
-    f(link)
-}
-
-#[inline]
-fn bool_from_mbool(boole: sys::mbool) -> bool {
-    boole != 0
-}
 
 /// Export the specified functions as native *LibraryLink* functions.
 ///
@@ -318,13 +329,13 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 ///
 /// # Syntax
 ///
-/// Export a function with a single argument.
+/// Export a native function.
 ///
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::export;
+/// #[export]
 /// # fn square(x: i64) -> i64 { x }
-/// export![square(_)];
 /// # }
 /// ```
 ///
@@ -333,33 +344,10 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::export;
+/// #[export(name = "WL_square")]
 /// # fn square(x: i64) -> i64 { x }
-/// export![square(_) as WL_square];
 /// # }
 /// ```
-///
-/// Export multiple functions with one `export!` invocation. This is purely for convenience.
-///
-/// ```
-/// # mod scope {
-/// # use wolfram_library_link::export;
-/// # fn square(x: i64) -> i64 { x }
-/// # fn add_two(a: i64, b: i64) -> i64 { a + b }
-/// export![
-///     square(_);
-///     add_two(_, _) as AddTwo;
-/// ];
-/// # }
-/// ```
-///
-// TODO: Remove this feature? If someone wants to export the low-level function, they
-//       should do `pub use square::square as ...` instead of exposing the hidden module
-//       (which is just an implementation detail of `export![]` anyway).
-// Make public the `mod` module that contains the low-level wrapper function.
-//
-// ```
-// export![pub square(_)];
-// ```
 ///
 /// # Examples
 ///
@@ -370,11 +358,10 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::export;
+/// #[export]
 /// fn square(x: i64) -> i64 {
 ///     x * x
 /// }
-///
-/// export![square(_)];
 /// # }
 /// ```
 ///
@@ -387,11 +374,10 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::export;
+/// #[export]
 /// fn reverse_string(string: String) -> String {
 ///     string.chars().rev().collect()
 /// }
-///
-/// export![reverse_string(_)];
 /// # }
 /// ```
 ///
@@ -404,11 +390,10 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::export;
+/// #[export]
 /// fn times(a: f64, b: f64) -> f64 {
 ///     a * b
 /// }
-///
-/// export![times(_, _)];
 /// # }
 /// ```
 ///
@@ -423,11 +408,10 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// ```
 /// # mod scope {
 /// # use wolfram_library_link::{export, NumericArray};
+/// #[export]
 /// fn total_i64(list: &NumericArray<i64>) -> i64 {
 ///     list.as_slice().into_iter().sum()
 /// }
-///
-/// export![total_i64(_)];
 /// # }
 /// ```
 ///
@@ -437,6 +421,27 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 ///     {LibraryDataType[NumericArray, "Integer64"]}
 ///     Integer
 /// ]
+/// ```
+///
+/// ### Customize exported function name
+///
+/// By default, the exported name of a function exported to the Wolfram Langauge
+/// using `#[export]` will be the same as the Rust function name. The exported name
+/// can be customed by specifying the `name = "..."` argument to the `#[export]` macro:
+///
+/// ```
+/// # mod scope {
+/// use wolfram_library_link::export;
+///
+/// #[export(name = "native_square")]
+/// fn square(x: i64) -> i64 {
+///     x * x
+/// }
+/// # }
+/// ```
+///
+/// ```wolfram
+/// LibraryFunctionLoad["<library name>", "native_square", {Integer}, Integer]
 /// ```
 ///
 ///
@@ -519,128 +524,13 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 ///
 /// [ref/NumericArray]: https://reference.wolfram.com/language/ref/NumericArray.html
 /// [ref/LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
-
-// # Design constraints
-//
-// The current design of this macro is intended to accommodate the following constraints:
-//
-// 1. Support automatic generation of wrapper functions without using procedural macros,
-//    and with minimal code duplication. Procedural macros require external dependencies,
-//    and can significantly increase compile times.
-//
-//      1a. Don't depend on the entire function definition to be contained within the
-//          macro invocation, which leads to unergonomic rightward drift. E.g. don't
-//          require something like:
-//
-//          export![
-//              fn foo(x: i64) { ... }
-//          ]
-//
-//      1b. Don't depend on the entire function declaration to be repeated in the
-//          macro invocation. E.g. don't require:
-//
-//              fn foo(x: i64) -> i64 {...}
-//
-//              export![
-//                  fn foo(x: i64) -> i64;
-//              ]
-//
-// 2. The name of the function in Rust should match the name of the function that appears
-//    in the WL LibraryFunctionLoad call. E.g. needing different `foo` and `foo__wrapper`
-//    named must be avoided.
-//
-// To satisfy constraint 1, it's necessary to depend on the type system rather than
-// clever macro operations. This leads naturally to the creation of the `NativeFunction`
-// trait, which is implemented for all suitable `fn(..) -> _` types.
-//
-// Constraint 1b is unable to be met completely by the current implementation due to
-// limitations with Rust's coercion from `fn(A, B, ..) -> C {some_name}` to
-// `fn(A, B, ..) -> C`. The coercion requires that the number of parameters (`foo(_, _)`)
-// be made explicit, even if their types can be elided. If eliding the number of fn(..)
-// arguments were permitted, `export![foo]` could work.
-//
-// To satisfy constraint 2, this implementation creates a private module with the same
-// name as the function that is being wrapped. This is required because in Rust (as in
-// many languages), it's illegal for two different functions with the same name to exist
-// within the same module:
-//
-// ```
-// fn foo { ... }
-//
-// #[no_mangle]
-// pub extern "C" fn foo { ... } // Error: conflicts with the other foo()
-// ```
-//
-// This means that the export![] macro cannot simply generate a wrapper function
-// with the same name as the wrapped function, because they would conflict.
-//
-// However, it *is* legal for a module to contain a function and a child module that
-// have the same name. Because `#[no_mangle]` functions are exported from the crate no
-// matter where they appear in the module heirarchy, this offers an effective workaround
-// for the name clash issue, while satisfy constraint 2's requirement that the original
-// function and the wrapper function have the same name:
-//
-// ```
-// fn foo() { ... } // This does not conflict with the `foo` module.
-//
-// mod foo {
-//     #[no_mangle]
-//     pub extern "C" fn foo(..) { ... } // This does not conflict with super::foo().
-// }
-// ```
-#[macro_export]
-macro_rules! export {
-    ($vis:vis $name:ident($($argc:ty),*) as $exported:ident) => {
-        $vis mod $name {
-            #[no_mangle]
-            pub unsafe extern "C" fn $exported(
-                lib: $crate::sys::WolframLibraryData,
-                argc: $crate::sys::mint,
-                args: *mut $crate::sys::MArgument,
-                res: $crate::sys::MArgument,
-            ) -> std::os::raw::c_uint {
-                // Cast away the unique `fn(...) {some_name}` function type to get the
-                // generic `fn(...)` type.
-                // The number of `$argc` is required for type inference of the variadic
-                // `fn(..) -> _` type to work. See constraint 2a.
-                let func: fn($($argc),*) -> _ = super::$name;
-
-                $crate::macro_utils::call_native_wolfram_library_function(
-                    lib,
-                    args,
-                    argc,
-                    res,
-                    func
-                )
-            }
-        }
-
-        // Register this exported function.
-        $crate::inventory::submit! {
-            $crate::macro_utils::LibraryLinkFunction::Native {
-                name: stringify!($exported),
-                signature: || {
-                    let func: fn($($argc),*) -> _ = $name;
-                    let func: &dyn $crate::NativeFunction<'_> = &func;
-
-                    func.signature()
-                }
-            }
-        }
-    };
-
-    // Convert export![name(..)] to export![name(..) as name].
-    ($vis:vis $name:ident($($argc:ty),*)) => {
-        $crate::export![$vis $name($($argc),*) as $name];
-    };
-
-    ($($vis:vis $name:ident($($argc:ty),*) $(as $exported:ident)?);* $(;)?) => {
-        $(
-            $crate::export![$vis $name($($argc),*) $(as $exported)?];
-        )*
-    };
-}
-
+///
+///
+///
+/// <br/><br/><br/>
+///
+/// # `#[export(wstp)]`
+///
 /// Export the specified functions as native *LibraryLink* WSTP functions.
 ///
 /// To be exported by this macro, the specified function(s) must implement
@@ -661,9 +551,9 @@ macro_rules! export {
 ///
 /// ```
 /// # mod scope {
-/// # use wolfram_library_link::{export_wstp, wstp::Link, expr::Expr};
+/// # use wolfram_library_link::{export, wstp::Link, expr::Expr};
+/// #[export(wstp)]
 /// # fn square(args: Vec<Expr>) -> Expr { todo!() }
-/// export_wstp![square(_)];
 /// # }
 /// ```
 ///
@@ -672,35 +562,11 @@ macro_rules! export {
 ///
 /// ```
 /// # mod scope {
-/// # use wolfram_library_link::{export_wstp, wstp::Link, expr::Expr};
+/// # use wolfram_library_link::{export, wstp::Link, expr::Expr};
+/// #[export(wstp, name = "WL_square")]
 /// # fn square(args: Vec<Expr>) -> Expr { todo!() }
-/// export_wstp![square(_) as WL_square];
 /// # }
 /// ```
-///
-/// Export multiple functions with one `export_wstp!` invocation. This is purely for
-/// convenience.
-///
-/// ```
-/// # mod scope {
-/// # use wolfram_library_link::{export_wstp, wstp::Link, expr::Expr};
-/// # fn square(args: Vec<Expr>) { }
-/// # fn add_two(args: Vec<Expr>) { }
-/// export_wstp![
-///     square(_);
-///     add_two(_) as AddTwo;
-/// ];
-/// # }
-/// ```
-///
-// TODO: Remove this feature? If someone wants to export the low-level function, they
-//       should do `pub use square::square as ...` instead of exposing the hidden module
-//       (which is just an implementation detail of `export![]` anyway).
-// Make public the `mod` module that contains the low-level wrapper function.
-//
-// ```
-// export![pub square(_)];
-// ```
 ///
 /// # Examples
 ///
@@ -708,8 +574,9 @@ macro_rules! export {
 ///
 /// ```
 /// # mod scope {
-/// use wolfram_library_link::{export_wstp, wstp::Link};
+/// use wolfram_library_link::{export, wstp::Link};
 ///
+/// #[export(wstp)]
 /// fn square_wstp(link: &mut Link) {
 ///     // Get the number of elements in the arguments list.
 ///     let arg_count = link.test_head("List").unwrap();
@@ -724,8 +591,6 @@ macro_rules! export {
 ///     // Write the return value.
 ///     link.put_i64(x * x).unwrap();
 /// }
-///
-/// export_wstp![square_wstp(&mut Link)];
 /// # }
 /// ```
 ///
@@ -737,8 +602,9 @@ macro_rules! export {
 ///
 /// ```
 /// # mod scope {
-/// use wolfram_library_link::{export_wstp, wstp::Link};
+/// use wolfram_library_link::{export, wstp::Link};
 ///
+/// #[export(wstp)]
 /// fn total_args_i64(link: &mut Link) {
 ///     // Check that we recieved a functions arguments list, and get the number of arguments.
 ///     let arg_count: usize = link.test_head("List").unwrap();
@@ -754,70 +620,144 @@ macro_rules! export {
 ///     // Write the return value to the link.
 ///     link.put_i64(total).unwrap();
 /// }
-///
-/// export_wstp![total_args_i64(&mut Link)];
 /// # }
 /// ```
 ///
 /// ```wolfram
 /// LibraryFunctionLoad["...", "total_args_i64", LinkObject, LinkObject]
 /// ```
-#[macro_export]
-macro_rules! export_wstp {
-    ($vis:vis $name:ident($($argc:ty),*) as $exported:ident) => {
-        $vis mod $name {
-            // Ensure that types imported into the enclosing parent module can be used in
-            // the expansion of $argc. Always `Link` or `Vec<Expr>` at the moment.
-            use super::*;
+pub use wolfram_library_link_macros::export;
 
-            #[no_mangle]
-            pub unsafe extern "C" fn $exported(
-                lib: $crate::sys::WolframLibraryData,
-                raw_link: $crate::wstp::sys::WSLINK,
-            ) -> std::os::raw::c_uint {
-                // Cast away the unique `fn(...) {some_name}` function type to get the
-                // generic `fn(...)` type.
-                // The number of `$argc` is required for type inference of the variadic
-                // `fn(..) -> _` type to work. See constraint 2a.
-                let func: fn($($argc),*) -> _ = super::$name;
+const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 
-                // TODO: Why does this code work:
-                //   let func: fn(&mut _) = super::$name;
-                // but this does not:
-                //   let func: fn(_) = super::$name;
+//======================================
+// Callbacks to the Wolfram Kernel
+//======================================
 
-                $crate::macro_utils::call_wstp_wolfram_library_function(
-                    lib,
-                    raw_link,
-                    func
-                )
-            }
-
-            // Register this exported function.
-            $crate::inventory::submit! {
-                $crate::macro_utils::LibraryLinkFunction::Wstp { name: stringify!($exported) }
-            }
-        }
-    };
-
-    // Convert export![name(..)] to export![name(..) as name].
-    ($vis:vis $name:ident($($argc:ty),*)) => {
-        $crate::export_wstp![$vis $name($($argc),*) as $name];
-    };
-
-    ($($vis:vis $name:ident($($argc:ty),*) $(as $exported:ident)?);* $(;)?) => {
-        $(
-            $crate::export_wstp![$vis $name($($argc),*) $(as $exported)?];
-        )*
-    };
+/// Evaluate `expr` by calling back into the Wolfram Kernel.
+///
+/// TODO: Specify and document what happens if the evaluation of `expr` triggers a
+///       kernel abort (such as a `Throw[]` in the code).
+pub fn evaluate(expr: &Expr) -> Expr {
+    match try_evaluate(expr) {
+        Ok(returned) => returned,
+        Err(msg) => panic!(
+            "evaluate(): evaluation of expression failed: {}: \n\texpression: {}",
+            msg, expr
+        ),
+    }
 }
+
+/// Attempt to evaluate `expr`, returning an error if a WSTP transport error occurred
+/// or evaluation failed.
+pub fn try_evaluate(expr: &Expr) -> Result<Expr, String> {
+    with_link(|link: &mut Link| {
+        // Send an EvaluatePacket['expr].
+        let _: () = link
+            // .put_expr(&Expr! { EvaluatePacket['expr] })
+            .put_expr(&Expr::normal(Symbol::new("System`EvaluatePacket"), vec![
+                expr.clone(),
+            ]))
+            .map_err(|e| e.to_string())?;
+
+        let _: () = process_wstp_link(link)?;
+
+        let return_packet: Expr = link.get_expr().map_err(|e| e.to_string())?;
+
+        let returned_expr = match return_packet.kind() {
+            ExprKind::Normal(normal) => {
+                debug_assert!(normal.has_head(&Symbol::new("System`ReturnPacket")));
+                debug_assert!(normal.elements().len() == 1);
+                normal.elements()[0].clone()
+            },
+            _ => {
+                return Err(format!(
+                    "try_evaluate(): returned expression was not ReturnPacket: {}",
+                    return_packet
+                ))
+            },
+        };
+
+        Ok(returned_expr)
+    })
+}
+
+/// Returns `true` if the user has requested that the current evaluation be aborted.
+///
+/// Programs should finish what they are doing and return control of this thread to
+/// to the kernel as quickly as possible. They should not exit the process or
+/// otherwise terminate execution, simply return up the call stack.
+///
+/// Within Rust functions exported using [`#[export]`][crate::export] or
+/// [`#[export(wstp)]`][crate::export#exportwstp] (which generate a wrapper function that
+/// catches panics), `panic!()` can be used to quickly unwind the call stack to the
+/// appropriate place.
+/// Note that this will not work if the current library is built with
+/// `panic = "abort"`. See the [`panic`][panic-option] profile configuration option
+/// for more information.
+///
+/// [panic-option]: https://doc.rust-lang.org/cargo/reference/profiles.html#panic
+pub fn aborted() -> bool {
+    // TODO: Is this function thread safe? Can it be called from a thread other than the
+    //       one the LibraryLink wrapper was originally invoked from?
+    let val: mint = unsafe { rtl::AbortQ() };
+    // TODO: What values can `val` be?
+    val == 1
+}
+
+fn process_wstp_link(link: &mut Link) -> Result<(), String> {
+    assert_main_thread();
+
+    let raw_link = unsafe { link.raw_link() };
+
+    // Process the packet on the link.
+    let code: i32 = unsafe { rtl::processWSLINK(raw_link as *mut _) };
+
+    if code == 0 {
+        let error_message = link
+            .error_message()
+            .unwrap_or_else(|| "unknown error occurred on WSTP Link".into());
+
+        return Err(error_message);
+    }
+
+    Ok(())
+}
+
+/// Enforce exclusive access to the link returned by `getWSLINK()`.
+fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
+    assert_main_thread();
+
+    static LOCK: Lazy<Mutex<()>> = Lazy::new(|| Default::default());
+
+    let _guard = LOCK.lock().expect("failed to acquire LINK lock");
+
+    let lib = get_library_data().raw_library_data;
+
+    let unsafe_link: sys::WSLINK = unsafe { rtl::getWSLINK(lib) };
+    let mut unsafe_link: wstp::sys::WSLINK = unsafe_link as wstp::sys::WSLINK;
+
+    // Safety:
+    //      By using LOCK to ensure exclusive access to the `getWSLINK()` value within
+    //      safe code, we can be confident that this `&mut Link` will not alias with
+    //      other references to the underling link object.
+    let link = unsafe { Link::unchecked_ref_cast_mut(&mut unsafe_link) };
+
+    f(link)
+}
+
+#[inline]
+fn bool_from_mbool(boole: sys::mbool) -> bool {
+    boole != 0
+}
+
 
 // TODO: Allow any type which implements FromExpr in wrapper parameter lists?
 
 /// Generate and export a "loader" function, which returns an Association containing the
 /// names and loaded forms of all functions exported by this library.
 ///
-/// All functions exported by the [`export!`] and [`export_wstp!`] macros will
+/// All functions exported by the [`#[export(..)]`][crate::export] macro will
 /// automatically be included in the Association returned by this function.
 ///
 /// # Syntax
@@ -837,8 +777,8 @@ macro_rules! export_wstp {
 /// * `flat_total_i64`
 /// * `time_since_epoch`
 ///
-/// These functions are exported from the library using the [`export!`] and
-/// [`export_wstp!`] macros. This makes them loadable using
+/// These functions are exported from the library using the
+/// [`#[export(..)]`][crate::export] macro. This makes them loadable using
 /// [`LibraryFunctionLoad`][ref/LibraryFunctionLoad]<sub>WL</sub>.
 ///
 ///
@@ -848,20 +788,17 @@ macro_rules! export_wstp {
 ///
 /// wll::generate_loader![load_my_library_functions];
 ///
-/// wll::export![
-///     add2(_, _);
-///     flat_total_i64(_);
-/// ];
-/// wll::export_wstp![time_since_epoch(_)];
-///
+/// #[wll::export]
 /// fn add2(x: i64, y: i64) -> i64 {
 ///     x + y
 /// }
 ///
+/// #[wll::export]
 /// fn flat_total_i64(list: &NumericArray<i64>) -> i64 {
 ///     list.as_slice().into_iter().sum()
 /// }
 ///
+/// #[wll::export(wstp)]
 /// fn time_since_epoch(args: Vec<Expr>) -> Expr {
 ///     use std::time::{SystemTime, UNIX_EPOCH};
 ///
@@ -936,7 +873,7 @@ macro_rules! export_wstp {
 #[macro_export]
 macro_rules! generate_loader {
     ($name:ident) => {
-        // TODO: Use this anonymous `const` trick in export! and export_wstp! too.
+        // TODO: Use this anonymous `const` trick in #[export(..)] too.
         const _: () = {
             #[no_mangle]
             pub unsafe extern "C" fn $name(
