@@ -98,7 +98,7 @@ pub trait NativeFunction<'a> {
 /// Trait implemented for any function whose parameters and return type can be passed
 /// over a WSTP [`Link`][crate::wstp::Link].
 ///
-/// [`export(wstp)`][crate::export#exportwstp] can only be used with functions that implement
+/// [`#[export(wstp)]`][crate::export#exportwstp] can only be used with functions that implement
 /// this trait.
 ///
 /// A function implements this trait if its type signature is one of:

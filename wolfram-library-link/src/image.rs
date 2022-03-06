@@ -103,7 +103,7 @@ type Setter<T> = unsafe extern "C" fn(sys::MImage, *mut mint, mint, T) -> c_int;
 /// The `STORAGE` associated type represents the data that is *physically* stored in the
 /// [`Image`] buffer.
 ///
-/// The following types can be used in an image:
+/// The following logical types can be used in an image:
 ///
 /// * [`bool`]
 /// * [`u8`], [`u16`]

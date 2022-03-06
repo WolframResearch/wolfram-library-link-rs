@@ -1,29 +1,69 @@
 //! A safe and ergonomic wrapper around Wolfram [LibraryLink][library-link-guide].
 //!
 //! Wolfram LibraryLink is an interface for dynamic libraries that can be
-//! [dynamically loaded][library-function-load] by the [Wolfram Language][WL]. This crate
+//! [dynamically loaded][LibraryFunctionLoad] by the [Wolfram Language][WL]. This crate
 //! provides idiomatic Rust bindings around the lower-level LibraryLink C interface.
 //!
-//! This library provides functionality for:
+//! **Features:**
 //!
-//! * Calling Rust functions from Wolfram code.
-//! * Passing data efficiently between Rust and Wolfram code using native data types
+//! * Call Rust functions from Wolfram code.
+//! * Pass data efficiently between Rust and Wolfram code using native data types
 //!   like [`NumericArray`] and [`Image`].
-//! * Passing arbitrary expressions between Rust and Wolfram code using
-//!   [`Expr`][struct@crate::Expr] and the [`export(wstp)`][crate::export#exportwstp]
+//! * Pass arbitrary expressions between Rust and Wolfram code using
+//!   [`Expr`][struct@crate::Expr] and the [`#[export(wstp)]`][crate::export#exportwstp]
 //!   macro.
-//! * Asynchronous events handled by the Wolfram Language, using an [`AsyncTaskObject`]
+//! * Generate asynchronous events handled by the Wolfram Language, using an [`AsyncTaskObject`]
 //!   background thread.
 //!
-//! #### Related Links
 //!
-//! * [LibraryLink for Rust Quick Start][QuickStart]
-//! * [Wolfram LibraryLink User Guide](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
+//!
+//!
+//! # What is Wolfram LibraryLink?
+//!
+//! > Wolfram LibraryLink provides a powerful way to connect external code to the Wolfram
+//! > Language, enabling high-speed and memory-efficient execution. It does this by
+//! > allowing dynamic libraries to be directly loaded into the Wolfram Language kernel so
+//! > that functions in the libraries can be immediately called from the Wolfram Language.
+//! >
+//! > &nbsp;&nbsp;&nbsp;&nbsp;— [Wolfram LibraryLink User Guide](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
+//!
+//! ## Library function types
+//!
+//! The Wolfram LibraryLink interface supports two different types of library function:
+//!
+//! * Native functions
+//! * WSTP functions
+//!
+//! The two function types differ in how their arguments and return value are passed
+//! between the Wolfram Language and the compiled library function.
+//!
+//! Native functions pass their values using efficient native data types, like machine sized
+//! integers, floating point numbers, C strings, or [`NumericArray`]s. Calling a native
+//! function is efficient, but they are unable to pass more complicated values
+//! (like general Wolfram Language expressions).
+//!
+//! WSTP functions pass their values using WSTP [`Link`] objects. A `Link` object can
+//! be used to pass arbitrary Wolfram Language expressions to or from the library
+//! function. However, WSTP links are less efficient for passing basic numeric arguments.
+//!
+//!
+//!
 //!
 //! # Examples
 //!
-//! Writing a Rust function that can be called from the Wolfram Language is as easy as
-//! writing:
+//! **Example programs:** In addition to the basic example programs show below, the
+//! wolfram-library-link repository contains
+//! [example programs](https://github.com/WolframResearch/wolfram-library-link-rs#example-programs)
+//! demonstrating the major features of this crate.
+//!
+//! **Quick Start**: The [LibraryLink for Rust Quick Start][QuickStart] is a complete tutorial
+//! covering how to create a new Rust library, compile it, and call into it from the
+//! Wolfram Language.
+//!
+//! ## Native functions
+//!
+//! Rust functions can be exported for use from the Wolfram Language using the
+//! [`#[export]`][crate::export] macro:
 //!
 //! ```
 //! # mod scope {
@@ -36,25 +76,107 @@
 //! # }
 //! ```
 //!
-//! [building your dynamic library][QuickStart], and loading the function into the Wolfram Language
-//! using [`LibraryFunctionLoad`][library-function-load]:
+//! Then, after building the Rust code into a dynamic library, the function can be loaded
+//! into the Wolfram Language using [`LibraryFunctionLoad`][LibraryFunctionLoad]:
 //!
 //! ```wolfram
-//! func = LibraryFunctionLoad["library_name", "square", {Integer}, Integer];
+//! square = LibraryFunctionLoad["<library name>", "square", {Integer}, Integer];
+//! ```
 //!
-//! func[5]   (* Returns 25 *)
+//! After being loaded, a library function can be called like any other Wolfram Language
+//! function:
+//!
+//! ```wolfram
+//! square[5]   (* Returns 25 *)
 //! ```
 //!
 //! [QuickStart]: https://github.com/WolframResearch/wolfram-library-link-rs/blob/master/docs/QuickStart.md
 //!
-//! ## Show backtrace when a panic occurs
+//! ## WSTP Functions
 //!
-//! Functions backed by a WSTP [`Link`] (using [`#[export(wstp)]`][crate::export#exportwstp]) will
-//! automatically catch any
+//! Rust WSTP functions can be exported for use from the Wolfram Language using the
+//! [`#[export(wstp)]`][crate::export#exportwstp] macro:
+//!
+//! ```
+//! # mod scope {
+//! use wolfram_library_link::{export, wstp::Link};
+//!
+//! #[export(wstp)]
+//! fn square(link: &mut Link) {
+//!     // WSTP function arguments are passed as a List expression: {...}
+//!     let arg_count = link.test_head("System`List").unwrap();
+//!
+//!     // Get that the argument list contains a single element.
+//!     if arg_count != 1 {
+//!         panic!("square: expected one argument")
+//!     }
+//!
+//!     // Check that the argument is an integer, and get it's value.
+//!     let x: i64 = link.get_i64().expect("expected Integer argument");
+//!
+//!     // Write the return value.
+//!     link.put_i64(x * x).unwrap();
+//! }
+//! # }
+//! ```
+//!
+//!
+//!
+//!
+//! # Additional Features
+//!
+//! ### Non-primitive native types
+//!
+//! Native functions support passing primitive types like [`bool`], [`i64`], [`f64`],
+//! and strings. Additionally, they also support a small number of non-primitive types
+//! that can be used to efficiently pass more complicated data structures between the
+//! Wolfram Langauge and compiled code, without requiring the full generality of using a
+//! WSTP function.
+//!
+//! The set of currently supported non-primitive native types includes:
+//!
+//! * [`NumericArray`]
+//! * [`Image`]
+//! * [`DataStore`]
+//!
+//! ### Cooperative computation abort handling
+//!
+//! The Wolfram Language supports the ability for the user to abort an in-progress
+//! computation, without ending the process and losing their current state. This is
+//! accomplished by code that checks if an abort has been triggered — and if so, performs an early return
+//! — which is placed at important points in the Wolfram Language kernel
+//! evaluation process.
+//!
+//! User libraries can cooperatively include abort checking logic in their library using
+//! the [`aborted()`] function. This enables LibraryLink libraries to provide the same
+//! user experience as built in Wolfram Language functions. LibraryLink libraries that may
+//! perform long computations are especially encouraged to do abort checking within loops
+//! that may run for a long time.
+//!
+//! ```no_run
+//! use wolfram_library_link as wll;
+//!
+//! if wll::aborted() {
+//!     // The user aborted this computation, so it doesn't matter what we return.
+//!     panic!("Wolfram abort");
+//! }
+//! ```
+//!
+//! *Note: The Wolfram Language 'abort' command is not at all related to the
+//! C/Rust [`abort()`][std::process::abort] function. The `abort()` function is typically used
+//! when an unrecoverable error occurs, at a point determined by the programmer. The
+//! Wolfram 'abort' command can be issued by the user at any point, and is commonly used
+//! to end long-running computations the user no longer wishes to wait for.*
+//!
+//! ### Show backtrace when a panic occurs
+//!
+//! [WSTP functions](#wstp-functions) will automatically catch any
 //! Rust panics that occur in the wrapped code, and return a [`Failure`][failure] object
-//! with the panic message and source file/line number. It also can optionally show the
-//! backtrace. This is configured by the `"LIBRARY_LINK_RUST_BACKTRACE"` environment
-//! variable. Enable it by evaluating:
+//! with the panic message and source file/line number. The failure can optionally include
+//! a backtrace showing the location of the panic.
+//!
+//! This is configured by the `"LIBRARY_LINK_RUST_BACKTRACE"` environment variable. Enable
+//! it by evaluating:
 //!
 //! ```wolfram
 //! SetEnvironment["LIBRARY_LINK_RUST_BACKTRACE" -> "True"]
@@ -62,12 +184,23 @@
 //!
 //! Now the error shown when a panic occurs will include a backtrace.
 //!
-//! Note that the error message may include more information if the `"nightly"`
-//! [feature][cargo-features] of `wolfram-library-link` is enabled.
+//! *The error message may include more information if the `"nightly"`
+//! [feature][cargo-features] of `wolfram-library-link` is enabled.*
+//!
+//!
+//!
+//!
+//! # Related Links
+//!
+//! * [LibraryLink for Rust Quick Start][QuickStart]
+//! * [Wolfram LibraryLink User Guide](https://reference.wolfram.com/language/LibraryLink/tutorial/Overview.html)
+//!
+//!
+//!
 //!
 //! [WL]: https://wolfram.com/language
 //! [library-link-guide]: https://reference.wolfram.com/language/guide/LibraryLink.html
-//! [library-function-load]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
+//! [LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
 //! [failure]: https://reference.wolfram.com/language/ref/Failure.html
 //! [cargo-features]: https://doc.rust-lang.org/cargo/reference/features.html
 // #![doc = include_str!("../docs/included/Overview.md")]
@@ -196,7 +329,7 @@ pub use wolfram_library_link_macros::init;
 ///
 /// # Syntax
 ///
-/// Export a function.
+/// Export a native function.
 ///
 /// ```
 /// # mod scope {
@@ -288,6 +421,27 @@ pub use wolfram_library_link_macros::init;
 ///     {LibraryDataType[NumericArray, "Integer64"]}
 ///     Integer
 /// ]
+/// ```
+///
+/// ### Customize exported function name
+///
+/// By default, the exported name of a function exported to the Wolfram Langauge
+/// using `#[export]` will be the same as the Rust function name. The exported name
+/// can be customed by specifying the `name = "..."` argument to the `#[export]` macro:
+///
+/// ```
+/// # mod scope {
+/// use wolfram_library_link::export;
+///
+/// #[export(name = "native_square")]
+/// fn square(x: i64) -> i64 {
+///     x * x
+/// }
+/// # }
+/// ```
+///
+/// ```wolfram
+/// LibraryFunctionLoad["<library name>", "native_square", {Integer}, Integer]
 /// ```
 ///
 ///
