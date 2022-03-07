@@ -217,7 +217,7 @@ pub unsafe fn load_library_functions_impl(
                 Ok(value) => value,
                 Err(err) => panic!("expected String argument (error: {})", err),
             };
-            std::path::PathBuf::from(path.to_str())
+            std::path::PathBuf::from(path.as_str())
         };
 
         let expr = library_function_load_expr(path);

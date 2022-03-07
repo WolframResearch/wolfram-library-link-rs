@@ -137,7 +137,7 @@ fn string_join(link: &mut Link) {
 
     for _ in 0..arg_count {
         let elem: LinkStr<'_> = link.get_string_ref().expect("expected String argument");
-        buffer.push_str(elem.to_str());
+        buffer.push_str(elem.as_str());
     }
 
     // Write the joined string value to the link.
