@@ -3,6 +3,10 @@ use std::path::PathBuf;
 use wolfram_app_discovery::WolframApp;
 
 fn main() {
+    // Ensure that changes to environment variables checked by wolfram-app-discovery will
+    // cause cargo to rebuild the current crate.
+    wolfram_app_discovery::config::set_print_cargo_build_script_instructions(true);
+
     // This crate is being built by docs.rs. Skip trying to locate a WolframApp.
     // See: https://docs.rs/about/builds#detecting-docsrs
     if std::env::var("DOCS_RS").is_ok() {
