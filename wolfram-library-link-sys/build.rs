@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use wolfram_app_discovery::WolframApp;
+use wolfram_app_discovery::{WolframApp, WolframVersion};
 
 fn main() {
     // Ensure that changes to environment variables checked by wolfram-app-discovery will
@@ -26,15 +26,98 @@ fn main() {
 
     let app = WolframApp::try_default().expect("unable to locate WolframApp");
 
-    //---------------------------------------------------------------
-    // Choose the pre-generated bindings to use for the target system
-    //---------------------------------------------------------------
+    //-----------------------------------------------------------
+    // Generate or use pre-generated Rust bindings to LibraryLink
+    //-----------------------------------------------------------
     // See docs/Maintenance.md for instructions on how to generate
     // bindings for new WL versions.
 
-    let wolfram_version = app
-        .wolfram_version()
-        .expect("unable to get Wolfram Language vesion number");
+    let bindings_path = use_generated_bindings(&app);
+
+    // let wolfram_version = app
+    //     .wolfram_version()
+    //     .expect("unable to get Wolfram Language vesion number");
+    // let bindings_path = use_pregenerated_bindings(&wolfram_version);
+
+    println!(
+        "cargo:rustc-env=CRATE_WOLFRAM_LIBRARYLINK_SYS_BINDINGS={}",
+        bindings_path.display()
+    );
+}
+
+//========================================================================
+// Tell `lib.rs` where to find the file containing the WSTP Rust bindings.
+//========================================================================
+
+//-----------------------------------
+// Bindings generated at compile time
+//-----------------------------------
+
+/// Use bindings that we generate now at compile time.
+fn use_generated_bindings(app: &WolframApp) -> PathBuf {
+    let c_includes = app
+        .library_link_c_includes_path()
+        .expect("unable to get LibraryLink C includes directory");
+
+    println!(
+        "cargo:warning=info: generating LibraryLink bindings from: {}",
+        c_includes.display()
+    );
+
+    let out_path =
+        PathBuf::from(std::env::var("OUT_DIR").unwrap()).join("LibraryLink_bindings.rs");
+
+    generate_and_save_bindings_to_file(&c_includes, &out_path);
+
+    out_path
+}
+
+/// Note: The definition of this function is copied from
+///       scripts/generate_versioned_bindings.rs. Changes to this copy of the function
+///       should also be made to the other copy.
+fn generate_and_save_bindings_to_file(c_includes: &PathBuf, out_path: &PathBuf) {
+    // For the time being there is no reason this shouldn't be here.
+    assert!(c_includes.ends_with("SystemFiles/IncludeFiles/C/"));
+    assert!(c_includes.is_dir());
+    assert!(c_includes.is_absolute());
+
+    #[rustfmt::skip]
+    let bindings = bindgen::builder()
+        .header(c_includes.join("WolframLibrary.h").display().to_string())
+        .header(c_includes.join("WolframNumericArrayLibrary.h").display().to_string())
+        .header(c_includes.join("WolframIOLibraryFunctions.h").display().to_string())
+        .header(c_includes.join("WolframImageLibrary.h").display().to_string())
+        .header(c_includes.join("WolframSparseLibrary.h").display().to_string())
+        .generate_comments(true)
+        .clang_arg("-fretain-comments-from-system-headers")
+        .clang_arg("-fparse-all-comments")
+        // .rustified_non_exhaustive_enum("MNumericArray_Data_Type")
+        .constified_enum_module("MNumericArray_Data_Type")
+        .constified_enum_module("MNumericArray_Convert_Method")
+        .constified_enum_module("MImage_Data_Type")
+        .constified_enum_module("MImage_CS_Type")
+        .rustfmt_bindings(true)
+        .generate()
+        .expect("unable to generate Rust bindings to Wolfram LibraryLink using bindgen");
+
+    //------------------
+    // Save the bindings
+    //------------------
+
+    std::fs::create_dir_all(out_path.parent().unwrap())
+        .expect("failed to create parent directories for generating bindings file");
+
+    bindings
+        .write_to_file(out_path)
+        .expect("failed to write Rust bindings with IO error");
+}
+
+//-----------------------
+// Pre-generated bindings
+//-----------------------
+
+#[allow(dead_code)]
+fn use_pregenerated_bindings(wolfram_version: &WolframVersion) -> PathBuf {
     let system_id =
         wolfram_app_discovery::system_id_from_target(&std::env::var("TARGET").unwrap())
             .expect("unable to get System ID for target system");
@@ -46,10 +129,7 @@ fn main() {
 
     println!("cargo:rerun-if-changed={}", bindings_path.display());
 
-    let absolute_bindings_path =
-        PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()).join(&bindings_path);
-
-    if !absolute_bindings_path.is_file() {
+    if !bindings_path.is_file() {
         println!(
             "
     ==== ERROR: wolfram-library-link-sys =====
@@ -70,10 +150,7 @@ fn main() {
         panic!("<See printed error>");
     }
 
-    println!(
-        "cargo:rustc-env=CRATE_WOLFRAM_LIBRARYLINK_SYS_BINDINGS={}",
-        bindings_path.display()
-    );
+    bindings_path
 }
 
 /// Path (relative to the crate root directory) to the bindings file.
@@ -84,5 +161,8 @@ fn make_bindings_path(wolfram_version: &str, system_id: &str) -> PathBuf {
         .join(system_id)
         .join("LibraryLink_bindings.rs");
 
-    bindings_path
+    let absolute_bindings_path =
+        PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap()).join(&bindings_path);
+
+    absolute_bindings_path
 }
