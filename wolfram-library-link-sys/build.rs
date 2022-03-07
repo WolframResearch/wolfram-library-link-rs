@@ -13,8 +13,8 @@ fn main() {
         // Force docs.rs to use the bindings generated for this version / system.
         let bindings_path = make_bindings_path("13.0.0", "MacOSX-x86-64");
 
-        // This environment variable is included using `env!()`. wstp-sys will fail to
-        // build if it is not set correctly.
+        // This environment variable is included using `env!()`. wolfram-library-link-sys
+        // will fail to build if it is not set correctly.
         println!(
             "cargo:rustc-env=CRATE_WOLFRAM_LIBRARYLINK_SYS_BINDINGS={}",
             bindings_path.display()
