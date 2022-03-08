@@ -784,7 +784,7 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 ///
 /// ```
 /// # mod scope {
-/// use wolfram_library_link::{self as wll, NumericArray, expr::{Expr, Symbol, Number}};
+/// use wolfram_library_link::{self as wll, NumericArray, expr::{Expr, Symbol}};
 ///
 /// wll::generate_loader![load_my_library_functions];
 ///
@@ -807,7 +807,7 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 ///     let duration = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
 ///
 ///     Expr::normal(Symbol::new("System`Quantity"), vec![
-///         Expr::number(Number::real(duration.as_secs_f64())),
+///         Expr::real(duration.as_secs_f64()),
 ///         Expr::string("Seconds")
 ///     ])
 /// }
