@@ -245,6 +245,7 @@ pub use self::{
     data_store::{DataStore, DataStoreNode, DataStoreNodeValue, Nodes},
     image::{ColorSpace, Image, ImageData, ImageType, Pixel, UninitImage},
     library_data::{get_library_data, initialize, WolframLibraryData},
+    macro_utils::exported_library_functions_association,
     numeric_array::{
         NumericArray, NumericArrayConvertMethod, NumericArrayDataType, NumericArrayKind,
         NumericArrayType, UninitNumericArray,
@@ -772,6 +773,8 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 ///
 /// All functions exported by the [`#[export(..)]`][crate::export] macro will
 /// automatically be included in the Association returned by this function.
+///
+/// See also: [`exported_library_functions_association()`]
 ///
 /// # Syntax
 ///

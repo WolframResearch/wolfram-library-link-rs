@@ -1,4 +1,7 @@
-use std::os::raw::{c_int, c_uint};
+use std::{
+    os::raw::{c_int, c_uint},
+    path::PathBuf,
+};
 
 use wstp::{self, Link};
 
@@ -220,14 +223,148 @@ pub unsafe fn load_library_functions_impl(
             std::path::PathBuf::from(path.as_str())
         };
 
-        let expr = library_function_load_expr(path);
+        let expr = exported_library_functions_association(Some(path));
 
         link.put_expr(&expr)
             .expect("failed to write loader Association");
     })
 }
 
-fn library_function_load_expr(library: std::path::PathBuf) -> Expr {
+/// Returns an [`Association`][Association] containing the names and `LibraryFunctionLoad`
+/// calls for every function in this library marked with [`#[export(..)]`][crate::export].
+///
+/// The expression returned by this function will automatically load the functions
+/// exported by this library. This frees the library author from having to manually write
+/// [`LibraryFunctionLoad[..]`][LibraryFunctionLoad] calls for each function.
+///
+/// See also: [`generate_loader!`][crate::generate_loader]
+///
+/// # Example
+///
+/// Support that a library exports two functions:
+///
+/// ```
+/// # mod scope {
+/// use wolfram_library_link::export;
+///
+/// #[export]
+/// fn square(x: i64) -> i64 {
+///     x * x
+/// }
+///
+/// #[export]
+/// fn string_join(mut a: String, b: String) -> String {
+///     a.push_str(&b);
+///     a
+/// }
+/// # }
+/// ```
+///
+/// If called inside this library, `exported_library_functions_association()` will
+/// return the expression:
+///
+/// ```wolfram
+/// <|
+///     "square" -> LibraryFunctionLoad[
+///         "<library path>",
+///         "square",
+///         {Integer},
+///         Integer
+///     ],
+///     "string_join" -> LibraryFunctionLoad[
+///         "<library path>",
+///         "string_join",
+///         {String, String},
+///         String
+///     ]
+/// |>
+/// ```
+///
+/// The returned Association automatically contains the boilerplate Wolfram Language code
+/// necessary to load the functions exported by this library.
+///
+/// See also: [`NativeFunction::signature()`]
+///
+/// # Creating a loader function
+///
+/// `exported_library_functions_association()` is intended to be used to define a *loader
+/// function*. Conventionally, a loader function is just a function that loads the other
+/// functions exported by the library.
+/// LibraryLink libraries that use the loader function convention will only require that a
+/// single `LibraryFunctionLoad` call be written manually. The other calls will be
+/// performed automatically.
+///
+/// To define a loader function, use [`#[export(wstp)]`][crate::export#exportwstp] to
+/// export a new function that calls `export_library_functions_association()`.
+///
+/// ```
+/// # mod scope {
+/// use wolfram_library_link::{self as wll, export, expr::Expr};
+///
+/// #[export(wstp, hidden)]
+/// fn load_library_functions(args: Vec<Expr>) -> Expr {
+///     assert!(args.len() == 0);
+///     return wll::exported_library_functions_association(None);
+/// }
+/// # }
+/// ```
+///
+/// *Note: the `hidden` argument to `export(..)` prevents the loader function itself from
+/// appearing in the output of `exported_library_functions_association()`, which would be
+/// redundant.*
+///
+/// Then, in your Wolfram Language code you can write a single `LibraryFunctionLoad` call
+/// to manually load the loader function:
+///
+/// ```wolfram
+/// loadLibraryFunctions = LibraryFunctionLoad[
+///     "<library path>",
+///     "load_library_functions",
+///     LinkObject,
+///     LinkObject
+/// ];
+///
+/// $functions = loadLibraryFunctions[];
+/// ```
+///
+/// `$functions` will be the Association containing the library functions.
+///
+/// You can then use `$functions` to access the other exported functions:
+///
+/// ```wolfram
+/// square = $functions["square"]
+/// stringJoin = $functions["string_join"]
+/// ```
+///
+/// The loaded functions can be called as normal:
+///
+/// ```wolfram
+/// square[2]    (* Returns 4)
+///
+/// stringJoin["hello", "world"]    (* Returns "helloworld" *)
+/// ```
+///
+// TODO: Polish this section and make into a doc comment.
+// ## Advantages
+//
+// Using the loader function convention has a number of advantages over writing
+// `LibraryFunctionLoad` calls manually:
+//
+// * Saves time
+// * Only one place needs to be updated when the function type signature changes
+// * Prevents potential undefined behavior if the type signature used to load the function
+//   differs from the definition.
+// * Most efficient library type is used automatically (memory management strategy for
+//   NumericArray's)
+///
+/// [Association]: https://reference.wolfram.com/language/ref/Association.html
+/// [LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
+pub fn exported_library_functions_association(library: Option<PathBuf>) -> Expr {
+    let library: PathBuf = library.unwrap_or_else(|| {
+        process_path::get_dylib_path()
+            .expect("unable to automatically determine Rust LibraryLink dynamic library file path")
+    });
+
     let mut fields = Vec::new();
     let rule = Symbol::new("System`Rule");
 
