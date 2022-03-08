@@ -15,9 +15,9 @@ TestMatch[
 	Failure["RustPanic", <|
 		"MessageTemplate" -> "Rust LibraryLink function panic: `message`",
 		"MessageParameters" -> <|
-			"message" -> "WstpFunction: WSTP error reading argument List expression: WSTP error: symbol name 'List' has no context"
+			"message" -> "evaluate(): evaluation of expression failed: WSTP error: symbol name 'ReturnPacket' has no context: \n\texpression: System`Echo[2]"
 		|>,
-		"SourceLocation" -> s_?StringQ /; StringStartsQ[s, "wolfram-library-link/src/args.rs:"],
+		"SourceLocation" -> s_?StringQ /; StringStartsQ[s, "wolfram-library-link/src/lib.rs:"],
 		"Backtrace" -> Missing["NotEnabled"]
 	|>]
 ]

@@ -10,7 +10,7 @@ use std::{
 use ref_cast::RefCast;
 
 use crate::{
-    expr::{Expr, ExprKind, Symbol},
+    expr::{Expr, Symbol},
     rtl,
     sys::{self, mint, mreal, MArgument},
     wstp::Link,
@@ -943,24 +943,27 @@ impl WstpFunction for fn(Vec<Expr>) {
 //----------------------------
 
 fn get_args_list(link: &mut Link) -> Result<Vec<Expr>, String> {
-    let list = match link.get_expr() {
-        Ok(args) => args,
-        Err(err) => {
-            return Err(format!(
-                "WSTP error reading argument List expression: {}",
-                err
-            ))
+    get_args_list_impl(link).map_err(|err: wstp::Error| {
+        format!("WSTP error reading argument List expression: {}", err)
+    })
+}
+
+fn get_args_list_impl(link: &mut Link) -> Result<Vec<Expr>, wstp::Error> {
+    let arg_count: usize = match link.test_head("List") {
+        Ok(count) => Ok(count),
+        Err(err) if err.code() == Some(wstp::sys::WSEGSEQ) => {
+            link.clear_error();
+            link.test_head("System`List")
         },
-    };
+        Err(err) => Err(err),
+    }?;
 
-    let list = match list.to_kind() {
-        ExprKind::Normal(list) => list,
-        _ => return Err("expected List expression".to_owned()),
-    };
+    let mut elements: Vec<Expr> = Vec::new();
 
-    if !list.has_head(&Symbol::new("System`List")) {
-        return Err("expected List expression".to_owned());
+    for _ in 0..arg_count {
+        let elem = link.get_expr()?;
+        elements.push(elem);
     }
 
-    Ok(list.into_elements())
+    Ok(elements)
 }
