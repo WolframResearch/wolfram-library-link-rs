@@ -349,6 +349,19 @@ pub use wolfram_library_link_macros::init;
 /// # }
 /// ```
 ///
+/// ### Advanced
+///
+/// Don't include an exported function in the automatic
+/// [`generate_loader!`] output.
+///
+/// ```
+/// # mod scope {
+/// # use wolfram_library_link::export;
+/// #[export(hidden)]
+/// # fn square(x: i64) -> i64 { x }
+/// # }
+/// ```
+///
 /// # Examples
 ///
 /// ### Primitive data types
