@@ -285,7 +285,7 @@ use crate::expr::{Expr, ExprKind, Symbol};
 // TODO: Mention which error code specifically:
 //         `macro_utils::error_code::FAILED_WITH_PANIC`.
 ///
-/// If the initialization function panics, the Kernel will prevent other LibraryLink
+/// If the initialization function panics, the Wolfram Kernel will prevent other LibraryLink
 /// functions exported from that library from being loaded.
 ///
 /// # Example
