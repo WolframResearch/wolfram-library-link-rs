@@ -59,6 +59,9 @@ similiar to other high-level languages: -->
   tests, and more. Easily use any of the tens of thousands of existing libraries from
   [crates.io](https://crates.io) in your project.
 
+  * E.g. the [`rayon`](https://crates.io/crates/rayon) crate makes it trivial to add
+    multithreading to code that processes elements sequencially.
+
 * **Testing** –
   Use [`cargo test`][cargo-test] to run all unit, integration, and doc tests[^doc-tests]
   in your package. Define [unit tests][unit-tests] alongside your library code to ensure
