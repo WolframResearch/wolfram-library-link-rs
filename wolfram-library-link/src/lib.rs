@@ -245,6 +245,7 @@ pub use self::{
     data_store::{DataStore, DataStoreNode, DataStoreNodeValue, Nodes},
     image::{ColorSpace, Image, ImageData, ImageType, Pixel, UninitImage},
     library_data::{get_library_data, initialize, WolframLibraryData},
+    macro_utils::exported_library_functions_association,
     numeric_array::{
         NumericArray, NumericArrayConvertMethod, NumericArrayDataType, NumericArrayKind,
         NumericArrayType, UninitNumericArray,
@@ -284,7 +285,7 @@ use crate::expr::{Expr, ExprKind, Symbol};
 // TODO: Mention which error code specifically:
 //         `macro_utils::error_code::FAILED_WITH_PANIC`.
 ///
-/// If the initialization function panics, the Kernel will prevent other LibraryLink
+/// If the initialization function panics, the Wolfram Kernel will prevent other LibraryLink
 /// functions exported from that library from being loaded.
 ///
 /// # Example
@@ -345,6 +346,19 @@ pub use wolfram_library_link_macros::init;
 /// # mod scope {
 /// # use wolfram_library_link::export;
 /// #[export(name = "WL_square")]
+/// # fn square(x: i64) -> i64 { x }
+/// # }
+/// ```
+///
+/// ### Advanced
+///
+/// Don't include an exported function in the automatic
+/// [`generate_loader!`] output.
+///
+/// ```
+/// # mod scope {
+/// # use wolfram_library_link::export;
+/// #[export(hidden)]
 /// # fn square(x: i64) -> i64 { x }
 /// # }
 /// ```
@@ -760,6 +774,8 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// All functions exported by the [`#[export(..)]`][crate::export] macro will
 /// automatically be included in the Association returned by this function.
 ///
+/// See also: [`exported_library_functions_association()`]
+///
 /// # Syntax
 ///
 /// Generate and export an automatic loader function.
@@ -784,7 +800,7 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 ///
 /// ```
 /// # mod scope {
-/// use wolfram_library_link::{self as wll, NumericArray, expr::{Expr, Symbol, Number}};
+/// use wolfram_library_link::{self as wll, NumericArray, expr::{Expr, Symbol}};
 ///
 /// wll::generate_loader![load_my_library_functions];
 ///
@@ -807,7 +823,7 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 ///     let duration = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
 ///
 ///     Expr::normal(Symbol::new("System`Quantity"), vec![
-///         Expr::number(Number::real(duration.as_secs_f64())),
+///         Expr::real(duration.as_secs_f64()),
 ///         Expr::string("Seconds")
 ///     ])
 /// }

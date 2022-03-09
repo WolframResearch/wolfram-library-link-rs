@@ -92,6 +92,7 @@ pub(crate) fn export(
     let ExportArgs {
         use_wstp,
         exported_name,
+        hidden,
     } = parse_export_attribute_args(attrs)?;
 
     //--------------------------------------------------------------------
@@ -140,9 +141,9 @@ pub(crate) fn export(
     let params = func.sig.inputs.clone();
 
     let wrapper = if use_wstp {
-        export_wstp_function(&name, &exported_name, params)
+        export_wstp_function(&name, &exported_name, params, hidden)
     } else {
-        export_native_function(&name, &exported_name, params.len())
+        export_native_function(&name, &exported_name, params.len(), hidden)
     };
 
     let output = quote! {
@@ -163,10 +164,11 @@ fn export_native_function(
     name: &Ident,
     exported_name: &Ident,
     parameter_count: usize,
+    hidden: bool,
 ) -> TokenStream2 {
     let params = vec![quote! { _ }; parameter_count];
 
-    quote! {
+    let mut tokens = quote! {
         mod #name {
             #[no_mangle]
             pub unsafe extern "C" fn #exported_name(
@@ -189,19 +191,26 @@ fn export_native_function(
             }
         }
 
-        // Register this exported function.
-        ::wolfram_library_link::inventory::submit! {
-            ::wolfram_library_link::macro_utils::LibraryLinkFunction::Native {
-                name: stringify!(#exported_name),
-                signature: || {
-                    let func: fn(#(#params),*) -> _ = #name;
-                    let func: &dyn ::wolfram_library_link::NativeFunction<'_> = &func;
+    };
 
-                    func.signature()
+    if !hidden {
+        tokens.extend(quote! {
+            // Register this exported function.
+            ::wolfram_library_link::inventory::submit! {
+                ::wolfram_library_link::macro_utils::LibraryLinkFunction::Native {
+                    name: stringify!(#exported_name),
+                    signature: || {
+                        let func: fn(#(#params),*) -> _ = #name;
+                        let func: &dyn ::wolfram_library_link::NativeFunction<'_> = &func;
+
+                        func.signature()
+                    }
                 }
             }
-        }
+        });
     }
+
+    tokens
 }
 
 //--------------------------------------
@@ -212,10 +221,11 @@ fn export_wstp_function(
     name: &Ident,
     exported_name: &Ident,
     parameter_tys: syn::punctuated::Punctuated<syn::FnArg, syn::token::Comma>,
+    hidden: bool,
 ) -> TokenStream2 {
     // let params = vec![quote! { _ }; parameter_count];
 
-    quote! {
+    let mut tokens = quote! {
         mod #name {
             // Ensure that types imported into the enclosing parent module can be used in
             // the expansion of $argc. Always `Link` or `Vec<Expr>` at the moment.
@@ -244,12 +254,19 @@ fn export_wstp_function(
                 )
             }
 
+        }
+    };
+
+    if !hidden {
+        tokens.extend(quote! {
             // Register this exported function.
             ::wolfram_library_link::inventory::submit! {
                 ::wolfram_library_link::macro_utils::LibraryLinkFunction::Wstp { name: stringify!(#exported_name) }
             }
-        }
+        });
     }
+
+    tokens
 }
 
 //======================================
@@ -262,10 +279,16 @@ struct ExportArgs {
     use_wstp: bool,
     /// `#[export(name = "...")]`
     exported_name: Option<Ident>,
+    /// `#[export(hidden)]`
+    ///
+    /// If set, this exported function will not have an automatic loader entry generated
+    /// for it.
+    hidden: bool,
 }
 
 fn parse_export_attribute_args(attrs: syn::AttributeArgs) -> Result<ExportArgs, Error> {
     let mut use_wstp = false;
+    let mut hidden = false;
     let mut exported_name: Option<Ident> = None;
 
     for attr in attrs {
@@ -280,6 +303,16 @@ fn parse_export_attribute_args(attrs: syn::AttributeArgs) -> Result<ExportArgs, 
                     }
 
                     use_wstp = true;
+                },
+                Meta::Path(path) if path.is_ident("hidden") => {
+                    if hidden {
+                        return Err(Error::new(
+                            attr.span(),
+                            "duplicate export `hidden` attribute argument",
+                        ));
+                    }
+
+                    hidden = true;
                 },
                 Meta::List(_) | Meta::Path(_) => {
                     return Err(Error::new(
@@ -336,5 +369,6 @@ fn parse_export_attribute_args(attrs: syn::AttributeArgs) -> Result<ExportArgs, 
     Ok(ExportArgs {
         use_wstp,
         exported_name,
+        hidden,
     })
 }
