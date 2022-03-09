@@ -357,6 +357,25 @@ pub unsafe fn load_library_functions_impl(
 // * Most efficient library type is used automatically (memory management strategy for
 //   NumericArray's)
 ///
+/// # Note on semver compatibility
+///
+/// The only backwards-compatibility guarantee provided by this function is that it
+/// returns an Association of the form:
+///
+/// ```
+/// <| ( name_?StringQ -> func_ )... |>
+/// ```
+///
+/// where `name` is the exported name of the function and `func` is an expression that will
+/// call the library function when arguments are applied to it. No specific guarantee is
+/// made about what form `func` is.
+///
+/// `func` is _currently_ a `LibraryFunction[..]` expression for native functions, and a
+/// `Function[..]` expression for WSTP functions, but this is not guaranteed to stay
+/// unchanged between semver compatible version numbers of this library.
+///
+/// Callers should treat `func` as an opaque expression that they can apply arguments to.
+///
 /// [Association]: https://reference.wolfram.com/language/ref/Association.html
 /// [LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
 pub fn exported_library_functions_association(library: Option<PathBuf>) -> Expr {
