@@ -35,6 +35,7 @@
 //! # Related links
 //!
 //! * [Managed Library Expressions] section of the LibraryLink documentation.
+//! * The [wolfram-library-link managed expressions example](https://github.com/WolframResearch/wolfram-library-link-rs#example-programs).
 //!
 //! [Managed Library Expressions]: https://reference.wolfram.com/language/LibraryLink/tutorial/InteractionWithWolframLanguage.html#353220453
 //! [ref/CreateManagedLibraryExpression]: https://reference.wolfram.com/language/ref/CreateManagedLibraryExpression.html
