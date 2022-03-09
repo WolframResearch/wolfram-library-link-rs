@@ -241,7 +241,7 @@ pub unsafe fn load_library_functions_impl(
 ///
 /// # Example
 ///
-/// Support that a library exports two functions:
+/// Suppose that a library exports two functions:
 ///
 /// ```
 /// # mod scope {
