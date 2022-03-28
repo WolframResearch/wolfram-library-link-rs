@@ -23,7 +23,7 @@ script = { file = "./scripts/RunTests.wls"}
 
 [tasks.clean-library-resources]
 script = '''
-rm -rf ./RustLink/LibraryResources
+rm -rf ./build/
 '''
 
 [tasks.build-library-resources]

@@ -92,15 +92,15 @@ See also: [`NumericArray`][ref/NumericArray], [`LibraryDataType`][ref/LibraryDat
 The [wolfram-library-link/examples](./wolfram-library-link/examples) subdirectory
 contains sample programs demonstrating features of the `wolfram-library-link` API.
 
-Rust code                                                                          | Wolfram Language code                                                   | Demonstrates ...
------------------------------------------------------------------------------------|-------------------------------------------------------------------------|-------------------------------
-[basic_types.rs](wolfram-library-link/examples/basic_types.rs)                     | [BasicTypes.wlt](RustLink/Examples/BasicTypes.wlt)                      | how to write Rust *LibraryLink* functions utilizing the basic, native types that can be passed efficiently, like integers, floating-point real numbers, and strings.
-[numeric_arrays.rs](wolfram-library-link/examples/numeric_arrays.rs)               | [NumericArrays.wlt](RustLink/Examples/NumericArrays.wlt)                | how the [`NumericArray`][NumericArray] data type can be used to efficiently pass large multi-dimensional arrays of uniform numeric data.
-[wstp.rs](wolfram-library-link/examples/wstp.rs)                                   | [WSTP.wlt](RustLink/Examples/WSTP.wlt)                                  | how WSTP [`Link`][wstp::Link]s can be used to pass arbitrary expressions to and from LibraryLink functions.
-[aborts.rs](wolfram-library-link/examples/aborts.rs)                               | [Aborts.wlt](RustLink/Examples/Aborts.wlt)                              | how Rust code can respond to Wolfram [abort requests][interrupts].
-[async_file_watcher.rs](wolfram-library-link/examples/async/async_file_watcher.rs) | [AsyncExamples.wlt](RustLink/Examples/AsyncExamples.wlt)                | how Rust code can generate asynchronous events that trigger Wolfram evaluations to process the event.
-[managed.rs](wolfram-library-link/examples/exprs/managed.rs)                       | [ManagedExpressions.wlt](RustLink/Examples/ManagedExpressions.wlt)      | how the managed expression API can be used to free library data when a Wolfram expression is deallocated.
-[data_store.rs](wolfram-library-link/examples/data_store.rs)                       | [DataStore.wlt](RustLink/Examples/DataStore.wlt)                        | how the [`DataStore`][DataStore] data type can be used to efficiently pass arbitrary expression-like heterogenous structures made up of native *LibraryLink* data types.
+Rust code                                                                          | Wolfram Language code                                                                               | Demonstrates ...
+-----------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|-------------------------------
+[basic_types.rs](wolfram-library-link/examples/basic_types.rs)                     | [BasicTypes.wlt](wolfram-library-link/RustLink/Examples/BasicTypes.wlt)                      | how to write Rust *LibraryLink* functions utilizing the basic, native types that can be passed efficiently, like integers, floating-point real numbers, and strings.
+[numeric_arrays.rs](wolfram-library-link/examples/numeric_arrays.rs)               | [NumericArrays.wlt](wolfram-library-link/RustLink/Examples/NumericArrays.wlt)                | how the [`NumericArray`][NumericArray] data type can be used to efficiently pass large multi-dimensional arrays of uniform numeric data.
+[wstp.rs](wolfram-library-link/examples/wstp.rs)                                   | [WSTP.wlt](wolfram-library-link/RustLink/Examples/WSTP.wlt)                                  | how WSTP [`Link`][wstp::Link]s can be used to pass arbitrary expressions to and from LibraryLink functions.
+[aborts.rs](wolfram-library-link/examples/aborts.rs)                               | [Aborts.wlt](wolfram-library-link/RustLink/Examples/Aborts.wlt)                              | how Rust code can respond to Wolfram [abort requests][interrupts].
+[async_file_watcher.rs](wolfram-library-link/examples/async/async_file_watcher.rs) | [AsyncExamples.wlt](wolfram-library-link/RustLink/Examples/AsyncExamples.wlt)                | how Rust code can generate asynchronous events that trigger Wolfram evaluations to process the event.
+[managed.rs](wolfram-library-link/examples/exprs/managed.rs)                       | [ManagedExpressions.wlt](wolfram-library-link/RustLink/Examples/ManagedExpressions.wlt)      | how the managed expression API can be used to free library data when a Wolfram expression is deallocated.
+[data_store.rs](wolfram-library-link/examples/data_store.rs)                       | [DataStore.wlt](wolfram-library-link/RustLink/Examples/DataStore.wlt)                        | how the [`DataStore`][DataStore] data type can be used to efficiently pass arbitrary expression-like heterogenous structures made up of native *LibraryLink* data types.
 
 [NumericArray]: https://docs.rs/wolfram-library-link/latest/wolfram_library_link/struct.NumericArray.html
 [wstp::Link]: https://docs.rs/wstp/latest/wstp/struct.Link.html
@@ -114,14 +114,14 @@ and `WSLINK` types, and manual WSTP operations.
 
 Rust code                                                            | Wolfram Language code
 ---------------------------------------------------------------------|-----------------
-[raw_librarylink_function.rs](wolfram-library-link/examples/raw/raw_librarylink_function.rs) and [raw_wstp_function.rs](wolfram-library-link/examples/raw/raw_wstp_function.rs) | [RawFunctions.wlt](RustLink/Examples/RawFunctions.wlt)
+[raw_librarylink_function.rs](wolfram-library-link/examples/raw/raw_librarylink_function.rs) and [raw_wstp_function.rs](wolfram-library-link/examples/raw/raw_wstp_function.rs) | [RawFunctions.wlt](wolfram-library-link/RustLink/Examples/RawFunctions.wlt)
 
 #### Additional examples
 
 In addition to the polished high-level examples, the
 [wolfram-library-link/examples/tests/](wolfram-library-link/examples/tests/) directory
 contains test code for a more exhaustive range of functionality and behavior, and may be a
-useful additional reference. The [RustLink/Tests/](./RustLink/Tests/) directory contains
+useful additional reference. The [RustLink/Tests/](./wolfram-library-link/RustLink/Tests/) directory contains
 the Wolfram Language unit testing logic that loads and calls the test functions.
 
 [wstp]: https://crates.io/crates/wstp

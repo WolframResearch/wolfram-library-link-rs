@@ -10,6 +10,15 @@ description = "Bindings to Wolfram LibraryLink"
 keywords = ["wolfram-library-link", "wstp", "wolfram", "wolfram-language", "wolfram-engine"]
 categories = ["external-ffi-bindings", "development-tools::ffi"]
 
+include = [
+    "/src",
+    "/examples",
+    # Files in this directory are included in the `wolfram_library_link::docs` module
+    # via `#[doc = include_str!()]`, so these need to be included in the published crate
+    # in order for the docs.rs build to succeed.
+    "/RustLink/Examples/Docs"
+]
+
 [dependencies]
 wolfram-library-link-macros    = { version = "0.2.1", path = "./wolfram-library-link-macros" }
 
@@ -96,6 +105,15 @@ crate-type = ["cdylib"]
 [[example]]
 name = "async_file_watcher_raw"
 path = "examples/async/async_file_watcher_raw.rs"
+crate-type = ["cdylib"]
+
+#---------------
+# Examples from the wolfram_library_link::docs module
+#---------------
+
+[[example]]
+name = "wll_docs"
+path = "examples/docs/main.rs"
 crate-type = ["cdylib"]
 
 #---------------

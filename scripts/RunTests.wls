@@ -1,4 +1,4 @@
-#!/usr/bin/env wolframscript -local /Applications/Wolfram/Mathematica-12.3.0.app/Contents/MacOS/WolframKernel
+#!/usr/bin/env wolframscript -local /Applications/Wolfram/Mathematica-13.0.0.app/Contents/MacOS/WolframKernel
 (* ::Package:: *)
 
 (* ::Title:: *)
@@ -8,9 +8,22 @@
 Needs["PacletTools`"]
 Needs["CodeFormatter`"]
 
+(*----------------------------------------------------------*)
+(* Verify that Directory[] is the repository root directory *)
+(*----------------------------------------------------------*)
+
+$repositoryDir = Directory[];
+
+If[FileNameTake[$repositoryDir] =!= "wolfram-library-link-rs",
+	Throw[StringForm["Unexpected repository root directory path: ``", $repositoryDir]]
+];
+
+(*---------------*)
+(* Run the tests *)
+(*---------------*)
 
 result = PacletTest[
-	FileNameJoin[{Directory[], "RustLink"}],
+	FileNameJoin[{$repositoryDir, "build", "RustLink"}],
 	Parallelization -> False
 ];
 

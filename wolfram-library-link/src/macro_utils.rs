@@ -362,7 +362,7 @@ pub unsafe fn load_library_functions_impl(
 /// The only backwards-compatibility guarantee provided by this function is that it
 /// returns an Association of the form:
 ///
-/// ```
+/// ```wolfram
 /// <| ( name_?StringQ -> func_ )... |>
 /// ```
 ///

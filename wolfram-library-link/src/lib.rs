@@ -123,6 +123,14 @@
 //!
 //!
 //!
+//! # Documentation
+//!
+//! * [How To: Convert Between Rust and Wolfram Types][crate::docs::converting_between_rust_and_wolfram_types]
+//!
+//! <br />
+//!
+//!
+//!
 //! # Additional Features
 //!
 //! ### Non-primitive native types
@@ -213,6 +221,8 @@ mod catch_panic;
 mod data_store;
 mod image;
 mod library_data;
+mod numeric_array;
+
 /// This module is *semver exempt*. This is not intended to be part of the public API of
 /// wolfram-library-link.
 ///
@@ -220,8 +230,9 @@ mod library_data;
 #[doc(hidden)]
 pub mod macro_utils;
 pub mod managed;
-mod numeric_array;
 pub mod rtl;
+
+pub mod docs;
 
 
 // Note: This is exported as doc(inline) so that it shows up in the 'Modules' section of
