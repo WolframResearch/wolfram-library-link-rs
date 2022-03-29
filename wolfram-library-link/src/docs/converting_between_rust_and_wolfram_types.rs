@@ -45,7 +45,7 @@ transfering the expression using [WSTP](https://crates.io/crates/wstp), via the
 
 ```wolfram
 */
-#![doc = include_str!("../../RustLink/Examples/Docs/Convert/ManualWstp.wlt")]
+#![doc = include_str!("../../RustLink/Examples/Docs/Convert/ManualWSTP.wlt")]
 /*!
 ```
 
