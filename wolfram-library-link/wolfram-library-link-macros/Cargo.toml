@@ -1,6 +1,6 @@
 [package]
 name = "wolfram-library-link-macros"
-version = "0.2.1"
+version = "0.2.2"
 license = "MIT OR Apache-2.0"
 edition = "2021"
 repository = "https://github.com/WolframResearch/wolfram-library-link-rs"

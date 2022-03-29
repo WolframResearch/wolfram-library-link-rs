@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.2.2] – 2022-03-28
+
+### Added
+
+* Added a new [`wolfram_library_link::docs`](https://docs.rs/wolfram-library-link/0.2.2/wolfram_library_link/docs/index.html)
+  module, and an initial 'How To' documentation page describing how to convert between
+  Rust types and Wolfram expressions. ([#31])
+
+  * [How To: Convert Between Rust and Wolfram Types](https://docs.rs/wolfram-library-link/0.2.2/wolfram_library_link/docs/converting_between_rust_and_wolfram_types/index.html)
+
+
+
 ## [0.2.1] – 2022-03-09
 
 ### Added
@@ -161,10 +173,14 @@ caused by bugs present in early versions of `wolfram-app-discovery` and `wstp-sy
 <!-- v0.2.1 -->
 [#26]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/26
 
+<!-- v0.2.2 -->
+[#31]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/31
+
 
 <!-- This needs to be updated for each tagged release. -->
-[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.2...HEAD
 
+[0.2.2]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.1.1...v0.1.2
