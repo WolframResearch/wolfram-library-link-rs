@@ -34,14 +34,16 @@ transfering the expression using [WSTP](https://crates.io/crates/wstp), via the
 **Rust**
 
 ```rust
+# mod scope {
 */
 #![doc = include_str!("../../examples/docs/convert/manual_wstp.rs")]
 /*!
+# }
 ```
 
 **Wolfram**
 
-```rust
+```wolfram
 */
 #![doc = include_str!("../../RustLink/Examples/Docs/Convert/ManualWstp.wlt")]
 /*!
@@ -56,14 +58,16 @@ type.
 **Rust**
 
 ```rust
+# mod scope {
 */
 #![doc = include_str!("../../examples/docs/convert/using_expr.rs")]
 /*!
+# }
 ```
 
 **Wolfram**
 
-```rust
+```wolfram
 */
 #![doc = include_str!("../../RustLink/Examples/Docs/Convert/UsingExpr.wlt")]
 /*!
