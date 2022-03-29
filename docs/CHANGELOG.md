@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.2.3] – 2022-03-29
+
+### Fixed
+
+* Fixed docs.rs build failure in v0.2.2, caused by a `#[doc = include_str!(..)]` that
+  fails on case-sensitive targets like the docs.rs Linux build host. ([#34])
+
+
+
 ## [0.2.2] – 2022-03-28
 
 ### Added
@@ -176,10 +185,14 @@ caused by bugs present in early versions of `wolfram-app-discovery` and `wstp-sy
 <!-- v0.2.2 -->
 [#31]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/31
 
+<!-- v0.2.3 -->
+[#34]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/34
+
 
 <!-- This needs to be updated for each tagged release. -->
-[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.3...HEAD
 
+[0.2.3]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.1.2...v0.2.0
