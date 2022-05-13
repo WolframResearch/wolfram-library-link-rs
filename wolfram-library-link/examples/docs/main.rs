@@ -3,6 +3,6 @@ mod convert {
     mod using_expr;
 }
 
-mod call_back_into_wolfram_from_rust {
+mod evaluate_wolfram_code_from_rust {
     mod generate_message;
 }
