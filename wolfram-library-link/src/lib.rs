@@ -126,7 +126,7 @@
 //! # Documentation
 //!
 //! * [How To: Convert Between Rust and Wolfram Types][crate::docs::converting_between_rust_and_wolfram_types]
-//! * [How To: Call back into Wolfram from Rust][docs::call_back_into_wolfram_from_rust]
+//! * [How To: Evaluate Wolfram code from Rust][docs::evaluate_wolfram_code_from_rust]
 //!
 //! *See the [`docs`] module for a complete list of available long-form documentation.*
 //!
