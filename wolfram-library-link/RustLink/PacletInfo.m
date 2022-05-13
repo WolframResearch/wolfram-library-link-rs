@@ -14,7 +14,7 @@ PacletObject[<|
 
         (* Test the documentation examples used in wolfram_library_link::docs. *)
         {"Tests", "Method" -> "Experimental-v1", "Root" -> "Examples/Docs/Convert"},
-        {"Tests", "Method" -> "Experimental-v1", "Root" -> "Examples/Docs/CallBackIntoWolframFromRust"}
+        {"Tests", "Method" -> "Experimental-v1", "Root" -> "Examples/Docs/EvaluateWolframCodeFromRust"}
     }
 |>]
 

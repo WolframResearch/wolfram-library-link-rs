@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.2.4] – 2022-05-13
+
+### Added
+
+* Added a new 'How To' page describing how to perform Wolfram evaluations from Rust
+  library functions. ([#38], [#39])
+
+  * [How To: Evaluate Wolfram code from Rust](https://docs.rs/wolfram-library-link/0.2.4/wolfram_library_link/docs/evaluate_wolfram_code_from_rust/index.html)
+
+
+
 ## [0.2.3] – 2022-03-29
 
 ### Fixed
@@ -188,10 +199,15 @@ caused by bugs present in early versions of `wolfram-app-discovery` and `wstp-sy
 <!-- v0.2.3 -->
 [#34]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/34
 
+<!-- v0.2.4 -->
+[#38]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/38
+[#39]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/39
+
 
 <!-- This needs to be updated for each tagged release. -->
-[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.3...HEAD
+[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.4...HEAD
 
+[0.2.4]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.0...v0.2.1
