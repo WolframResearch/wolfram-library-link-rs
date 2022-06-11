@@ -1,6 +1,6 @@
 [package]
 name = "wolfram-library-link"
-version = "0.2.4"
+version = "0.2.5"
 authors = ["Connor Gray <code@connorgray.com>"]
 license = "MIT OR Apache-2.0"
 edition = "2021"
@@ -20,9 +20,9 @@ include = [
 ]
 
 [dependencies]
-wolfram-library-link-macros    = { version = "0.2.4", path = "./wolfram-library-link-macros" }
+wolfram-library-link-macros    = { version = "0.2.5", path = "./wolfram-library-link-macros" }
 
-wolfram-library-link-sys       = { version = "0.2.4", path = "../wolfram-library-link-sys" }
+wolfram-library-link-sys       = { version = "0.2.5", path = "../wolfram-library-link-sys" }
 
 wstp         = "0.2.1"
 wolfram-expr = "0.1.0"

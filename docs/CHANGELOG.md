@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+
+
+## [0.2.5] – 2022-06-11
+
+### Fixed
+
+* Fixed [issue #29](https://github.com/WolframResearch/wolfram-library-link-rs/issues/29), a compilation failure on Windows. ([#41], [#42])
+
+
+
 ## [0.2.4] – 2022-05-13
 
 ### Added
@@ -203,10 +213,15 @@ caused by bugs present in early versions of `wolfram-app-discovery` and `wstp-sy
 [#38]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/38
 [#39]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/39
 
+<!-- v0.2.5 -->
+[#41]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/41
+[#42]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/42
+
 
 <!-- This needs to be updated for each tagged release. -->
-[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.4...HEAD
+[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.5...HEAD
 
+[0.2.5]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.1...v0.2.2
