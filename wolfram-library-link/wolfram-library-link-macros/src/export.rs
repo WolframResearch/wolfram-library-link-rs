@@ -176,7 +176,7 @@ fn export_native_function(
                 argc: ::wolfram_library_link::sys::mint,
                 args: *mut ::wolfram_library_link::sys::MArgument,
                 res: ::wolfram_library_link::sys::MArgument,
-            ) -> std::os::raw::c_uint {
+            ) -> std::os::raw::c_int {
                 // Cast away the unique `fn(...) {some_name}` function type to get the
                 // generic `fn(...)` type.
                 let func: fn(#(#params),*) -> _ = super::#name;
@@ -235,7 +235,7 @@ fn export_wstp_function(
             pub unsafe extern "C" fn #exported_name(
                 lib: ::wolfram_library_link::sys::WolframLibraryData,
                 raw_link: ::wolfram_library_link::wstp::sys::WSLINK,
-            ) -> std::os::raw::c_uint {
+            ) -> std::os::raw::c_int {
                 // Cast away the unique `fn(...) {some_name}` function type to get the
                 // generic `fn(...)` type.
                 // The number of arguments is required for type inference of the variadic
