@@ -909,7 +909,7 @@ macro_rules! generate_loader {
             pub unsafe extern "C" fn $name(
                 lib: $crate::sys::WolframLibraryData,
                 raw_link: $crate::wstp::sys::WSLINK,
-            ) -> std::os::raw::c_uint {
+            ) -> std::os::raw::c_int {
                 $crate::macro_utils::load_library_functions_impl(lib, raw_link)
             }
         };
