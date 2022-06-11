@@ -172,16 +172,16 @@ pub enum NumericArrayDataType {
 #[repr(u32)]
 #[allow(missing_docs)]
 pub enum NumericArrayConvertMethod {
-    Cast = MNumericArray_Convert_Cast,
-    Check = MNumericArray_Convert_Check,
-    Coerce = MNumericArray_Convert_Coerce,
-    Round = MNumericArray_Convert_Round,
-    Scale = MNumericArray_Convert_Scale,
-    ClipAndCast = MNumericArray_Convert_Clip_Cast,
-    ClipAndCheck = MNumericArray_Convert_Clip_Check,
-    ClipAndCoerce = MNumericArray_Convert_Clip_Coerce,
-    ClipAndRound = MNumericArray_Convert_Clip_Round,
-    ClipAndScale = MNumericArray_Convert_Clip_Scale,
+    Cast = MNumericArray_Convert_Cast as u32,
+    Check = MNumericArray_Convert_Check as u32,
+    Coerce = MNumericArray_Convert_Coerce as u32,
+    Round = MNumericArray_Convert_Round as u32,
+    Scale = MNumericArray_Convert_Scale as u32,
+    ClipAndCast = MNumericArray_Convert_Clip_Cast as u32,
+    ClipAndCheck = MNumericArray_Convert_Clip_Check as u32,
+    ClipAndCoerce = MNumericArray_Convert_Clip_Coerce as u32,
+    ClipAndRound = MNumericArray_Convert_Clip_Round as u32,
+    ClipAndScale = MNumericArray_Convert_Clip_Scale as u32,
 }
 
 /// Data array borrowed from a [`NumericArray`].
@@ -540,6 +540,7 @@ impl<T> NumericArray<T> {
     #[allow(missing_docs)]
     pub fn data_type(&self) -> NumericArrayDataType {
         let value: sys::numericarray_data_t = self.data_type_raw();
+        let value: u32 = value as u32;
 
         NumericArrayDataType::try_from(value)
             .expect("NumericArray tensor property type is value is not a known NumericArrayDataType variant")
@@ -828,7 +829,7 @@ fn copy_from_slice_uninit<T>(src: &[T], dest: &mut [MaybeUninit<T>]) {
 impl NumericArrayDataType {
     #[allow(missing_docs)]
     pub fn as_raw(self) -> sys::numericarray_data_t {
-        self as u32
+        self as sys::numericarray_data_t
     }
 
     /// Get the string name of this type, suitable for use in
@@ -860,7 +861,7 @@ impl NumericArrayDataType {
 impl NumericArrayConvertMethod {
     #[allow(missing_docs)]
     pub fn as_raw(self) -> sys::numericarray_convert_method_t {
-        self as u32
+        self as sys::numericarray_convert_method_t
     }
 }
 

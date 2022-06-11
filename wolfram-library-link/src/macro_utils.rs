@@ -1,7 +1,4 @@
-use std::{
-    os::raw::{c_int, c_uint},
-    path::PathBuf,
-};
+use std::{os::raw::c_int, path::PathBuf};
 
 use wstp::{self, Link};
 
@@ -22,19 +19,19 @@ use crate::{
 // TODO: Make this module public somewhere and document these error code in #[export(..)]
 //       and Overview.md.
 mod error_code {
-    use std::os::raw::c_uint;
+    use std::os::raw::c_int;
 
     // Chosen arbitrarily. Avoids clashing with `LIBRARY_FUNCTION_ERROR` and related
     // error codes.
-    const OFFSET: c_uint = 1000;
+    const OFFSET: c_int = 1000;
 
     /// A call to [initialize()][crate::initialize] failed.
-    pub const FAILED_TO_INIT: c_uint = OFFSET + 1;
+    pub const FAILED_TO_INIT: c_int = OFFSET + 1;
 
     /// The library code panicked.
     //
     // TODO: Wherever this code is set, also set a $LastError-like variable.
-    pub const FAILED_WITH_PANIC: c_uint = OFFSET + 2;
+    pub const FAILED_WITH_PANIC: c_int = OFFSET + 2;
 }
 
 //==================
@@ -47,7 +44,7 @@ unsafe fn call_wstp_link_wolfram_library_function<
     libdata: sys::WolframLibraryData,
     mut unsafe_link: wstp::sys::WSLINK,
     function: F,
-) -> c_uint {
+) -> c_int {
     // Initialize the library.
     if crate::initialize(libdata).is_err() {
         return error_code::FAILED_TO_INIT;
@@ -61,14 +58,14 @@ unsafe fn call_wstp_link_wolfram_library_function<
         }));
 
     match result {
-        Ok(()) => LIBRARY_NO_ERROR,
+        Ok(()) => LIBRARY_NO_ERROR as c_int,
         // Try to fail gracefully by writing the panic message as a Failure[..] object to
         // be returned, but if that fails, just return LIBRARY_FUNCTION_ERROR.
         Err(panic) => match write_panic_failure_to_link(link, panic) {
-            Ok(()) => LIBRARY_NO_ERROR,
+            Ok(()) => LIBRARY_NO_ERROR as c_int,
             Err(_wstp_err) => {
                 // println!("PANIC ERROR: {}", _wstp_err);
-                sys::LIBRARY_FUNCTION_ERROR // +1
+                sys::LIBRARY_FUNCTION_ERROR as c_int // +1
             },
         },
     }
@@ -114,7 +111,7 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
     argc: sys::mint,
     res: MArgument,
     func: F,
-) -> c_uint {
+) -> c_int {
     use std::panic::AssertUnwindSafe;
 
     // Initialize the library.
@@ -124,7 +121,7 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
 
     let argc = match usize::try_from(argc) {
         Ok(argc) => argc,
-        Err(_) => return sys::LIBRARY_FUNCTION_ERROR,
+        Err(_) => return sys::LIBRARY_FUNCTION_ERROR as c_int,
     };
 
     // FIXME: This isn't safe! 'a could be 'static, and then the user could store the
@@ -138,7 +135,7 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
         return error_code::FAILED_WITH_PANIC;
     };
 
-    sys::LIBRARY_NO_ERROR
+    sys::LIBRARY_NO_ERROR as c_int
 }
 
 pub unsafe fn call_wstp_wolfram_library_function<
@@ -147,7 +144,7 @@ pub unsafe fn call_wstp_wolfram_library_function<
     libdata: sys::WolframLibraryData,
     unsafe_link: wstp::sys::WSLINK,
     func: F,
-) -> c_uint {
+) -> c_int {
     call_wstp_link_wolfram_library_function(
         libdata,
         unsafe_link,
@@ -204,7 +201,7 @@ inventory::collect!(LibraryLinkFunction);
 pub unsafe fn load_library_functions_impl(
     lib_data: sys::WolframLibraryData,
     raw_link: wstp::sys::WSLINK,
-) -> c_uint {
+) -> c_int {
     call_wstp_link_wolfram_library_function(lib_data, raw_link, |link: &mut Link| {
         let arg_count: usize =
             link.test_head("List").expect("expected 'List' expression");
