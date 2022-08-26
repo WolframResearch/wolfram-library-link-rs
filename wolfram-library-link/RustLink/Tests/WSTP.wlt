@@ -50,6 +50,23 @@ TestMatch[
 TestMatch[
 	LibraryFunctionLoad[
 		"liblibrary_tests",
+		"test_wstp_fn_panic_partial_result",
+		LinkObject,
+		LinkObject
+	][]
+	,
+	Failure["RustPanic", <|
+		"MessageTemplate" -> "Rust LibraryLink function panic: `message`",
+		"MessageParameters" -> <|"message" -> "incomplete result"|>,
+		(* Avoid hard-coding the panic line/column number into the test. *)
+		"SourceLocation" -> s_?StringQ /; StringStartsQ[s, "wolfram-library-link/examples/tests/test_wstp.rs:"],
+		"Backtrace" -> Missing["NotEnabled"]
+	|>]
+]
+
+TestMatch[
+	LibraryFunctionLoad[
+		"liblibrary_tests",
 		"test_wstp_fn_poison_link_and_panic",
 		LinkObject,
 		LinkObject
