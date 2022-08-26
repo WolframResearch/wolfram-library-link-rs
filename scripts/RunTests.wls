@@ -1,4 +1,4 @@
-#!/usr/bin/env wolframscript -local /Applications/Wolfram/Mathematica-13.0.0.app/Contents/MacOS/WolframKernel
+#!/usr/bin/env wolframscript -local /Applications/Wolfram/Mathematica-13.1.0.app/Contents/MacOS/WolframKernel
 (* ::Package:: *)
 
 (* ::Title:: *)
@@ -34,10 +34,16 @@ If[!ListQ[result],
 	Exit[-1];
 ];
 
+codeFormattedString[expr_] :=
+	CodeFormat[
+		ToString[expr, InputForm],
+		"BreakLinesMethod" -> "LineBreakerV2"
+	]
+
 Scan[
 	Replace[report_ :> Module[{failedCases},
 		If[Head[report] =!= TestReportObject,
-			Echo[CodeFormat @ ToString[result, InputForm], "unexpected head"];
+			Echo[codeFormattedString[result], "unexpected head"];
 			Exit[-1];
 		];
 
@@ -49,7 +55,7 @@ Scan[
 				Do[
 					Print["=========================="];
 					Print["Failed Case: \n"];
-					Print[CodeFormat @ ToString[case, InputForm]];
+					Print[codeFormattedString[case]];
 					Print["\n"];
 					,
 					{case, failedCases}
