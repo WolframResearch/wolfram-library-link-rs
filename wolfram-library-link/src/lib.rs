@@ -733,6 +733,8 @@ pub fn aborted() -> bool {
     val == 1
 }
 
+// TODO: Instead of making these public, add new evaluate(..) alternative that
+//       takes a WstpExpr type.
 fn process_wstp_link(link: &mut Link) -> Result<(), String> {
     assert_main_thread();
 

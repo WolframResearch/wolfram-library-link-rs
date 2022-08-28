@@ -65,7 +65,7 @@ unsafe fn call_wstp_link_wolfram_library_function<
             Ok(()) => LIBRARY_NO_ERROR as c_int,
             Err(_wstp_err) => {
                 // println!("PANIC ERROR: {}", _wstp_err);
-                sys::LIBRARY_FUNCTION_ERROR as c_int // +1
+                error_code::FAILED_WITH_PANIC
             },
         },
     }
@@ -95,7 +95,28 @@ fn write_panic_failure_to_link(
     // Skip whatever data is still stored in the link, if any.
     if link.is_ready() {
         link.raw_get_next()?;
-        link.new_packet()?;
+
+        // Skip to the next packet on the link.
+        //
+        // If there is (possibly partial) data that is unread, this will
+        // skip to the end and return Ok. If there is partially complete data
+        // being *written*, this will still skip to the end, but will return
+        // an Err(..).
+        //
+        // Incomplete data being read typically happens if an unwrap()
+        // fails when expecting to read an argument of a specific type.
+        //
+        // Incomplete data being written typically happens if a panic occurs
+        // within the logic that puts the function return value. E.g.:
+        //
+        //     link.put_function("List", 3)?; // Start writing a function of 3 elems
+        //     todo!() // <-- leave the List[... incomplete.
+
+        let result: Result<(), _> = link.new_packet();
+
+        if result.is_err() {
+            link.clear_error();
+        }
     }
 
     link.put_expr(&caught_panic.to_pretty_expr())
