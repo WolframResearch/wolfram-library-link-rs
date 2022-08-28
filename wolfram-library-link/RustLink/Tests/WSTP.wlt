@@ -67,6 +67,30 @@ TestMatch[
 TestMatch[
 	LibraryFunctionLoad[
 		"liblibrary_tests",
+		"test_wstp_fn_return_partial_result",
+		LinkObject,
+		LinkObject
+	][]
+	,
+	Unevaluated @ LibraryFunction[
+		s_String /; StringEndsQ[
+			s,
+			FileNameJoin[{"RustLink", "LibraryResources", $SystemID}]
+			~~ $PathnameSeparator
+			~~ RepeatedNull["lib", 1]
+			~~ "library_tests."
+			~~ ("dylib" | "dll" | "so")
+		]
+		,
+		"test_wstp_fn_return_partial_result"
+		,
+		LinkObject
+	][]
+]
+
+TestMatch[
+	LibraryFunctionLoad[
+		"liblibrary_tests",
 		"test_wstp_fn_poison_link_and_panic",
 		LinkObject,
 		LinkObject
