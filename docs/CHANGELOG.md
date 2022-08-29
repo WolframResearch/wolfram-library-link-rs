@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.2.6] – 2022-08-28
+
+### Fixed
+
+* Fixed `Failure["RustPanic", ..]` messages not being returned from
+  `#[export(wstp)]` functions when a panic occurs after partial results had
+  begun being written to the WSTP link. ([#46])
+
+### Changed
+
+* Clarified documentation problem
+  [described in comment on #44](https://github.com/WolframResearch/wolfram-library-link-rs/issues/44#issuecomment-1153244113),
+  the documentation for `exported_library_functions_association()` was unclear about
+  when and how to use the `library` parameter. ([#47])
+
 
 
 ## [0.2.5] – 2022-06-11
@@ -217,10 +232,15 @@ caused by bugs present in early versions of `wolfram-app-discovery` and `wstp-sy
 [#41]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/41
 [#42]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/42
 
+<!-- v0.2.6 -->
+[#46]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/46
+[#47]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/47
+
 
 <!-- This needs to be updated for each tagged release. -->
-[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.5...HEAD
+[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.6...HEAD
 
+[0.2.6]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.2...v0.2.3
