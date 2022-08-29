@@ -257,6 +257,47 @@ pub unsafe fn load_library_functions_impl(
 ///
 /// See also: [`generate_loader!`][crate::generate_loader]
 ///
+/// ### Possible issues
+///
+/// <details>
+///   <summary>
+///     <h6 style="display: inline"><u>Automatic Discovery of Dynamic Library Path Fails</u></h6>
+///   </summary>
+///
+/// This function generates calls to
+/// [`LibraryFunctionLoad[lib, ...]`][LibraryFunctionLoad]
+/// automatically. The `lib` argument must be a library name or file path that
+/// the Wolfram Language can locate using [`FindLibrary`][FindLibrary].
+///
+/// [`exported_library_functions_association()`] will attempt to determine the
+/// `lib` file path automatically at runtime. (This is currently done using
+/// [`process_path::get_dylib_path()`](https://docs.rs/process_path/0.1.4/process_path/fn.get_dylib_path.html)
+/// ). However, determining this location automatically is not guaranteed to be
+/// supported on all operating systems and for all libraries.
+///
+/// In the event that automatic discovery of the dynamic library file path fails,
+/// you can specify the library name / path by specifing it as an argument
+/// to [`exported_library_functions_association()`]:
+///
+/// ```
+/// use std::path::PathBuf;
+/// # use wolfram_library_link::{exported_library_functions_association, expr::Expr};
+///
+/// // Specify a library base name. (FindLibrary will search on $LibraryPath and in paclets.)
+/// # fn a() -> Expr {
+/// exported_library_functions_association(Some(PathBuf::from("my_library")))
+/// # }
+///
+/// // Specify an absolute path
+/// # fn b() -> Expr {
+/// exported_library_functions_association(Some(PathBuf::from("/Some/Path/To/libmy_library.dylib")))
+/// # }
+/// ```
+///
+/// [FindLibrary]: https://reference.wolfram.com/language/ref/FindLibrary.html
+///
+/// </details>
+///
 /// # Example
 ///
 /// Suppose that a library exports two functions:
@@ -399,7 +440,7 @@ pub unsafe fn load_library_functions_impl(
 pub fn exported_library_functions_association(library: Option<PathBuf>) -> Expr {
     let library: PathBuf = library.unwrap_or_else(|| {
         process_path::get_dylib_path()
-            .expect("unable to automatically determine Rust LibraryLink dynamic library file path")
+            .expect("unable to automatically determine Rust LibraryLink dynamic library file path. Suggestion: pass the library name or path to exported_library_functions_association(..)")
     });
 
     let mut fields = Vec::new();
