@@ -43,11 +43,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Added a new [`wolfram_library_link::docs`](https://docs.rs/wolfram-library-link/0.2.2/wolfram_library_link/docs/index.html)
+* Added a new [`wolfram_library_link::docs`](https://docs.rs/wolfram-library-link/0.2.3/wolfram_library_link/docs/index.html)
   module, and an initial 'How To' documentation page describing how to convert between
   Rust types and Wolfram expressions. ([#31])
 
-  * [How To: Convert Between Rust and Wolfram Types](https://docs.rs/wolfram-library-link/0.2.2/wolfram_library_link/docs/converting_between_rust_and_wolfram_types/index.html)
+  * [How To: Convert Between Rust and Wolfram Types](https://docs.rs/wolfram-library-link/0.2.3/wolfram_library_link/docs/converting_between_rust_and_wolfram_types/index.html)
 
 
 
