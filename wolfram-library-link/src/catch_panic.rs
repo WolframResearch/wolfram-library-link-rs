@@ -8,7 +8,9 @@ use std::sync::{self, Mutex};
 use std::thread::{self, ThreadId};
 use std::time::Instant;
 
+#[cfg(feature = "panic-failure-backtraces")]
 use backtrace::Backtrace;
+
 use once_cell::sync::Lazy;
 
 use crate::expr::{Expr, Symbol};
@@ -30,6 +32,8 @@ pub struct CaughtPanic {
     /// occur in multiple threads at once.
     message: Option<String>,
     location: Option<String>,
+
+    #[cfg(feature = "panic-failure-backtraces")]
     backtrace: Option<Backtrace>,
 }
 
@@ -38,12 +42,32 @@ impl CaughtPanic {
         let CaughtPanic {
             message,
             location,
+
+            #[cfg(feature = "panic-failure-backtraces")]
             backtrace,
         } = self.clone();
 
         let message = Expr::string(message.unwrap_or("Rust panic (no message)".into()));
         let location = Expr::string(location.unwrap_or("Unknown".into()));
-        let backtrace = display_backtrace(backtrace);
+
+        let backtrace = {
+            // Avoid showing the backtrace if it hasn't been explicitly requested by the user.
+            // This avoids calling `.resolve()` below, which can sometimes be very slow (100s of
+            // millisends).
+            if !cfg!(feature = "panic-failure-backtraces") || !should_show_backtrace() {
+                Expr::normal(Symbol::new("System`Missing"), vec![Expr::string(
+                    "NotEnabled",
+                )])
+            } else {
+                #[cfg(feature = "panic-failure-backtraces")]
+                {
+                    display_backtrace(backtrace)
+                }
+
+                #[cfg(not(feature = "panic-failure-backtraces"))]
+                unreachable!()
+            }
+        };
 
         // Failure["RustPanic", <|
         //     "MessageTemplate" -> "Rust LibraryLink function panic: `message`",
@@ -82,16 +106,8 @@ fn should_show_backtrace() -> bool {
     std::env::var(crate::BACKTRACE_ENV_VAR).is_ok()
 }
 
+#[cfg(feature = "panic-failure-backtraces")]
 fn display_backtrace(bt: Option<Backtrace>) -> Expr {
-    // Avoid showing the backtrace if it hasn't been explicitly requested by the user.
-    // This avoids calling `.resolve()` below, which can sometimes be very slow (100s of
-    // millisends).
-    if !should_show_backtrace() {
-        return Expr::normal(Symbol::new("System`Missing"), vec![Expr::string(
-            "NotEnabled",
-        )]);
-    }
-
     let bt: Expr = if let Some(mut bt) = bt {
         // Resolve the symbols in the frames of the backtrace.
         bt.resolve();
@@ -241,6 +257,8 @@ fn get_caught_panic() -> CaughtPanic {
                     CaughtPanic {
                         message: Some(message),
                         location: None,
+
+                        #[cfg(feature = "panic-failure-backtraces")]
                         backtrace: None,
                     }
                 },
@@ -271,13 +289,18 @@ fn custom_hook(info: &panic::PanicInfo) {
     let caught_panic = {
         let message: Option<String> = get_panic_message(info);
         let location: Option<String> = info.location().map(ToString::to_string);
+
         // Don't resolve the backtrace inside the panic hook. This seems to hang for a
         // long time (maybe forever?). Resolving it later, in the ToPrettyExpr impl, seems
         // to work (though it is noticeably slower, takes maybe ~0.5s-1s).
+        #[cfg(feature = "panic-failure-backtraces")]
         let backtrace = Some(Backtrace::new_unresolved());
+
         CaughtPanic {
             message,
             location,
+
+            #[cfg(feature = "panic-failure-backtraces")]
             backtrace,
         }
     };

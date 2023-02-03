@@ -5,6 +5,19 @@ This document describes tasks necessary to maintain the `wolfram-library-link` a
 for the maintainer of these crates; users of these crates do not need to read this
 document.
 
+## Release
+
+### Check that common feature combinations compile successfully
+
+```shell
+$ cargo check --all-features --all-targets --tests --examples --benches
+```
+
+```shell
+$ cargo check --no-default-features --all-targets --tests --examples --benches
+```
+
+
 ## Generating `wolfram-library-link-sys` bindings
 
 After every Wolfram Language release, the pre-generated bindings stored in the

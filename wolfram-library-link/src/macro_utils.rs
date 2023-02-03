@@ -1,4 +1,4 @@
-use std::{os::raw::c_int, path::PathBuf};
+use std::os::raw::c_int;
 
 use wstp::{self, Link};
 
@@ -217,8 +217,10 @@ pub enum LibraryLinkFunction {
     },
 }
 
+#[cfg(feature = "automate-function-loading-boilerplate")]
 inventory::collect!(LibraryLinkFunction);
 
+#[cfg(feature = "automate-function-loading-boilerplate")]
 pub unsafe fn load_library_functions_impl(
     lib_data: sys::WolframLibraryData,
     raw_link: wstp::sys::WSLINK,
@@ -437,8 +439,11 @@ pub unsafe fn load_library_functions_impl(
 ///
 /// [Association]: https://reference.wolfram.com/language/ref/Association.html
 /// [LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
-pub fn exported_library_functions_association(library: Option<PathBuf>) -> Expr {
-    let library: PathBuf = library.unwrap_or_else(|| {
+#[cfg(feature = "automate-function-loading-boilerplate")]
+pub fn exported_library_functions_association(
+    library: Option<std::path::PathBuf>,
+) -> Expr {
+    let library: std::path::PathBuf = library.unwrap_or_else(|| {
         process_path::get_dylib_path()
             .expect("unable to automatically determine Rust LibraryLink dynamic library file path. Suggestion: pass the library name or path to exported_library_functions_association(..)")
     });
@@ -461,6 +466,10 @@ pub fn exported_library_functions_association(library: Option<PathBuf>) -> Expr 
     Expr::normal(Symbol::new("System`Association"), fields)
 }
 
+#[cfg_attr(
+    not(feature = "automate-function-loading-boilerplate"),
+    allow(dead_code)
+)]
 impl LibraryLinkFunction {
     fn name(&self) -> &str {
         match self {

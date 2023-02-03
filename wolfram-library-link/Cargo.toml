@@ -28,17 +28,22 @@ wstp         = "0.2.6"
 wolfram-expr = "0.1.0"
 
 once_cell = "1.8.0"
-backtrace = "^0.3.46"
 static_assertions = "1.1.0"
 ref-cast = "1.0.6"
-inventory = "0.2.1"
-process_path = "0.1.3"
+
+backtrace = { version = "^0.3.46", optional = true }
+inventory = { version = "0.2.1", optional = true }
+process_path = { version = "0.1.3", optional = true }
 
 [dev-dependencies]
 
 [features]
-default = []
+default = ["panic-failure-backtraces", "automate-function-loading-boilerplate"]
 nightly = []
+
+panic-failure-backtraces = ["backtrace"]
+automate-function-loading-boilerplate = ["inventory", "process_path", "wolfram-library-link-macros/automate-function-loading-boilerplate"]
+
 
 #=======================================
 # Examples
@@ -47,6 +52,7 @@ nightly = []
 [[example]]
 name = "basic_types"
 crate-type = ["cdylib"]
+required-features = ["automate-function-loading-boilerplate"]
 
 [[example]]
 name = "numeric_arrays"
@@ -64,6 +70,7 @@ crate-type = ["cdylib"]
 name = "wstp_example" # avoid "libwstp.dylib", which seems too generic.
 path = "examples/wstp.rs"
 crate-type = ["cdylib"]
+required-features = ["automate-function-loading-boilerplate"]
 
 #-----------------------------
 # Raw (unsafe, low-level) APIs
@@ -92,6 +99,7 @@ crate-type = ["cdylib"]
 name = "managed_exprs"
 path = "examples/exprs/managed.rs"
 crate-type = ["cdylib"]
+required-features = ["automate-function-loading-boilerplate"]
 
 #---------------
 # Async examples

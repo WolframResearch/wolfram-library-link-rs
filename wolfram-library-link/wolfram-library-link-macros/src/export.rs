@@ -193,7 +193,7 @@ fn export_native_function(
 
     };
 
-    if !hidden {
+    if !hidden && cfg!(feature = "automate-function-loading-boilerplate") {
         tokens.extend(quote! {
             // Register this exported function.
             ::wolfram_library_link::inventory::submit! {
@@ -257,7 +257,7 @@ fn export_wstp_function(
         }
     };
 
-    if !hidden {
+    if !hidden && cfg!(feature = "automate-function-loading-boilerplate") {
         tokens.extend(quote! {
             // Register this exported function.
             ::wolfram_library_link::inventory::submit! {

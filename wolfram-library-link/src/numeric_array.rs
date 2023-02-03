@@ -1,9 +1,9 @@
 use std::ffi::c_void;
 use std::fmt;
 use std::marker::PhantomData;
-use std::mem::MaybeUninit;
+use std::mem::{self, MaybeUninit};
 
-use static_assertions::{assert_eq_align, assert_eq_size, assert_not_impl_any};
+use static_assertions::assert_not_impl_any;
 
 use crate::{rtl, sys};
 
@@ -220,8 +220,8 @@ pub enum NumericArrayKind<'e> {
 
 // Assert that `sys::mcomplex` is the 64-bit complex real type and not a 32-bit complex
 // real type.
-assert_eq_size!(sys::mcomplex, [f64; 2]);
-assert_eq_align!(sys::mcomplex, f64);
+const _: () = assert!(mem::size_of::<sys::mcomplex>() == mem::size_of::<[f64; 2]>());
+const _: () = assert!(mem::align_of::<sys::mcomplex>() == mem::align_of::<f64>());
 
 //======================================
 // Impls
@@ -605,7 +605,7 @@ impl<T> NumericArray<T> {
         let dims: *const crate::sys::mint =
             unsafe { rtl::MNumericArray_getDimensions(numeric_array) };
 
-        assert_eq_size!(sys::mint, usize);
+        const _: () = assert!(mem::size_of::<sys::mint>() == mem::size_of::<usize>());
         let dims: *mut usize = dims as *mut usize;
 
         debug_assert!(!dims.is_null());
