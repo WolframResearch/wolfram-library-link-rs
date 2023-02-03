@@ -249,9 +249,15 @@ pub use wolfram_expr as expr;
 pub use wolfram_library_link_sys as sys;
 pub use wstp;
 
+
 // Used by the #[export]/#[export(wstp)] macro implementations.
+#[cfg(feature = "automate-function-loading-boilerplate")]
 #[doc(hidden)]
 pub use inventory;
+
+#[cfg(feature = "automate-function-loading-boilerplate")]
+pub use self::macro_utils::exported_library_functions_association;
+
 
 pub use self::{
     args::{FromArg, IntoArg, NativeFunction, WstpFunction},
@@ -259,7 +265,6 @@ pub use self::{
     data_store::{DataStore, DataStoreNode, DataStoreNodeValue, Nodes},
     image::{ColorSpace, Image, ImageData, ImageType, Pixel, UninitImage},
     library_data::{get_library_data, initialize, WolframLibraryData},
-    macro_utils::exported_library_functions_association,
     numeric_array::{
         NumericArray, NumericArrayConvertMethod, NumericArrayDataType, NumericArrayKind,
         NumericArrayType, UninitNumericArray,
@@ -902,6 +907,7 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// ```
 ///
 /// [ref/LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
+#[cfg(feature = "automate-function-loading-boilerplate")]
 #[macro_export]
 macro_rules! generate_loader {
     ($name:ident) => {
