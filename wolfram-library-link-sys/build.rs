@@ -3,6 +3,8 @@ use std::path::PathBuf;
 use wolfram_app_discovery::{WolframApp, WolframVersion};
 
 fn main() {
+    env_logger::init();
+
     // Ensure that changes to environment variables checked by wolfram-app-discovery will
     // cause cargo to rebuild the current crate.
     wolfram_app_discovery::config::set_print_cargo_build_script_directives(true);
