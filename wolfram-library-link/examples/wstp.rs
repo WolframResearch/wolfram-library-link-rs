@@ -176,7 +176,7 @@ fn link_expr_identity(link: &mut Link) {
 fn expr_string_join(link: &mut Link) {
     let expr = link.get_expr().unwrap();
 
-    let list = expr.try_normal().unwrap();
+    let list = expr.try_as_normal().unwrap();
     assert!(list.has_head(&Symbol::new("System`List")));
 
     let mut buffer = String::new();
@@ -203,7 +203,7 @@ fn total(args: Vec<Expr>) -> Expr {
     let mut total = Number::Integer(0);
 
     for (index, arg) in args.into_iter().enumerate() {
-        let number = match arg.try_number() {
+        let number = match arg.try_as_number() {
             Some(number) => number,
             None => panic!(
                 "expected argument at position {} to be a number, got {}",
