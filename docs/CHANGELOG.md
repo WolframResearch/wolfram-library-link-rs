@@ -9,6 +9,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.2.9] – 2023-02-03
+
+### Added
+
+* Add logging support to `wolfram-library-link-sys/build.rs`. ([#54])
+
+  [wolfram-app-discovery v0.4.3](https://github.com/WolframResearch/wolfram-app-discovery-rs/blob/master/docs/CHANGELOG.md#043--2023-02-03)
+  added support for logging via the Rust [`log`](https://crates.io/crates/log)
+  logging facade library. `wolfram-library-link-sys/build.rs` uses
+  wolfram-app-discovery to find `WolframLibrary.h`.
+
+  Logging messages from `wolfram-library-link-sys/build.rs` can now be enabled
+  by setting the `RUST_LOG` environment to an appropriate value, as documented
+  in the [`env_logger`](https://docs.rs/env_logger) crate documentation. This
+  can help debug discovery errors that occur during a build.
+
+### Changed
+
+* Reduce minimal configurable set of dependencies by adding new cargo features.
+  ([#53])
+
+  This release adds two new cargo features:
+
+  * `panic-failure-backtraces`
+  * `automate-function-loading-boilerplate`
+
+  which are enabled by default.
+
+  These features are used to control whether the following (now optional)
+  dependencies are enabled:
+
+  * `backtrace`
+  * `inventory`
+  * `process_path`
+
+  Making these dependnecies optional reduces the minimal possible set of
+  overall dependencies in projects that use wolfram-library-link.
+
+
+
 ## [0.2.8] – 2023-02-01
 
 ### Changed
@@ -262,10 +302,15 @@ caused by bugs present in early versions of `wolfram-app-discovery` and `wstp-sy
 <!-- v0.2.8 -->
 [#51]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/51
 
+<!-- v0.2.9 -->
+[#53]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/53
+[#54]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/54
+
 
 <!-- This needs to be updated for each tagged release. -->
-[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.8...HEAD
+[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.9...HEAD
 
+[0.2.9]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.5...v0.2.6
