@@ -5,7 +5,7 @@
 //! [dependencies]
 //! clap = { version = "4.3.3", features = ["derive"] }
 //! bindgen = "^0.58.1"
-//! wolfram-app-discovery = { git = "https://github.com/WolframResearch/wolfram-app-discovery-rs" }
+//! wolfram-app-discovery = "0.4.7"
 //! ```
 
 use std::path::{Path, PathBuf};
