@@ -40,7 +40,7 @@ From the `RustLink` repository root directory:
 
 ```
 $ export WOLFRAM_APP_DIRECTORY=/Applications/Wolfram/12.2.x/Mathematica-12.2.0.app
-$ cargo make gen-bindings
+$ cargo +nightly make gen-bindings
 ```
 
 will re-generate the `wolfram-library-link-sys/generated/12.2.0/MacOSX-x86-64/LibraryLink_bindings.rs`

@@ -3,31 +3,74 @@
 //! edition = "2021"
 //!
 //! [dependencies]
+//! clap = { version = "4.3.3", features = ["derive"] }
 //! bindgen = "^0.58.1"
 //! wolfram-app-discovery = { git = "https://github.com/WolframResearch/wolfram-app-discovery-rs" }
 //! ```
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use wolfram_app_discovery::{WolframApp, WolframVersion};
+use clap::Parser;
+
+use wolfram_app_discovery::{SystemID, WolframApp, WolframVersion};
 
 const BINDINGS_FILENAME: &str = "LibraryLink_bindings.rs";
 
-fn main() {
-    let app = WolframApp::try_default().expect("unable to locate default Wolfram app");
-
-    let c_includes = app
-        .library_link_c_includes_path()
-        .expect("unable to get LibraryLink C includes directory");
-
-    generate_bindings(&app, c_includes);
+#[derive(Parser)]
+struct Cli {
+    /// Target to generate bindings for.
+    #[arg(long)]
+    target: Option<String>,
 }
 
-fn generate_bindings(app: &WolframApp, c_includes: PathBuf) {
+fn main() {
+    let Cli { target } = Cli::parse();
+
+    let app = WolframApp::try_default().expect("unable to locate default Wolfram app");
+
+    let wolfram_version: WolframVersion =
+        app.wolfram_version().expect("unable to get WolframVersion");
+
+    let c_includes = app
+        .library_link_c_includes_directory()
+        .expect("unable to get LibraryLink C includes directory");
+
+    let targets: Vec<&str> = match target {
+        Some(ref target) => vec![target.as_str()],
+        None => determine_targets().to_vec(),
+    };
+
+    println!("Generating bindings for: {targets:?}");
+
+    for target in targets {
+        generate_bindings(&wolfram_version, &c_includes, target);
+    }
+}
+
+/// Generte bindings for multiple targets at once, based on the current
+/// operating system.
+fn determine_targets() -> &'static [&'static str] {
+    if cfg!(target_os = "macos") {
+        &["x86_64-apple-darwin", "aarch64-apple-darwin"]
+    } else if cfg!(target_os = "windows") {
+        &["x86_64-pc-windows-msvc"]
+    } else if cfg!(target_os = "linux") {
+        &["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"]
+    } else {
+        panic!("unsupported operating system for determining LibraryLink bindings target architecture")
+    }
+}
+
+fn generate_bindings(wolfram_version: &WolframVersion, c_includes: &Path, target: &str) {
     // For the time being there is no reason this shouldn't be here.
     assert!(c_includes.ends_with("SystemFiles/IncludeFiles/C/"));
     assert!(c_includes.is_dir());
     assert!(c_includes.is_absolute());
+
+    let clang_args = vec!["-target", target];
+
+    let target_system_id = SystemID::try_from_rust_target(target)
+        .expect("Rust target doesn't map to a known SystemID");
 
     #[rustfmt::skip]
     let bindings = bindgen::builder()
@@ -52,24 +95,24 @@ fn generate_bindings(app: &WolframApp, c_includes: PathBuf) {
         //       have a look at the generated documentation, which is easier to read and
         //       navigate anyway.
         .rustfmt_bindings(true)
+        .clang_args(clang_args)
         .generate()
         .expect("unable to generate Rust bindings to Wolfram LibraryLink using bindgen");
 
-    let version: WolframVersion =
-        app.wolfram_version().expect("unable to get WolframVersion");
-
     let out_path: PathBuf = out_dir()
         .join("wolfram-library-link-sys/generated/")
-        .join(&version.to_string())
-        .join(wolfram_app_discovery::target_system_id())
+        .join(&wolfram_version.to_string())
+        .join(target_system_id.as_str())
         .join(BINDINGS_FILENAME);
 
     std::fs::create_dir_all(out_path.parent().unwrap())
         .expect("failed to create parent directories for generating bindings file");
 
     bindings
-        .write_to_file(out_path)
+        .write_to_file(&out_path)
         .expect("failed to write Rust bindings with IO error");
+
+    println!("OUTPUT: {}", out_path.display());
 }
 
 fn out_dir() -> PathBuf {
