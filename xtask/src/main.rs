@@ -1,16 +1,11 @@
-//! ```cargo
-//! [package]
-//! edition = "2021"
+//! `cargo xtask` helper commands for the wolfram-library-link-rs project.
 //!
-//! [dependencies]
-//! clap = { version = "4.3.3", features = ["derive"] }
-//! bindgen = "^0.58.1"
-//! wolfram-app-discovery = "0.4.7"
-//! ```
+//! This crate follows the [`cargo xtask`](https://github.com/matklad/cargo-xtask)
+//! convention.
 
 use std::path::{Path, PathBuf};
 
-use clap::Parser;
+use clap::{Parser, Subcommand};
 
 use wolfram_app_discovery::{SystemID, WolframApp, WolframVersion};
 
@@ -18,13 +13,28 @@ const BINDINGS_FILENAME: &str = "LibraryLink_bindings.rs";
 
 #[derive(Parser)]
 struct Cli {
-    /// Target to generate bindings for.
-    #[arg(long)]
-    target: Option<String>,
+    #[command(subcommand)]
+    command: Commands,
 }
 
+#[derive(Subcommand)]
+enum Commands {
+    /// Generate and save LibraryLink bindings for the current platform.
+    GenBindings {
+        /// Target to generate bindings for.
+        #[arg(long)]
+        target: Option<String>,
+    },
+}
+
+//======================================
+// Main
+//======================================
+
 fn main() {
-    let Cli { target } = Cli::parse();
+    let Cli {
+        command: Commands::GenBindings { target },
+    } = Cli::parse();
 
     let app = WolframApp::try_default().expect("unable to locate default Wolfram app");
 
@@ -87,19 +97,11 @@ fn generate_bindings(wolfram_version: &WolframVersion, c_includes: &Path, target
         .constified_enum_module("MNumericArray_Convert_Method")
         .constified_enum_module("MImage_Data_Type")
         .constified_enum_module("MImage_CS_Type")
-        // NOTE: At time of writing this will silently fail to work if you are using a
-        //       nightly version of Rust, making the generated bindings almost impossible
-        //       to decipher.
-        //
-        //       Instead, use `$ cargo doc --document-private-items && open target/doc` to
-        //       have a look at the generated documentation, which is easier to read and
-        //       navigate anyway.
-        .rustfmt_bindings(true)
         .clang_args(clang_args)
         .generate()
         .expect("unable to generate Rust bindings to Wolfram LibraryLink using bindgen");
 
-    let out_path: PathBuf = out_dir()
+    let out_path: PathBuf = repo_root_dir()
         .join("wolfram-library-link-sys/generated/")
         .join(&wolfram_version.to_string())
         .join(target_system_id.as_str())
@@ -115,7 +117,8 @@ fn generate_bindings(wolfram_version: &WolframVersion, c_includes: &Path, target
     println!("OUTPUT: {}", out_path.display());
 }
 
-fn out_dir() -> PathBuf {
-    // TODO: Provide a way to override this location using an environment variable.
-    std::env::current_dir().expect("unable to get process current working directory")
+fn repo_root_dir() -> PathBuf {
+    let xtask_crate = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
+    assert!(xtask_crate.file_name().unwrap() == "xtask");
+    xtask_crate.parent().unwrap().to_path_buf()
 }
