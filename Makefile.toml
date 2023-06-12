@@ -29,12 +29,3 @@ rm -rf ./build/
 [tasks.build-library-resources]
 command = "cargo"
 args = ["build", "--examples"]
-
-#------------------
-# Maintenance tasks
-#------------------
-
-# Generate LibraryLink sys bindings for the current platform.
-[tasks.gen-bindings]
-script_runner = "@rust"
-script = { file = "scripts/generate_versioned_bindings.rs" }

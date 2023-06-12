@@ -1,6 +1,8 @@
 [workspace]
+resolver = "2"
 
 members = [
     "wolfram-library-link",
-    "wolfram-library-link-sys"
+    "wolfram-library-link-sys",
+    "xtask"
 ]
