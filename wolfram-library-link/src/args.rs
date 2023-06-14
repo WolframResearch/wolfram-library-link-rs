@@ -160,7 +160,7 @@ impl FromArg<'_> for sys::mcomplex {
 //--------------------------------------
 
 unsafe fn c_str_from_arg<'a>(arg: &'a MArgument) -> &'a CStr {
-    let cstr: *mut i8 = *arg.utf8string;
+    let cstr: *mut c_char = *arg.utf8string;
     CStr::from_ptr(cstr)
 }
 
