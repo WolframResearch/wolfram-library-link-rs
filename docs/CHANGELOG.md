@@ -8,6 +8,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [0.2.10] – 2023-08-28
+
+### Changed
+
+* Always use pre-generated LibraryLink bindings. ([#57])
+
+  Previously, wolfram-library-link-sys would use bindgen to generate bindings at
+  compile time. Now, the bindings are pre-generated and built-in to
+  wolfram-library-link-sys, without any loss in functionality.
+
+  The build dependency on bindgen has been removed, simplifying the dependency
+  tree and reducing compile times.
+
+  When wolfram-library-link occasionally updates to support a new minimum
+  LibraryLink version, the bindings will need to be regenerated as described in
+  [docs/Maintenance.md](./Maintenance.md).
+
+* Update wstp dependency to v0.2.8, which also replaces build-time use of
+  bindgen with pre-generated bindings. ([#59])
+
+* *Developer:* Replace custom RunTests.wls script with instructions on how to
+  use the slightly more standardized `wolfram-cli paclet test` tool. ([#58])
+
+### Fixed
+
+* Fixed build failure caused by assumption that `c_char` is `i8` on every
+  platform, which is not true.
+
+
 
 ## [0.2.9] – 2023-02-03
 
@@ -306,10 +335,16 @@ caused by bugs present in early versions of `wolfram-app-discovery` and `wstp-sy
 [#53]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/53
 [#54]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/54
 
+<!-- v0.2.10 -->
+[#57]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/57
+[#58]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/58
+[#59]: https://github.com/WolframResearch/wolfram-library-link-rs/pull/59
+
 
 <!-- This needs to be updated for each tagged release. -->
-[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.9...HEAD
+[Unreleased]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.10...HEAD
 
+[0.2.10]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/WolframResearch/wolfram-library-link-rs/compare/v0.2.6...v0.2.7
