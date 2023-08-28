@@ -41,10 +41,11 @@ cargo make paclet
 Run the `wolfram-library-link` tests using:
 
 ```shell
-cargo make paclet-test
+wolfram-cli paclet test ./build/RustLink
 ```
 
-This will use [scripts/RunTests.wlt](../scripts/RunTests.wls) to run all of the Wolfram
-`.wlt` test files in the Tests directory, and output the results to the terminal.
+This requires that the [unofficial wolfram-cli tool](https://github.com/ConnorGray/wolfram-cli)
+is installed, and will run all of the Wolfram `.wlt` test files in the Tests directory,
+and output the results to the terminal.
 
 [cargo-test]: https://doc.rust-lang.org/cargo/commands/cargo-test.html
