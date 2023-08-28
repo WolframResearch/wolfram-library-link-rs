@@ -13,10 +13,6 @@ default_to_workspace = false
 dependencies = ["clean-library-resources", "build-library-resources"]
 script = { file = "./scripts/BuildPaclet.wls"}
 
-[tasks.paclet-test]
-dependencies = ["paclet"]
-script = { file = "./scripts/RunTests.wls"}
-
 #--------------------
 # Building the paclet
 #--------------------
