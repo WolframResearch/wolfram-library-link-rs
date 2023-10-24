@@ -3,6 +3,7 @@
 
 use std::{
     cell::RefCell,
+    collections::HashMap,
     ffi::{CStr, CString},
     os::raw::c_char,
 };
@@ -10,6 +11,7 @@ use std::{
 use ref_cast::RefCast;
 
 use crate::{
+    data_store::{DataStoreAdd, DataStoreNodeValue},
     expr::{Expr, Symbol},
     rtl,
     sys::{self, mint, mreal, MArgument},
@@ -254,6 +256,16 @@ impl<'a> FromArg<'a> for &'a str {
     }
 }
 
+impl FromArg<'_> for char {
+    unsafe fn from_arg(arg: &MArgument) -> Self {
+        String::from_arg(arg).chars().next().unwrap()
+    }
+
+    fn parameter_type() -> Expr {
+        String::parameter_type()
+    }
+}
+
 //--------------------------------------
 // NumericArray
 //--------------------------------------
@@ -456,6 +468,61 @@ impl<'a> FromArg<'a> for &'a DataStore {
     }
 }
 
+impl<T: for<'a> From<DataStoreNodeValue<'a>>> FromArg<'_> for Vec<T> {
+    unsafe fn from_arg(arg: &MArgument) -> Vec<T> {
+        let mut vec = Vec::new();
+        DataStore::from_arg(arg)
+            .nodes()
+            .for_each(|node| vec.push(T::from(node.value())));
+        vec
+    }
+
+    fn parameter_type() -> Expr {
+        Expr::string("DataStore")
+    }
+}
+
+impl<
+        K: for<'a> From<DataStoreNodeValue<'a>> + Eq + std::hash::Hash,
+        V: for<'a> From<DataStoreNodeValue<'a>>,
+        S: Default + std::hash::BuildHasher,
+    > FromArg<'_> for HashMap<K, V, S>
+{
+    unsafe fn from_arg(arg: &MArgument) -> HashMap<K, V, S> {
+        let mut dict = HashMap::default();
+        DataStore::from_arg(arg)
+            .nodes()
+            .for_each(|node| match node.value() {
+                DataStoreNodeValue::DataStore(rule) => {
+                    let mut nodes = rule.nodes();
+                    let k = K::from(nodes.next().unwrap().value());
+                    let v = V::from(nodes.next().unwrap().value());
+                    dict.insert(k, v);
+                    ()
+                },
+                _ => panic!("Expected DataStore of DataStores"),
+            });
+        dict
+    }
+
+    fn parameter_type() -> Expr {
+        Expr::string("DataStore")
+    }
+}
+
+impl<T: for<'a> From<DataStoreNodeValue<'a>>> FromArg<'_> for Option<T> {
+    unsafe fn from_arg(arg: &MArgument) -> Option<T> {
+        match DataStore::from_arg(arg).nodes().next() {
+            None => None,
+            Some(v) => Some(T::from(v.value())),
+        }
+    }
+
+    fn parameter_type() -> Expr {
+        Expr::string("DataStore")
+    }
+}
+
 //======================================
 // impl IntoArg
 //======================================
@@ -644,6 +711,16 @@ impl IntoArg for String {
     }
 }
 
+impl IntoArg for char {
+    unsafe fn into_arg(self, arg: MArgument) {
+        String::from(self).into_arg(arg)
+    }
+
+    fn return_type() -> Expr {
+        String::return_type()
+    }
+}
+
 //---------------------------------------
 // NumericArray, Image, DataStore
 //---------------------------------------
@@ -696,6 +773,19 @@ impl<T: crate::ImageData> IntoArg for Image<T> {
 impl IntoArg for DataStore {
     unsafe fn into_arg(self, arg: MArgument) {
         *arg.tensor = self.into_raw() as *mut _;
+    }
+
+    fn return_type() -> Expr {
+        Expr::string("DataStore")
+    }
+}
+
+
+impl<T: DataStoreAdd> IntoArg for Vec<T> {
+    unsafe fn into_arg(self, arg: MArgument) {
+        let mut store = DataStore::new();
+        self.iter().for_each(|x| x.add_to_datastore(&mut store));
+        store.into_arg(arg)
     }
 
     fn return_type() -> Expr {

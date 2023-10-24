@@ -601,6 +601,164 @@ impl<'store> DataStoreNode<'store> {
 }
 
 //---------------
+// DataStoreAdd trait
+//---------------
+
+pub trait DataStoreAdd {
+    fn add_to_datastore(&self, ds: &mut DataStore);
+}
+
+impl DataStoreAdd for bool {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        ds.add_bool(*self)
+    }
+}
+
+impl DataStoreAdd for &str {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        ds.add_str(*self)
+    }
+}
+
+impl DataStoreAdd for char {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        String::from(*self).as_str().add_to_datastore(ds)
+    }
+}
+
+impl DataStoreAdd for u16 {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        ds.add_i64(*self as i64)
+    }
+}
+
+impl DataStoreAdd for DataStore {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        ds.add_data_store(self.clone())
+    }
+}
+
+impl<T: DataStoreAdd> DataStoreAdd for Vec<T> {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        let mut inner = DataStore::new();
+        self.into_iter().for_each(|item| item.add_to_datastore(&mut inner));
+        ds.add_data_store(inner)
+    }
+}
+
+//---------------
+// From DataStoreNodeValue
+//---------------
+
+impl From<DataStoreNodeValue<'_>> for bool {
+    fn from(value: DataStoreNodeValue) -> bool {
+        match value {
+            DataStoreNodeValue::Boolean(val) => val,
+            _ => panic!("expected DataStoreNodeValue::Boolean"),
+        }
+    }
+}
+
+impl From<DataStoreNodeValue<'_>> for mint {
+    fn from(value: DataStoreNodeValue) -> mint {
+        match value {
+            DataStoreNodeValue::Integer(val) => val,
+            _ => panic!("expected DataStoreNodeValue::Integer"),
+        }
+    }
+}
+
+impl From<DataStoreNodeValue<'_>> for mreal {
+    fn from(value: DataStoreNodeValue) -> mreal {
+        match value {
+            DataStoreNodeValue::Real(val) => val,
+            _ => panic!("expected DataStoreNodeValue::Real"),
+        }
+    }
+}
+
+impl From<DataStoreNodeValue<'_>> for f32 {
+    fn from(value: DataStoreNodeValue) -> f32 {
+        match value {
+            DataStoreNodeValue::Real(val) => val as f32,
+            _ => panic!("expected DataStoreNodeValue::Real"),
+        }
+    }
+}
+
+impl From<DataStoreNodeValue<'_>> for mcomplex {
+    fn from(value: DataStoreNodeValue) -> mcomplex {
+        match value {
+            DataStoreNodeValue::Complex(val) => val,
+            _ => panic!("expected DataStoreNodeValue::Complex"),
+        }
+    }
+}
+
+impl<'node> From<DataStoreNodeValue<'node>> for &'node str {
+    fn from(value: DataStoreNodeValue<'node>) -> &'node str {
+        match value {
+            DataStoreNodeValue::Str(val) => val,
+            _ => panic!("expected DataStoreNodeValue::Str"),
+        }
+    }
+}
+
+impl<'node> From<DataStoreNodeValue<'node>> for String {
+    fn from(value: DataStoreNodeValue<'node>) -> String {
+        match value {
+            DataStoreNodeValue::Str(val) => String::from(val),
+            _ => panic!("expected DataStoreNodeValue::Str"),
+        }
+    }
+}
+
+impl From<DataStoreNodeValue<'_>> for char {
+    fn from(value: DataStoreNodeValue) -> char {
+        match value {
+            DataStoreNodeValue::Str(val) => String::from(val).chars().next().unwrap(),
+            _ => panic!("expected DataStoreNodeValue::Str"),
+        }
+    }
+}
+
+impl<'node> From<DataStoreNodeValue<'node>> for &'node NumericArray {
+    fn from(value: DataStoreNodeValue<'node>) -> &'node NumericArray {
+        match value {
+            DataStoreNodeValue::NumericArray(val) => val,
+            _ => panic!("expected DataStoreNodeValue::NumericArray"),
+        }
+    }
+}
+
+impl<'node> From<DataStoreNodeValue<'node>> for &'node Image {
+    fn from(value: DataStoreNodeValue<'node>) -> &'node Image {
+        match value {
+            DataStoreNodeValue::Image(val) => val,
+            _ => panic!("expected DataStoreNodeValue::Image"),
+        }
+    }
+}
+
+impl<'node> From<DataStoreNodeValue<'node>> for &'node DataStore {
+    fn from(value: DataStoreNodeValue<'node>) -> &'node DataStore {
+        match value {
+            DataStoreNodeValue::DataStore(val) => val,
+            _ => panic!("expected DataStoreNodeValue::DataStore"),
+        }
+    }
+}
+
+impl<'node, T: for<'a> From<DataStoreNodeValue<'a>>> From<DataStoreNodeValue<'node>> for Vec<T> {
+    fn from(value: DataStoreNodeValue<'node>) -> Vec<T> {
+        match value {
+            DataStoreNodeValue::DataStore(val) => val.nodes().map(|n| n.value().into()).collect(),
+            _ => panic!("expected DataStoreNodeValue::DataStore"),
+        }
+    }
+}
+
+//---------------
 // Nodes iterator
 //---------------
 
