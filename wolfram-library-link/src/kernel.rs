@@ -1,0 +1,234 @@
+//! Construct and manipulate native Wolfram Kernel expressions.
+
+mod expr_types;
+mod predicates;
+mod sys;
+
+use std::mem::ManuallyDrop;
+
+use self::sys::{mint, Flags_Expression_UnsignedInteger16};
+
+pub use self::expr_types::{Expr, MIntExpr, NormalExpr, StringExpr, SymbolExpr};
+
+
+/// A partially initialized expression value.
+///
+/// `Uninit` is different from [`std::mem::MaybeUninit`] in that it's meant to be used
+/// for values which are *partially* initialized, but which could lead to undefined
+/// behavior if the wrong methods were called, or if they were to be dropped.
+///
+/// Hence, `Uninit` offers a [`assume_init()`][Uninit::assume_init] method.
+/// [`std::mem::MaybeUninit`] is a binary condition -- either the underlying value is or
+/// is not initialized.
+pub struct Uninit<T>(ManuallyDrop<T>);
+
+//======================================
+// Impl Expr
+//======================================
+
+impl Expr {
+    /// Construct a machine-sized Integer expression.
+    pub fn mint(value: mint) -> Expr {
+        MIntExpr::new(value).into_expr()
+    }
+
+    /// Construct a String expression.
+    pub fn string(string: &str) -> Expr {
+        StringExpr::new(string).into_expr()
+    }
+
+    /// Get the expression flags.
+    fn flags(&self) -> u16 {
+        unsafe { Flags_Expression_UnsignedInteger16(self.to_c_expr()) }
+    }
+}
+
+//======================================
+// Machien Integer Expressions
+//======================================
+
+impl MIntExpr {
+    /// Construct a new machine integer expression.
+    pub fn new(value: sys::mint) -> MIntExpr {
+        let signed = true;
+
+        const _: () = assert!(std::mem::size_of::<sys::mint>() <= 8);
+
+        let value = value as i64;
+
+        const BIT_SIZE: u32 = 8 * std::mem::size_of::<sys::mint>() as u32;
+
+        let expr = unsafe { sys::CreateMIntegerExpr(value, BIT_SIZE, signed) };
+
+        unsafe {
+            let expr = Expr::from_result(expr);
+            MIntExpr::unchecked_from_expr(expr)
+        }
+    }
+}
+
+//======================================
+// Normal Expressions
+//======================================
+
+impl NormalExpr {
+    /// Construct a new expression with the specified head and length.
+    ///
+    /// The elements of the resulting expression must be initialized,
+    /// using [`write_elem()`][Uninit::<NormalExpr>::write_elem].
+    ///
+    /// # Examples
+    ///
+    /// Construct the expression `{1, 2, 3}`:
+    ///
+    /// ```no_run
+    /// use wolfram_library_link::kernel::{Expr, SymbolExpr, NormalExpr};
+    ///
+    /// let mut expr = NormalExpr::headed(SymbolExpr::lookup("System`List").into(), 3);
+    ///
+    /// let list: NormalExpr = unsafe {
+    ///     expr.write_elem(1, &Expr::mint(1));
+    ///     expr.write_elem(2, &Expr::mint(2));
+    ///     expr.write_elem(3, &Expr::mint(3));
+    ///
+    ///     expr.assume_init()
+    /// };
+    /// ```
+    pub fn headed(head: Expr, len: usize) -> Uninit<NormalExpr> {
+        let len = mint::try_from(len).expect("Normal expr length usize overflows mint");
+
+        let normal = unsafe { sys::CreateHeaded_IE_E(len, head.to_c_expr()) };
+
+        // FIXME: `normal` is not fully initialized at this point, so we
+        //        shouldn't have a program point where an Expr gets constructed
+        //        from it.
+        let normal = unsafe { Expr::from_result(normal) };
+        let normal = unsafe { NormalExpr::unchecked_from_expr(normal) };
+
+        Uninit(ManuallyDrop::new(normal))
+    }
+
+    /// Construct a new `{...}` expression from an array of expressions.
+    ///
+    /// # Examples
+    ///
+    /// Construct the expression `{1, 2, 3}`:
+    ///
+    /// ```no_run
+    /// use wolfram_library_link::kernel::{Expr, NormalExpr};
+    ///
+    /// let list = NormalExpr::list_from_array([
+    ///     Expr::mint(1),
+    ///     Expr::mint(2),
+    ///     Expr::mint(3)
+    /// ]);
+    /// ```
+    pub fn list_from_array<const N: usize>(array: [Expr; N]) -> NormalExpr {
+        let mut list = NormalExpr::headed(SymbolExpr::lookup("System`List").into(), N);
+
+        for (index_0, elem) in array.iter().enumerate() {
+            let index_1 = index_0 + 1;
+            unsafe { list.write_elem(index_1, elem) }
+        }
+
+        unsafe { list.assume_init() }
+    }
+}
+
+impl Uninit<NormalExpr> {
+    /// # Safety
+    ///
+    /// * The current expr must be a Normal expression.
+    /// * `index` must not be 0
+    /// * `index` can only point to an element which has not been initialized yet.
+    pub unsafe fn write_elem(&mut self, index: usize, value: &Expr) {
+        let Uninit(self_) = self;
+
+        let self_: &mut NormalExpr = &mut *self_;
+
+        let index = mint::try_from(index).expect("usize index overflows mint");
+
+        sys::SetElement_EIE_E(self_.as_expr().to_c_expr(), index, value.to_c_expr())
+    }
+
+    /// Assume that all elements of [`NormalExpr`] have been fully initialized.
+    ///
+    /// # Safety
+    ///
+    /// This function must only be called once all elements of this [`NormalExpr`]
+    /// have been initialized. It is undefined behavior to construct a
+    /// [`NormalExpr`] without first initializing all elements.
+    pub unsafe fn assume_init(self) -> NormalExpr {
+        let Uninit(expr) = self;
+
+        ManuallyDrop::into_inner(expr)
+    }
+}
+
+//======================================
+// Symbol Expressions
+//======================================
+
+impl SymbolExpr {
+    /// Lookup or create a symbol expression from a fully qualified symbol or
+    /// symbol name.
+    ///
+    /// FIXME: This function currently does minimal validation that `string` is
+    ///        a valid symbol name or fully qualified symbol.
+    pub fn lookup(string: &str) -> SymbolExpr {
+        let string = StringExpr::new(string);
+
+        unsafe {
+            let expr = sys::LookupSymbol_E_E(string.as_expr().to_c_expr());
+
+            let symbol = Expr::from_result(expr);
+
+            SymbolExpr::unchecked_from_expr(symbol)
+        }
+    }
+
+    /// Set this symbol to the specified value.
+    ///
+    /// This does NOT evaluate `value` before doing the assignment.
+    ///
+    /// This is conceptually similar to evaluating
+    /// `Set[self, Unevaluated[value]]`.
+    pub fn set_to(&self, value: &Expr) -> Expr {
+        let expr = unsafe {
+            sys::SetSymbol_E_E_E(self.as_expr().to_c_expr(), value.to_c_expr())
+        };
+
+        unsafe { Expr::from_result(expr) }
+    }
+}
+
+//======================================
+// String Expressions
+//======================================
+
+impl StringExpr {
+    /// Construct a new String expression from a UTF-8 encoded string.
+    pub fn new(string: &str) -> StringExpr {
+        let len = string.len() as mint;
+        let string: *const u8 = string.as_ptr();
+
+        let expr = unsafe { sys::UTF8BytesToStringExpression(string, len) };
+
+        unsafe {
+            let expr = Expr::from_result(expr);
+            StringExpr::unchecked_from_expr(expr)
+        }
+    }
+}
+
+//======================================
+// Functions
+//======================================
+
+/// Evaluate `Print[e]`
+#[allow(non_snake_case)]
+pub fn Print(e: &Expr) {
+    unsafe {
+        sys::Print_E_I(e.to_c_expr());
+    }
+}

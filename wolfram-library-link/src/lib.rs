@@ -237,6 +237,14 @@ pub mod rtl;
 
 pub mod docs;
 
+// Hide this module unless the `experimental-kernel-expr` feature is enabled.
+//
+// To view this documentation locally, build with:
+//
+//     cargo doc --features experimental-kernel-expr
+#[cfg_attr(not(feature = "experimental-kernel-expr"), doc(hidden))]
+pub mod kernel;
+
 
 // Note: This is exported as doc(inline) so that it shows up in the 'Modules' section of
 //       the crate docs instead of in the 'Re-exports' section. This is to make way for

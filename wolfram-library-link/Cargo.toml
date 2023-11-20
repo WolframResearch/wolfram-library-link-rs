@@ -44,6 +44,8 @@ nightly = []
 panic-failure-backtraces = ["backtrace"]
 automate-function-loading-boilerplate = ["inventory", "process_path", "wolfram-library-link-macros/automate-function-loading-boilerplate"]
 
+experimental-kernel-expr = []
+
 
 #=======================================
 # Examples

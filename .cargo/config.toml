@@ -1,2 +1,8 @@
 [alias]
 xtask = "run --package xtask --"
+
+# Avoid undefined symbol errors produced by the linker when calling functions
+# declared in wolfram-library-link/src/kernel/sys.rs that aren't resolved until
+# the built LibraryLink library is loaded into a running Kernel.
+[build]
+rustflags = ["-C", "link-args=-undefined dynamic_lookup"]
