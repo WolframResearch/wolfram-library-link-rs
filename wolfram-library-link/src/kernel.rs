@@ -32,18 +32,84 @@ pub struct Uninit<T>(ManuallyDrop<T>);
 
 impl Expr {
     /// Construct a machine-sized Integer expression.
+    ///
+    /// # Examples
+    ///
+    /// Construct the expression `42`:
+    ///
+    /// ```no_run
+    /// use wolfram_library_link::kernel::Expr;
+    ///
+    /// let e = Expr::mint(42);
+    /// ```
     pub fn mint(value: mint) -> Expr {
         MIntExpr::new(value).into_expr()
     }
 
     /// Construct a machine-sized Real expression.
+    ///
+    /// # Examples
+    ///
+    /// Construct the expression `1.23`:
+    ///
+    /// ```no_run
+    /// use wolfram_library_link::kernel::Expr;
+    ///
+    /// let e = Expr::mreal(1.23);
+    /// ```
     pub fn mreal(value: mreal) -> Expr {
         MRealExpr::new(value).into_expr()
     }
 
     /// Construct a String expression.
+    ///
+    /// # Examples
+    ///
+    /// Construct the expression `"Hello, Wolfram!"`:
+    ///
+    /// ```no_run
+    /// use wolfram_library_link::kernel::Expr;
+    ///
+    /// let e = Expr::string("Hello, Wolfram!");
+    /// ```
     pub fn string(string: &str) -> Expr {
         StringExpr::new(string).into_expr()
+    }
+
+    /// Construct a Symbol expression.
+    ///
+    /// # Examples
+    ///
+    /// Construct the expression `` System`Now ``:
+    ///
+    /// ```no_run
+    /// use wolfram_library_link::kernel::Expr;
+    ///
+    /// let e = Expr::symbol("System`Now");
+    /// ```
+    pub fn symbol(symbol: &str) -> Expr {
+        // FIXME: Validate that `symbol` is a valid symbol name or fully
+        //        qualified symbol.
+        SymbolExpr::lookup(symbol).into_expr()
+    }
+
+    /// Construct a new `{...}` expression from an array of expressions.
+    ///
+    /// # Examples
+    ///
+    /// Construct the expression `{1, 2, 3}`:
+    ///
+    /// ```no_run
+    /// use wolfram_library_link::kernel::Expr;
+    ///
+    /// let list = Expr::list_from_array([
+    ///     Expr::mint(1),
+    ///     Expr::mint(2),
+    ///     Expr::mint(3)
+    /// ]);
+    /// ```
+    pub fn list_from_array<const N: usize>(array: [Expr; N]) -> Expr {
+        NormalExpr::list_from_array(array).into_expr()
     }
 
     /// Get the expression flags.

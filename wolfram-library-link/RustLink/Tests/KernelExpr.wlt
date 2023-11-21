@@ -19,3 +19,13 @@ Test[
 	),
 	{Global`Example1, Global`Example2, Example3`Example4}
 ]
+
+Test[
+	(
+		LibraryFunctionLoad[
+			"liblibrary_tests", "test_kernel_expr_create_heterogenous", {}, "Void"
+		][];
+		Global`$ReturnValue
+	),
+	{1, 2.01, "three", Four, {"a", "b", "c"}}
+]
