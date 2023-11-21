@@ -7,7 +7,7 @@ Test[
 		][];
 		Global`$ReturnValue
 	),
-	{1, "two"}
+	{1, "two", 3.5}
 ]
 
 Test[

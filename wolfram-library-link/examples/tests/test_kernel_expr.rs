@@ -5,7 +5,11 @@ use wolfram_library_link::{
 
 #[export]
 fn test_kernel_expr_create_string() {
-    let list = NormalExpr::list_from_array([Expr::mint(1), Expr::string("two")]);
+    let list = NormalExpr::list_from_array([
+        Expr::mint(1),
+        Expr::string("two"),
+        Expr::mreal(3.5),
+    ]);
 
     // $ReturnValue = list
     SymbolExpr::lookup("Global`$ReturnValue").set_to(&list.as_expr());

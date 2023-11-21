@@ -4,11 +4,15 @@ mod expr_types;
 mod predicates;
 mod sys;
 
-use std::mem::ManuallyDrop;
+use std::{ffi::c_void, mem::ManuallyDrop};
 
-use self::sys::{mint, Flags_Expression_UnsignedInteger16};
+use crate::sys::{mint, mreal};
 
-pub use self::expr_types::{Expr, MIntExpr, NormalExpr, StringExpr, SymbolExpr};
+use self::sys::Flags_Expression_UnsignedInteger16;
+
+pub use self::expr_types::{
+    Expr, MIntExpr, MRealExpr, NormalExpr, StringExpr, SymbolExpr,
+};
 
 
 /// A partially initialized expression value.
@@ -32,6 +36,11 @@ impl Expr {
         MIntExpr::new(value).into_expr()
     }
 
+    /// Construct a machine-sized Real expression.
+    pub fn mreal(value: mreal) -> Expr {
+        MRealExpr::new(value).into_expr()
+    }
+
     /// Construct a String expression.
     pub fn string(string: &str) -> Expr {
         StringExpr::new(string).into_expr()
@@ -44,25 +53,67 @@ impl Expr {
 }
 
 //======================================
-// Machien Integer Expressions
+// Machine Integer Expressions
 //======================================
 
 impl MIntExpr {
     /// Construct a new machine integer expression.
-    pub fn new(value: sys::mint) -> MIntExpr {
+    pub fn new(value: mint) -> MIntExpr {
         let signed = true;
 
-        const _: () = assert!(std::mem::size_of::<sys::mint>() <= 8);
+        // Sanity check that `mint` can be validly `as`-casted to i64.
+        // This would only not be true if/when future computers have a mint size
+        // larger than 8 bytes (i.e. where mint is an alias for i128).
+        const _: () = assert!(std::mem::size_of::<mint>() <= 8);
 
         let value = value as i64;
 
-        const BIT_SIZE: u32 = 8 * std::mem::size_of::<sys::mint>() as u32;
+        const BIT_SIZE: u32 = 8 * std::mem::size_of::<mint>() as u32;
 
         let expr = unsafe { sys::CreateMIntegerExpr(value, BIT_SIZE, signed) };
 
         unsafe {
             let expr = Expr::from_result(expr);
             MIntExpr::unchecked_from_expr(expr)
+        }
+    }
+}
+
+//======================================
+// Machine Real Expressions
+//======================================
+
+impl MRealExpr {
+    /// Construct a new machine integer expression.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `value` is NaN or infinity.
+    pub fn new(value: mreal) -> MRealExpr {
+        assert!(!value.is_nan() && !value.is_infinite());
+
+        unsafe { MRealExpr::unchecked_new(value) }
+    }
+
+    /// Construct a new machine integer expression, without checking for illegal
+    /// floating point values.
+    ///
+    /// # Safety
+    ///
+    /// `value` must not be a NaN or floating point infinity value.
+    pub unsafe fn unchecked_new(mut value: mreal) -> MRealExpr {
+        const _: () = assert!(std::mem::size_of::<mreal>() <= 8);
+
+        const BIT_SIZE: u32 = 8 * std::mem::size_of::<mreal>() as u32;
+
+        let value_ptr: *mut f64 = &mut value;
+        let value_ptr = value_ptr as *mut c_void;
+
+        let expr = unsafe { sys::CreateMRealExpr(value_ptr, BIT_SIZE) };
+
+        unsafe {
+            let expr = Expr::from_result(expr);
+            MRealExpr::unchecked_from_expr(expr)
         }
     }
 }

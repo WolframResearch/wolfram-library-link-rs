@@ -1,9 +1,11 @@
 #![allow(non_camel_case_types)]
 
 use std::{
-    ffi::c_uchar,
+    ffi::{c_uchar, c_void},
     marker::{PhantomData, PhantomPinned},
 };
+
+use wolfram_library_link_sys::mint;
 
 #[repr(C)]
 pub struct expr_struct {
@@ -13,8 +15,6 @@ pub struct expr_struct {
 }
 
 pub(crate) type expr = *mut expr_struct;
-
-pub(crate) type mint = isize;
 
 //
 // Type declarations available from compiler type system setup code for
@@ -27,6 +27,7 @@ pub(crate) type mint = isize;
 extern "C" {
     pub(crate) fn Print_E_I(arg: expr) -> mint;
     pub(crate) fn CreateMIntegerExpr(i: i64, size: u32, signedQ: bool) -> expr;
+    pub(crate) fn CreateMRealExpr(src: *mut c_void, size: u32) -> expr;
     pub(crate) fn LookupSymbol_E_E(arg: expr) -> expr;
     pub(crate) fn SetSymbol_E_E_E(arg1: expr, arg2: expr) -> expr;
     pub(crate) fn CreateHeaded_IE_E(len: mint, head: expr) -> expr;
