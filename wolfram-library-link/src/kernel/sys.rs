@@ -37,4 +37,5 @@ extern "C" {
     pub(crate) fn Runtime_DecrementRefCount(e: *mut expr) -> mint;
     pub(crate) fn Flags_Expression_UnsignedInteger16(arg: expr) -> u16;
     pub(crate) fn UTF8BytesToStringExpression(data: *const c_uchar, len: mint) -> expr;
+    pub(crate) fn Evaluate_E_E(arg: expr) -> expr;
 }

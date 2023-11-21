@@ -211,7 +211,7 @@ impl NormalExpr {
     ///     expr.assume_init()
     /// };
     /// ```
-    pub fn headed(head: Expr, len: usize) -> Uninit<NormalExpr> {
+    pub fn headed(head: &Expr, len: usize) -> Uninit<NormalExpr> {
         let len = mint::try_from(len).expect("Normal expr length usize overflows mint");
 
         let normal = unsafe { sys::CreateHeaded_IE_E(len, head.to_c_expr()) };
@@ -241,7 +241,7 @@ impl NormalExpr {
     /// ]);
     /// ```
     pub fn list_from_array<const N: usize>(array: [Expr; N]) -> NormalExpr {
-        let mut list = NormalExpr::headed(SymbolExpr::lookup("System`List").into(), N);
+        let mut list = NormalExpr::headed(&SymbolExpr::lookup("System`List").into(), N);
 
         for (index_0, elem) in array.iter().enumerate() {
             let index_1 = index_0 + 1;
@@ -249,6 +249,26 @@ impl NormalExpr {
         }
 
         unsafe { list.assume_init() }
+    }
+
+    /// Construct a normal expression with the given head and arguments.
+    ///
+    /// # Examples
+    ///
+    /// Construct the expression `Plus[2, 2]`:
+    ///
+    /// ```no_run
+    /// use wolfram_library_link::kernel::{Expr, NormalExpr};
+    /// ```
+    pub fn from_slice(head: &Expr, args: &[Expr]) -> NormalExpr {
+        let mut normal = NormalExpr::headed(head, args.len());
+
+        for (index_0, elem) in args.into_iter().enumerate() {
+            let index_1 = index_0 + 1;
+            unsafe { normal.write_elem(index_1, elem) }
+        }
+
+        unsafe { normal.assume_init() }
     }
 }
 
@@ -347,5 +367,30 @@ impl StringExpr {
 pub fn Print(e: &Expr) {
     unsafe {
         sys::Print_E_I(e.to_c_expr());
+    }
+}
+
+/// Evaluate the given expression, returning the resulting expression.
+///
+/// # Examples
+///
+/// ```no_run
+/// use wolfram_library_link::kernel::{self, Expr, NormalExpr, MIntExpr};
+///
+/// let result = kernel::eval(
+///     &NormalExpr::from_slice(&Expr::symbol("System`Plus"), &[
+///         Expr::mint(2),
+///         Expr::mint(2),
+///     ])
+///     .into(),
+/// );
+///
+/// let result = MIntExpr::try_from_expr(result).unwrap();
+/// ```
+pub fn eval(e: &Expr) -> Expr {
+    unsafe {
+        let result = sys::Evaluate_E_E(e.to_c_expr());
+
+        Expr::from_result(result)
     }
 }

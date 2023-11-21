@@ -1,6 +1,6 @@
 use wolfram_library_link::{
     export,
-    kernel::{Expr, NormalExpr, SymbolExpr},
+    kernel::{self, Expr, MIntExpr, NormalExpr, SymbolExpr},
 };
 
 #[export]
@@ -36,6 +36,24 @@ fn test_kernel_expr_create_heterogenous() {
         Expr::symbol("Global`Four"),
         Expr::list_from_array([Expr::string("a"), Expr::string("b"), Expr::string("c")]),
     ]);
+
+    // $ReturnValue = list
+    SymbolExpr::lookup("Global`$ReturnValue").set_to(&result.as_expr());
+}
+
+#[export]
+fn test_kernel_expr_evaluate() {
+    // Evaluate Plus[2, 2]
+    let result = kernel::eval(
+        &NormalExpr::from_slice(&Expr::symbol("System`Plus"), &[
+            Expr::mint(2),
+            Expr::mint(2),
+        ])
+        .into(),
+    );
+
+    let result = MIntExpr::try_from_expr(result)
+        .expect("expected result of evaluating 2 + 2 to be MIntExpr");
 
     // $ReturnValue = list
     SymbolExpr::lookup("Global`$ReturnValue").set_to(&result.as_expr());

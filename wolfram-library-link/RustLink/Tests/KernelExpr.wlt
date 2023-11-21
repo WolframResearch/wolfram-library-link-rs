@@ -29,3 +29,13 @@ Test[
 	),
 	{1, 2.01, "three", Four, {"a", "b", "c"}}
 ]
+
+Test[
+	(
+		LibraryFunctionLoad[
+			"liblibrary_tests", "test_kernel_expr_evaluate", {}, "Void"
+		][];
+		Global`$ReturnValue
+	),
+	4
+]
