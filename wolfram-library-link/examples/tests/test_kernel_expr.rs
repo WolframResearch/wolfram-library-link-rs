@@ -1,6 +1,6 @@
 use wolfram_library_link::{
     export,
-    kernel::{self, Expr, MIntExpr, NormalExpr, SymbolExpr},
+    kernel::{self, Expr, MIntExpr, NormalExpr, SymbolExpr, UncountedExpr},
 };
 
 #[export]
@@ -57,4 +57,21 @@ fn test_kernel_expr_evaluate() {
 
     // $ReturnValue = list
     SymbolExpr::lookup("Global`$ReturnValue").set_to(&result.as_expr());
+}
+
+//======================================
+// Custom DownCode
+//======================================
+
+extern "C" fn eval_downcode(expr: UncountedExpr) -> Expr {
+    let _normal = NormalExpr::try_from_expr_ref(expr.as_expr()).unwrap();
+
+    Expr::string("CUSTOM DOWNCODE")
+}
+
+#[export]
+fn test_kernel_expr_custom_downcode() {
+    let symbol = SymbolExpr::lookup("Global`CustomDownCode");
+
+    symbol.set_downcode(Some(eval_downcode))
 }

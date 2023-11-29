@@ -30,6 +30,7 @@ extern "C" {
     pub(crate) fn CreateMRealExpr(src: *mut c_void, size: u32) -> expr;
     pub(crate) fn LookupSymbol_E_E(arg: expr) -> expr;
     pub(crate) fn SetSymbol_E_E_E(arg1: expr, arg2: expr) -> expr;
+    pub(crate) fn SetSymbolDownCode(a1: expr, a2: *mut c_void);
     pub(crate) fn CreateHeaded_IE_E(len: mint, head: expr) -> expr;
     pub(crate) fn SetElement_EIE_E(base_arg: expr, pos: mint, elem_arg: expr);
     pub(crate) fn LoadEFAIL() -> expr;

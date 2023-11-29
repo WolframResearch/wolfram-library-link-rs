@@ -11,7 +11,7 @@ use crate::sys::{mint, mreal};
 use self::sys::Flags_Expression_UnsignedInteger16;
 
 pub use self::expr_types::{
-    Expr, MIntExpr, MRealExpr, NormalExpr, StringExpr, SymbolExpr,
+    Expr, MIntExpr, MRealExpr, NormalExpr, StringExpr, SymbolExpr, UncountedExpr,
 };
 
 
@@ -336,6 +336,35 @@ impl SymbolExpr {
         };
 
         unsafe { Expr::from_result(expr) }
+    }
+
+    /// Set downcode used when evaluating `symbol[...]`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use wolfram_library_link::kernel::{SymbolExpr, Expr, UncountedExpr};
+    ///
+    /// extern "C" fn my_custom_downcode(expr: UncountedExpr) -> Expr {
+    ///     let _normal = NormalExpr::try_from_expr_ref(expr.as_expr()).unwrap();
+    ///
+    ///     Expr::string("foo")
+    /// }
+    ///
+    /// let symbol = SymbolExpr::lookup("Global`CustomDownCode");
+    ///
+    /// symbol.set_downcode(Some(eval_downcode))
+    /// ```
+    ///
+    /// Now evaluating `CustomDownCode[arg1, arg2, ...]` will invoke the custom
+    /// downcode function `my_custom_downcode`.
+    pub fn set_downcode(&self, downcode: Option<extern "C" fn(UncountedExpr) -> Expr>) {
+        let downcode = match downcode {
+            Some(downcode) => downcode as *mut c_void,
+            None => std::ptr::null_mut(),
+        };
+
+        unsafe { sys::SetSymbolDownCode(self.as_expr().to_c_expr(), downcode) }
     }
 }
 

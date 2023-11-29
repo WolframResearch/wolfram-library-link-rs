@@ -39,3 +39,18 @@ Test[
 	),
 	4
 ]
+
+(*====================================*)
+(* Custom DownCode                    *)
+(*====================================*)
+
+Test[
+	(
+		LibraryFunctionLoad[
+			"liblibrary_tests", "test_kernel_expr_custom_downcode", {}, "Void"
+		][];
+
+		Global`CustomDownCode[]
+	),
+	"CUSTOM DOWNCODE"
+]

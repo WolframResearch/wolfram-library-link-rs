@@ -1,4 +1,10 @@
+use std::{marker::PhantomData, mem::ManuallyDrop};
+
 use crate::kernel::{predicates, sys};
+
+//==========================================================
+// Fundamental expression wrapper types
+//==========================================================
 
 /// Wolfram Kernel expr.
 ///
@@ -8,8 +14,45 @@ use crate::kernel::{predicates, sys};
 pub struct Expr(sys::expr);
 
 //======================================
-// Expression wrapper types
+// UncountedExpr
 //======================================
+
+/// Represents an uncounted copy of an expression, which is tied to the lifetime
+/// of a counted [`Expr`].
+///
+/// This type is used in the signature of the callback function pointer
+/// accepted by [`SymbolExpr::set_downcode()`].
+///
+/// # Implementation
+///
+/// The use of [`ManuallyDrop`] prevents the underlying [`Expr`] from being dropped (and
+/// therefore getting RefDecr'd) when the `UncountedExpr` is dropped. This maintains the
+/// invariant that `UncountedExpr` doesn't own a +1 count of the underlying expression.
+///
+/// The use of the [`PhantomData`] lifetime prevents an `UncountedExpr` from living longer
+/// than the [`Expr`] it's borrowed from.
+//
+// TODO: Could also be called `ExprRef` (though this might be confused with the `*Ref`
+//       naming convention used by SymbolRef/NormalRef/StringRef/BigIntRef/etc.).
+#[repr(transparent)]
+pub struct UncountedExpr<'e> {
+    /// This type MUST NOT provide users of this API with owned access to this
+    /// value.
+    expr: ManuallyDrop<Expr>,
+    phantom: PhantomData<&'e Expr>,
+}
+
+impl<'e> UncountedExpr<'e> {
+    pub fn as_expr(&self) -> &Expr {
+        let UncountedExpr { expr, phantom: _ } = self;
+
+        &*expr
+    }
+}
+
+//==========================================================
+// Typed Expression wrapper types
+//==========================================================
 
 /// Generate all the common methods for an expression wrapper type.
 macro_rules! expr_wrapper {
