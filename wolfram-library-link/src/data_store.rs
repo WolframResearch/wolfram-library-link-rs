@@ -648,6 +648,15 @@ impl DataStoreAdd for u64 {
     }
 }
 
+impl DataStoreAdd for usize {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        if *self > i64::MAX as usize {
+            panic!("usize value {} exceeds i64::MAX; cannot store in DataStore integer slot", self);
+        }
+        ds.add_i64(*self as i64)
+    }
+}
+
 impl DataStoreAdd for DataStore {
     fn add_to_datastore(&self, ds: &mut DataStore) {
         ds.add_data_store(self.clone())
@@ -689,6 +698,17 @@ impl From<DataStoreNodeValue<'_>> for u64 {
         match value {
             DataStoreNodeValue::Integer(val) => {
                 u64::try_from(val).expect("expected non-negative integer that fits in u64")
+            }
+            _ => panic!("expected DataStoreNodeValue::Integer"),
+        }
+    }
+}
+
+impl From<DataStoreNodeValue<'_>> for usize {
+    fn from(value: DataStoreNodeValue) -> usize {
+        match value {
+            DataStoreNodeValue::Integer(val) => {
+                usize::try_from(val).expect("expected non-negative integer that fits in usize")
             }
             _ => panic!("expected DataStoreNodeValue::Integer"),
         }

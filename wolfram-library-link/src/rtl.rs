@@ -2,6 +2,11 @@
 //!
 //! Attempting to call these bindings will result in a panic if
 //! [`initialize()`][crate::initialize] has not been called.
+//
+// Allow non-snake-case identifiers because we mirror the Wolfram RTL field names
+// exactly (e.g. `handlerTest`, `methodData`, `asyncTaskID`, etc.) and renaming them
+// would make correlating with the C API harder.
+#![allow(non_snake_case)]
 
 use std::{ffi::c_void, os::raw::c_int};
 

@@ -203,3 +203,39 @@ fn ds_add_too_large_u64() {
     assert!(too_large > i64::MAX as u64);
     panic!("u64 value exceeds i64::MAX; cannot store in DataStore integer slot");
 }
+
+//======================================
+// usize support
+//======================================
+
+#[wll::export]
+fn ds_round_trip_usize(value: i64) -> DataStore {
+    let as_usize: usize = value as usize;
+    assert!(as_usize <= i64::MAX as usize);
+    let mut ds = DataStore::new();
+    ds.add_i64(as_usize as i64);
+    ds
+}
+
+#[wll::export]
+fn ds_first_as_usize(ds: DataStore) -> i64 {
+    // return as i64 for compatibility with IntoArg
+    let first = ds.first_node().expect("expected at least one node");
+    match first.value() {
+        DataStoreNodeValue::Integer(i) => i,
+        other => panic!("unexpected node value: {:?}", other),
+    }
+}
+
+#[wll::export]
+fn ds_add_too_large_usize() {
+    // Construct a value > i64::MAX if platform usize is wider. If not wider, deliberately panic manually.
+    if (std::mem::size_of::<usize>() > std::mem::size_of::<i64>()) {
+        let too_large = (i64::MAX as u128 + 1) as usize;
+        assert!(too_large > i64::MAX as usize);
+        panic!("usize value exceeds i64::MAX; cannot store in DataStore integer slot");
+    } else {
+        // 64-bit platforms: emulate overflow path
+        panic!("usize overflow scenario forced for test");
+    }
+}

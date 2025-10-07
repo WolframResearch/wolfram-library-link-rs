@@ -136,3 +136,29 @@ Test[
 	,
 	{LibraryFunction::rterr}
 ]
+
+(*====================================*)
+
+(* usize support                      *)
+
+(*====================================*)
+
+Test[
+	LibraryFunctionLoad["liblibrary_tests", "ds_round_trip_usize", {Integer}, "DataStore"][77]
+	,
+	Developer`DataStore[77]
+]
+
+Test[
+	LibraryFunctionLoad["liblibrary_tests", "ds_first_as_usize", {"DataStore"}, Integer][Developer`DataStore[321]]
+	,
+	321
+]
+
+Test[
+	LibraryFunctionLoad["liblibrary_tests", "ds_add_too_large_usize", {}, "Void"][]
+	,
+	LibraryFunctionError["LIBRARY_USER_ERROR", 1002]
+	,
+	{LibraryFunction::rterr}
+]
