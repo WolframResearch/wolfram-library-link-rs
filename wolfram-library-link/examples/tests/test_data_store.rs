@@ -2,7 +2,8 @@ use std::os::raw::c_int;
 use wolfram_library_link::{
     self as wll,
     sys::{self, WolframLibraryData},
-    DataStore, NumericArray,
+    DataStore, DataStoreNodeValue,
+    NumericArray,
 };
 
 
@@ -172,4 +173,33 @@ fn test_data_store_nodes() {
         );
         assert!(nodes.next().is_none());
     }
+}
+
+//======================================
+// u64 support (merged)
+//======================================
+
+#[wll::export]
+fn ds_round_trip_u64(value: i64) -> DataStore {
+    let as_u64: u64 = value as u64;
+    assert!(as_u64 <= i64::MAX as u64);
+    let mut ds = DataStore::new();
+    ds.add_i64(as_u64 as i64);
+    ds
+}
+
+#[wll::export]
+fn ds_first_as_u64(ds: DataStore) -> i64 {
+    let first = ds.first_node().expect("expected at least one node");
+    match first.value() {
+        DataStoreNodeValue::Integer(i) => i,
+        other => panic!("unexpected node value: {:?}", other),
+    }
+}
+
+#[wll::export]
+fn ds_add_too_large_u64() {
+    let too_large = (i64::MAX as u128 + 1) as u64;
+    assert!(too_large > i64::MAX as u64);
+    panic!("u64 value exceeds i64::MAX; cannot store in DataStore integer slot");
 }
