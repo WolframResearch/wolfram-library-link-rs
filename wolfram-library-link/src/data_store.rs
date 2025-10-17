@@ -704,6 +704,28 @@ impl From<DataStoreNodeValue<'_>> for u64 {
     }
 }
 
+impl From<DataStoreNodeValue<'_>> for u32 {
+    fn from(value: DataStoreNodeValue) -> u32 {
+        match value {
+            DataStoreNodeValue::Integer(val) => {
+                u32::try_from(val).expect("expected non-negative integer that fits in u32")
+            }
+            _ => panic!("expected DataStoreNodeValue::Integer"),
+        }
+    }
+}
+
+impl From<DataStoreNodeValue<'_>> for u16 {
+    fn from(value: DataStoreNodeValue) -> u16 {
+        match value {
+            DataStoreNodeValue::Integer(val) => {
+                u16::try_from(val).expect("expected non-negative integer that fits in u16")
+            }
+            _ => panic!("expected DataStoreNodeValue::Integer"),
+        }
+    }
+}
+
 impl From<DataStoreNodeValue<'_>> for usize {
     fn from(value: DataStoreNodeValue) -> usize {
         match value {
