@@ -285,7 +285,7 @@ fn get_caught_panic() -> CaughtPanic {
     caught_panic
 }
 
-fn custom_hook(info: &panic::PanicInfo) {
+fn custom_hook(info: &panic::PanicHookInfo) {
     let caught_panic = {
         let message: Option<String> = get_panic_message(info);
         let location: Option<String> = info.location().map(ToString::to_string);
@@ -324,7 +324,7 @@ fn custom_hook(info: &panic::PanicInfo) {
     }
 }
 
-fn get_panic_message(info: &panic::PanicInfo) -> Option<String> {
+fn get_panic_message(info: &panic::PanicHookInfo) -> Option<String> {
     // Extract the message from `panic!("...")` statements.
     // In this case, the payload is always the static formatting string.
     if let Some(string) = info.payload().downcast_ref::<&str>() {

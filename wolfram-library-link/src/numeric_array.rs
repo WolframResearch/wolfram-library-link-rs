@@ -259,7 +259,7 @@ impl NumericArray {
     ///     }
     /// }
     /// ```
-    pub fn kind(&self) -> NumericArrayKind {
+    pub fn kind(&self) -> NumericArrayKind<'_> {
         /// The purpose of this intermediate function is to limit the scope of the call to
         /// transmute(). `transmute()` is a *very* unsafe function, so it seems prudent to
         /// future-proof this code against accidental changes which alter the inferrence

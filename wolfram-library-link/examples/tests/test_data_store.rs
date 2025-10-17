@@ -230,7 +230,7 @@ fn ds_first_as_usize(ds: DataStore) -> i64 {
 #[wll::export]
 fn ds_add_too_large_usize() {
     // Construct a value > i64::MAX if platform usize is wider. If not wider, deliberately panic manually.
-    if (std::mem::size_of::<usize>() > std::mem::size_of::<i64>()) {
+    if std::mem::size_of::<usize>() > std::mem::size_of::<i64>() {
         let too_large = (i64::MAX as u128 + 1) as usize;
         assert!(too_large > i64::MAX as usize);
         panic!("usize value exceeds i64::MAX; cannot store in DataStore integer slot");
