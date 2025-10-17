@@ -205,6 +205,64 @@ fn ds_add_too_large_u64() {
 }
 
 //======================================
+// u32/u16/u8 support
+//======================================
+
+#[wll::export]
+fn ds_round_trip_u32(value: i64) -> DataStore {
+    let as_u32: u32 = value as u32;
+    assert!(as_u32 as i64 <= i64::MAX);
+    let mut ds = DataStore::new();
+    ds.add_i64(as_u32 as i64);
+    ds
+}
+
+#[wll::export]
+fn ds_first_as_u32(ds: DataStore) -> i64 {
+    let first = ds.first_node().expect("expected at least one node");
+    match first.value() {
+        DataStoreNodeValue::Integer(i) => i,
+        other => panic!("unexpected node value: {:?}", other),
+    }
+}
+
+#[wll::export]
+fn ds_round_trip_u16(value: i64) -> DataStore {
+    let as_u16: u16 = value as u16;
+    assert!(as_u16 as i64 <= i64::MAX);
+    let mut ds = DataStore::new();
+    ds.add_i64(as_u16 as i64);
+    ds
+}
+
+#[wll::export]
+fn ds_first_as_u16(ds: DataStore) -> i64 {
+    let first = ds.first_node().expect("expected at least one node");
+    match first.value() {
+        DataStoreNodeValue::Integer(i) => i,
+        other => panic!("unexpected node value: {:?}", other),
+    }
+}
+
+#[wll::export]
+fn ds_round_trip_u8(value: i64) -> DataStore {
+    let as_u8: u8 = value as u8;
+    assert!(as_u8 as i64 <= i64::MAX);
+    let mut ds = DataStore::new();
+    ds.add_i64(as_u8 as i64);
+    ds
+}
+
+#[wll::export]
+fn ds_first_as_u8(ds: DataStore) -> i64 {
+    let first = ds.first_node().expect("expected at least one node");
+    match first.value() {
+        DataStoreNodeValue::Integer(i) => i,
+        other => panic!("unexpected node value: {:?}", other),
+    }
+}
+
+//======================================
 // usize support
 //======================================
 

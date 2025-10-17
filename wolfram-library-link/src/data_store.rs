@@ -626,6 +626,12 @@ impl DataStoreAdd for char {
     }
 }
 
+impl DataStoreAdd for u8 {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        ds.add_i64(*self as i64)
+    }
+}
+
 impl DataStoreAdd for u16 {
     fn add_to_datastore(&self, ds: &mut DataStore) {
         ds.add_i64(*self as i64)
@@ -709,6 +715,17 @@ impl From<DataStoreNodeValue<'_>> for u32 {
         match value {
             DataStoreNodeValue::Integer(val) => {
                 u32::try_from(val).expect("expected non-negative integer that fits in u32")
+            }
+            _ => panic!("expected DataStoreNodeValue::Integer"),
+        }
+    }
+}
+
+impl From<DataStoreNodeValue<'_>> for u8 {
+    fn from(value: DataStoreNodeValue) -> u8 {
+        match value {
+            DataStoreNodeValue::Integer(val) => {
+                u8::try_from(val).expect("expected non-negative integer that fits in u8")
             }
             _ => panic!("expected DataStoreNodeValue::Integer"),
         }
