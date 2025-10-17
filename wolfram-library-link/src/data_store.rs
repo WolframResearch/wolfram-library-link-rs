@@ -663,6 +663,32 @@ impl DataStoreAdd for usize {
     }
 }
 
+impl DataStoreAdd for i8 {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        ds.add_i64(*self as i64)
+    }
+}
+
+impl DataStoreAdd for i16 {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        ds.add_i64(*self as i64)
+    }
+}
+
+impl DataStoreAdd for i32 {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        ds.add_i64(*self as i64)
+    }
+}
+
+impl DataStoreAdd for isize {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        // Ensure the isize value fits in i64 on platforms where isize may be larger
+        let v: i64 = i64::try_from(*self).expect("isize value out of range for i64");
+        ds.add_i64(v)
+    }
+}
+
 impl DataStoreAdd for DataStore {
     fn add_to_datastore(&self, ds: &mut DataStore) {
         ds.add_data_store(self.clone())
@@ -731,7 +757,6 @@ impl From<DataStoreNodeValue<'_>> for u8 {
         }
     }
 }
-
 impl From<DataStoreNodeValue<'_>> for u16 {
     fn from(value: DataStoreNodeValue) -> u16 {
         match value {
@@ -749,6 +774,42 @@ impl From<DataStoreNodeValue<'_>> for usize {
             DataStoreNodeValue::Integer(val) => {
                 usize::try_from(val).expect("expected non-negative integer that fits in usize")
             }
+            _ => panic!("expected DataStoreNodeValue::Integer"),
+        }
+    }
+}
+
+impl From<DataStoreNodeValue<'_>> for i8 {
+    fn from(value: DataStoreNodeValue) -> i8 {
+        match value {
+            DataStoreNodeValue::Integer(val) => i8::try_from(val).expect("expected integer that fits in i8"),
+            _ => panic!("expected DataStoreNodeValue::Integer"),
+        }
+    }
+}
+
+impl From<DataStoreNodeValue<'_>> for i16 {
+    fn from(value: DataStoreNodeValue) -> i16 {
+        match value {
+            DataStoreNodeValue::Integer(val) => i16::try_from(val).expect("expected integer that fits in i16"),
+            _ => panic!("expected DataStoreNodeValue::Integer"),
+        }
+    }
+}
+
+impl From<DataStoreNodeValue<'_>> for i32 {
+    fn from(value: DataStoreNodeValue) -> i32 {
+        match value {
+            DataStoreNodeValue::Integer(val) => i32::try_from(val).expect("expected integer that fits in i32"),
+            _ => panic!("expected DataStoreNodeValue::Integer"),
+        }
+    }
+}
+
+impl From<DataStoreNodeValue<'_>> for isize {
+    fn from(value: DataStoreNodeValue) -> isize {
+        match value {
+            DataStoreNodeValue::Integer(val) => isize::try_from(val).expect("expected integer that fits in isize"),
             _ => panic!("expected DataStoreNodeValue::Integer"),
         }
     }

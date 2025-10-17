@@ -144,19 +144,22 @@ Test[
 (*====================================*)
 
 Test[
-	LibraryFunctionLoad["liblibrary_tests", "ds_round_trip_usize", {Integer}, "DataStore"][77]
+	LibraryFunctionLoad["liblibrary_tests", "ds_round_trip_usize", {Integer
+		}, "DataStore"][77]
 	,
 	Developer`DataStore[77]
 ]
 
 Test[
-	LibraryFunctionLoad["liblibrary_tests", "ds_first_as_usize", {"DataStore"}, Integer][Developer`DataStore[321]]
+	LibraryFunctionLoad["liblibrary_tests", "ds_first_as_usize", {"DataStore"
+		}, Integer][Developer`DataStore[321]]
 	,
 	321
 ]
 
 Test[
-	LibraryFunctionLoad["liblibrary_tests", "ds_add_too_large_usize", {}, "Void"][]
+	LibraryFunctionLoad["liblibrary_tests", "ds_add_too_large_usize", {},
+		 "Void"][]
 	,
 	LibraryFunctionError["LIBRARY_USER_ERROR", 1002]
 	,
@@ -170,37 +173,91 @@ Test[
 (*====================================*)
 
 Test[
-	LibraryFunctionLoad["liblibrary_tests", "ds_round_trip_u32", {Integer}, "DataStore"][42]
+	LibraryFunctionLoad["liblibrary_tests", "ds_round_trip_u32", {Integer
+		}, "DataStore"][42]
 	,
 	Developer`DataStore[42]
 ]
 
 Test[
-	LibraryFunctionLoad["liblibrary_tests", "ds_first_as_u32", {"DataStore"}, Integer][Developer`DataStore[123]]
+	LibraryFunctionLoad["liblibrary_tests", "ds_first_as_u32", {"DataStore"
+		}, Integer][Developer`DataStore[123]]
 	,
 	123
 ]
 
 Test[
-	LibraryFunctionLoad["liblibrary_tests", "ds_round_trip_u16", {Integer}, "DataStore"][13]
+	LibraryFunctionLoad["liblibrary_tests", "ds_round_trip_u16", {Integer
+		}, "DataStore"][13]
 	,
 	Developer`DataStore[13]
 ]
 
 Test[
-	LibraryFunctionLoad["liblibrary_tests", "ds_first_as_u16", {"DataStore"}, Integer][Developer`DataStore[7]]
+	LibraryFunctionLoad["liblibrary_tests", "ds_first_as_u16", {"DataStore"
+		}, Integer][Developer`DataStore[7]]
 	,
 	7
 ]
 
 Test[
-	LibraryFunctionLoad["liblibrary_tests", "ds_round_trip_u8", {Integer}, "DataStore"][5]
+	LibraryFunctionLoad["liblibrary_tests", "ds_round_trip_u8", {Integer
+		}, "DataStore"][5]
 	,
 	Developer`DataStore[5]
 ]
 
 Test[
-	LibraryFunctionLoad["liblibrary_tests", "ds_first_as_u8", {"DataStore"}, Integer][Developer`DataStore[9]]
+	LibraryFunctionLoad["liblibrary_tests", "ds_first_as_u8", {"DataStore"
+		}, Integer][Developer`DataStore[9]]
+	,
+	9
+]
+
+(*====================================*)
+
+(* i32/i16/i8 support                 *)
+
+(*====================================*)
+
+Test[
+	LibraryFunctionLoad["liblibrary_tests", "ds_round_trip_i32", {Integer
+		}, "DataStore"][42]
+	,
+	Developer`DataStore[42]
+]
+
+Test[
+	LibraryFunctionLoad["liblibrary_tests", "ds_first_as_i32", {"DataStore"
+		}, Integer][Developer`DataStore[123]]
+	,
+	123
+]
+
+Test[
+	LibraryFunctionLoad["liblibrary_tests", "ds_round_trip_i16", {Integer
+		}, "DataStore"][13]
+	,
+	Developer`DataStore[13]
+]
+
+Test[
+	LibraryFunctionLoad["liblibrary_tests", "ds_first_as_i16", {"DataStore"
+		}, Integer][Developer`DataStore[7]]
+	,
+	7
+]
+
+Test[
+	LibraryFunctionLoad["liblibrary_tests", "ds_round_trip_i8", {Integer
+		}, "DataStore"][5]
+	,
+	Developer`DataStore[5]
+]
+
+Test[
+	LibraryFunctionLoad["liblibrary_tests", "ds_first_as_i8", {"DataStore"
+		}, Integer][Developer`DataStore[9]]
 	,
 	9
 ]
