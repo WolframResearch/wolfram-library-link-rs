@@ -50,6 +50,32 @@ $ cargo +nightly xtask gen-bindings
 will re-generate the `wolfram-library-link-sys/generated/12.2.0/MacOSX-x86-64/LibraryLink_bindings.rs`
 file.
 
+### Generating bindings for multiple Linux platforms using Docker
+A helper script is provided to run the binding generator inside Docker for a
+single Linux target (x86_64) using the WolframResearch `wolframengine` image. This
+is useful for CI or for maintainers who don't have the Wolfram runtime locally.
+don't have every Linux architecture available locally.
+
+Note: macOS bindings cannot be generated inside Docker because Mathematica/Wolfram
+applications must be run on macOS to access the runtime headers and shared libraries.
+You must still generate macOS bindings on macOS hosts and commit them.
+
+
+From the repository root:
+
+```shell
+# Optionally point to a local Wolfram installation to mount inside the container
+export WOLFRAM_APP_DIRECTORY="/path/to/Mathematica.app"
+./scripts/gen_bindings_all.sh
+```
+
+The script will run the `wolframresearch/wolframengine:latest` container (or the
+image specified by `WOLFRAM_DOCKER_IMAGE`), install Rust if necessary, and run
+`cargo +nightly xtask gen-bindings` for the x86_64 Linux target. Generated files
+will be placed under `wolfram-library-link-sys/generated/` and should be reviewed
+and committed.
+
+
 ## Updating build.rs bindings to use on docs.rs
 
 When `wolfram-library-link-sys` is built in the <docs.rs> environment, some special logic
