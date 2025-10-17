@@ -2,8 +2,12 @@ use std::path::PathBuf;
 
 use wolfram_app_discovery::{SystemID, WolframVersion};
 
-/// Oldest Wolfram Version that wolfram-library-link is compatible with.
-const WOLFRAM_VERSION: WolframVersion = WolframVersion::new(13, 0, 1);
+/// Target Wolfram Version for which to prefer generated bindings.
+///
+/// Note: If pre-generated bindings for this version are not present under
+/// `generated/`, the build will fail with an explanatory message listing
+/// available generated versions.
+const WOLFRAM_VERSION: WolframVersion = WolframVersion::new(14, 3, 0);
 
 fn main() {
     env_logger::init();
@@ -61,26 +65,31 @@ fn use_pregenerated_bindings() -> PathBuf {
 
     println!("cargo:rerun-if-changed={}", bindings_path.display());
 
-    if !bindings_path.is_file() {
-        println!(
-            "
-    ==== ERROR: wolfram-library-link-sys =====
+        if !bindings_path.is_file() {
+            // Build a helpful listing of available generated bindings.
+            let gen_dir = PathBuf::from("generated");
+            let mut available = String::new();
+            if gen_dir.is_dir() {
+                for entry in std::fs::read_dir(&gen_dir).unwrap_or_else(|_| panic!("failed to read generated/ directory")) {
+                    if let Ok(entry) = entry {
+                        if let Some(name) = entry.file_name().to_str() {
+                            // list the version directory
+                            available.push_str(&format!("  - {}\n", name));
+                        }
+                    }
+                }
+            }
 
-    Rust bindings for Wolfram LibraryLink for target configuration:
+            println!(
+                "\n==== ERROR: wolfram-library-link-sys =====\n\nRust bindings for Wolfram LibraryLink for target configuration:\n\n    WolframVersion:    {}\n    SystemID:          {}\n\nhave not been pre-generated.\n\nAvailable generated bindings (under generated/):\n{}\nTo add bindings for {}, see docs/Maintenance.md for instructions.\n\n=========================================\n",
+                WOLFRAM_VERSION,
+                system_id,
+                available,
+                WOLFRAM_VERSION
+            );
 
-        WolframVersion:    {}
-        SystemID:          {}
-
-    have not been pre-generated.
-
-    See wolfram-library-link-sys/generated/ for a listing of currently available targets.
-
-    =========================================
-            ",
-            WOLFRAM_VERSION, system_id
-        );
-        panic!("<See printed error>");
-    }
+            panic!("missing generated LibraryLink bindings for requested Wolfram version and target");
+        }
 
     bindings_path
 }
