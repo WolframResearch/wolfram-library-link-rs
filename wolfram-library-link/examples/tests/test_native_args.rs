@@ -54,7 +54,7 @@ fn test_mreal(x: mreal) -> mreal {
 }
 
 //------------
-// i64, f64
+// i64, f64, u32, u64, usize, isize
 //------------
 
 #[wll::export]
@@ -71,6 +71,27 @@ fn test_i64_i64(x: i64, y: i64) -> i64 {
 fn test_f64(x: f64) -> f64 {
     x * x
 }
+
+#[wll::export]
+fn test_u32_roundtrip(x: u32) -> u32 {
+    x
+}
+
+#[wll::export]
+fn test_u64_roundtrip(x: u64) -> u64 {
+    x
+}
+
+#[wll::export]
+fn test_usize_roundtrip(x: usize) -> usize {
+    x
+}
+
+#[wll::export]
+fn test_isize_roundtrip(x: isize) -> isize {
+    x
+}
+
 
 //--------
 // Strings

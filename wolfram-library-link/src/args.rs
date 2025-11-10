@@ -523,6 +523,49 @@ impl<T: for<'a> From<DataStoreNodeValue<'a>>> FromArg<'_> for Option<T> {
     }
 }
 
+impl<'a> FromArg<'a> for u32 {
+    unsafe fn from_arg(arg: &MArgument) -> Self {
+        *arg.integer as u32
+    }
+
+    fn parameter_type() -> Expr {
+        Expr::symbol(Symbol::new("System`Integer"))
+    }
+}
+
+impl<'a> FromArg<'a> for u64 {
+    unsafe fn from_arg(arg: &'a MArgument) -> u64 {
+        let v = *arg.integer;
+        u64::try_from(v).expect("expected non-negative integer that fits in u64")
+    }
+
+    fn parameter_type() -> Expr {
+        Expr::symbol(Symbol::new("System`Integer"))
+    }
+}
+
+impl<'a> FromArg<'a> for usize {
+    unsafe fn from_arg(arg: &'a MArgument) -> usize {
+        let v = *arg.integer;
+        usize::try_from(v).expect("expected non-negative integer that fits in usize")
+    }
+
+    fn parameter_type() -> Expr {
+        Expr::symbol(Symbol::new("System`Integer"))
+    }
+}
+
+impl<'a> FromArg<'a> for isize {
+    unsafe fn from_arg(arg: &'a MArgument) -> isize {
+        let v = *arg.integer;
+        isize::try_from(v).expect("expected integer that fits in isize")
+    }
+
+    fn parameter_type() -> Expr {
+        Expr::symbol(Symbol::new("System`Integer"))
+    }
+}
+
 //======================================
 // impl IntoArg
 //======================================
@@ -642,6 +685,43 @@ impl IntoArg for u16 {
 impl IntoArg for u32 {
     unsafe fn into_arg(self, arg: MArgument) {
         *arg.integer = mint::from(self);
+    }
+
+    fn return_type() -> Expr {
+        Expr::symbol(Symbol::new("System`Integer"))
+    }
+}
+
+impl IntoArg for u64 {
+    unsafe fn into_arg(self, arg: MArgument) {
+        if self > i64::MAX as u64 {
+            panic!("u64 value {} exceeds i64::MAX; cannot store in DataStore integer slot", self);
+        }
+        *arg.integer = mint::from(self as i64);
+    }
+
+    fn return_type() -> Expr {
+        Expr::symbol(Symbol::new("System`Integer"))
+    }
+}
+
+impl IntoArg for usize {
+    unsafe fn into_arg(self, arg: MArgument) {
+        if self > i64::MAX as usize {
+            panic!("usize value {} exceeds i64::MAX; cannot store in DataStore integer slot", self);
+        }
+        *arg.integer = mint::from(self as i64);
+    }
+
+    fn return_type() -> Expr {
+        Expr::symbol(Symbol::new("System`Integer"))
+    }
+}
+
+impl IntoArg for isize {
+    unsafe fn into_arg(self, arg: MArgument) {
+        let v: i64 = i64::try_from(self).expect("isize value out of range for i64");
+        *arg.integer = mint::from(v);
     }
 
     fn return_type() -> Expr {

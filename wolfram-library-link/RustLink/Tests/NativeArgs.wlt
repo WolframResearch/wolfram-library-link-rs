@@ -99,6 +99,50 @@ Test[
 	6.25
 ]
 
+Test[
+	LibraryFunctionLoad[
+		"liblibrary_tests",
+		"test_u32_roundtrip",
+		{Integer},
+		Integer
+	][1234567890]
+	,
+	1234567890
+]
+
+Test[
+	LibraryFunctionLoad[
+		"liblibrary_tests",
+		"test_u64_roundtrip",
+		{Integer},
+		Integer
+	][1234567890123456789]
+	,
+	1234567890123456789
+]
+
+Test[
+	LibraryFunctionLoad[
+		"liblibrary_tests",
+		"test_usize_roundtrip",
+		{Integer},
+		Integer
+	][42]
+	,
+	42
+]
+
+Test[
+	LibraryFunctionLoad[
+		"liblibrary_tests",
+		"test_isize_roundtrip",
+		{Integer},
+		Integer
+	][-42]
+	,
+	-42
+]
+
 (*---------*)
 (* Strings *)
 (*---------*)
