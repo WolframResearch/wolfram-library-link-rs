@@ -695,6 +695,12 @@ impl DataStoreAdd for DataStore {
     }
 }
 
+impl DataStoreAdd for String {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        ds.add_str(self.as_str())
+    }
+}
+
 impl<T: DataStoreAdd> DataStoreAdd for Vec<T> {
     fn add_to_datastore(&self, ds: &mut DataStore) {
         let mut inner = DataStore::new();

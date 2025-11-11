@@ -352,3 +352,11 @@ fn ds_add_too_large_usize() {
         panic!("usize overflow scenario forced for test");
     }
 }
+
+#[wll::export]
+fn test_add_string_to_data_store() -> DataStore {
+    let mut data = DataStore::new();
+    let s = String::from("owned");
+    data.add_str(&s);
+    data
+}

@@ -95,6 +95,17 @@ Test[
 	3
 ]
 
+Test[
+	LibraryFunctionLoad[
+		"liblibrary_tests",
+		"test_add_string_to_data_store",
+		{},
+		"DataStore"
+	][]
+	,
+	Developer`DataStore["owned"]
+]
+
 (*====================================*)
 
 (* DataStore nodes                    *)

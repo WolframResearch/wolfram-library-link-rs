@@ -1,5 +1,47 @@
-//! Traits for working with data types that can be passed natively via LibraryLink
-//! [`MArgument`]s.
+// BigInt/BigUint support
+use num_bigint::{BigInt, BigUint};
+
+impl<'a> FromArg<'a> for BigInt {
+    unsafe fn from_arg(arg: &'a MArgument) -> Self {
+        let s = String::from_arg(arg);
+        BigInt::parse_bytes(s.as_bytes(), 10).expect("Invalid BigInt string")
+    }
+
+    fn parameter_type() -> Expr {
+        Expr::from(Symbol::new("System`String"))
+    }
+}
+
+impl<'a> FromArg<'a> for BigUint {
+    unsafe fn from_arg(arg: &'a MArgument) -> Self {
+        let s = String::from_arg(arg);
+        BigUint::parse_bytes(s.as_bytes(), 10).expect("Invalid BigUint string")
+    }
+
+    fn parameter_type() -> Expr {
+        Expr::from(Symbol::new("System`String"))
+    }
+}
+
+impl IntoArg for BigInt {
+    unsafe fn into_arg(self, arg: MArgument) {
+        self.to_string().into_arg(arg)
+    }
+
+    fn return_type() -> Expr {
+        Expr::from(Symbol::new("System`String"))
+    }
+}
+
+impl IntoArg for BigUint {
+    unsafe fn into_arg(self, arg: MArgument) {
+        self.to_string().into_arg(arg)
+    }
+
+    fn return_type() -> Expr {
+        Expr::from(Symbol::new("System`String"))
+    }
+}
 
 use std::{
     cell::RefCell,
