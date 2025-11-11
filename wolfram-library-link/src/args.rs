@@ -916,6 +916,45 @@ impl<T: DataStoreAdd> IntoArg for Vec<T> {
 }
 
 //======================================
+// Trait impls
+//======================================
+
+macro_rules! impl_into_arg_for_tuple {
+    ( $( $T:ident : $idx:tt ),* ) => {
+        impl<$($T),*> IntoArg for ($($T,)*)
+        where
+            $($T: DataStoreAdd,)*
+        {
+            unsafe fn into_arg(self, arg: crate::sys::MArgument) {
+                let mut ds = crate::DataStore::new();
+                $(
+                    self.$idx.add_to_datastore(&mut ds);
+                )*
+                ds.into_arg(arg);
+            }
+
+            fn return_type() -> crate::Expr {
+                crate::Expr::from(crate::Symbol::new("Developer`DataStore"))
+            }
+        }
+    };
+}
+
+impl_into_arg_for_tuple!(A:0);
+impl_into_arg_for_tuple!(A:0, B:1);
+impl_into_arg_for_tuple!(A:0, B:1, C:2);
+impl_into_arg_for_tuple!(A:0, B:1, C:2, D:3);
+impl_into_arg_for_tuple!(A:0, B:1, C:2, D:3, E:4);
+impl_into_arg_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5);
+impl_into_arg_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6);
+impl_into_arg_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7);
+impl_into_arg_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8);
+impl_into_arg_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8, J:9);
+impl_into_arg_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8, J:9, K:10);
+impl_into_arg_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8, J:9, K:10, L:11);
+
+
+//======================================
 // impl NativeFunction
 //======================================
 
