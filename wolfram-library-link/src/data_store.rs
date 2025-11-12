@@ -709,6 +709,36 @@ impl<T: DataStoreAdd> DataStoreAdd for Vec<T> {
     }
 }
 
+macro_rules! impl_datastore_add_for_tuple {
+    ( $( $T:ident : $idx:tt ),* ) => {
+        impl<$($T),*> DataStoreAdd for ($($T,)*)
+        where
+            $($T: DataStoreAdd,)*
+        {
+            fn add_to_datastore(&self, ds: &mut DataStore) {
+                let mut inner = DataStore::new();
+                $(
+                    self.$idx.add_to_datastore(&mut inner);
+                )*
+                ds.add_data_store(inner);
+            }
+        }
+    };
+}
+
+impl_datastore_add_for_tuple!(A:0);
+impl_datastore_add_for_tuple!(A:0, B:1);
+impl_datastore_add_for_tuple!(A:0, B:1, C:2);
+impl_datastore_add_for_tuple!(A:0, B:1, C:2, D:3);
+impl_datastore_add_for_tuple!(A:0, B:1, C:2, D:3, E:4);
+impl_datastore_add_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5);
+impl_datastore_add_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6);
+impl_datastore_add_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7);
+impl_datastore_add_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8);
+impl_datastore_add_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8, J:9);
+impl_datastore_add_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8, J:9, K:10);
+impl_datastore_add_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8, J:9, K:10, L:11);
+
 //---------------
 // From DataStoreNodeValue
 //---------------
