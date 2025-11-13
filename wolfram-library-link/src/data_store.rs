@@ -941,6 +941,51 @@ impl<'node, T: for<'a> From<DataStoreNodeValue<'a>>> From<DataStoreNodeValue<'no
     }
 }
 
+macro_rules! impl_from_datastore_node_value_for_tuple {
+    ( $($T:ident : $idx:tt),* ) => {
+        impl<'node, $($T),*> From<DataStoreNodeValue<'node>> for ($($T,)*)
+        where
+            $( $T: for<'a> From<DataStoreNodeValue<'a>>, )*
+        {
+            fn from(value: DataStoreNodeValue<'node>) -> Self {
+                match value {
+                    DataStoreNodeValue::DataStore(ds) => {
+                        let mut nodes = ds.nodes();
+                        (
+                            $(
+                                nodes.next().expect(concat!("DataStore has too few nodes to create tuple (expected ", stringify!($idx + 1), ")")).value().into(),
+                            )*
+                        )
+                    },
+                    _ => panic!("expected DataStoreNodeValue::DataStore to convert to tuple"),
+                }
+            }
+        }
+    };
+}
+
+impl<'node> From<DataStoreNodeValue<'node>> for () {
+    fn from(value: DataStoreNodeValue<'node>) -> Self {
+        match value {
+            DataStoreNodeValue::DataStore(_ds) => (),
+            _ => {
+                panic!("expected DataStoreNodeValue::DataStore to convert to unit tuple")
+            },
+        }
+    }
+}
+impl_from_datastore_node_value_for_tuple!(A:0, B:1);
+impl_from_datastore_node_value_for_tuple!(A:0, B:1, C:2);
+impl_from_datastore_node_value_for_tuple!(A:0, B:1, C:2, D:3);
+impl_from_datastore_node_value_for_tuple!(A:0, B:1, C:2, D:3, E:4);
+impl_from_datastore_node_value_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5);
+impl_from_datastore_node_value_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6);
+impl_from_datastore_node_value_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7);
+impl_from_datastore_node_value_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8);
+impl_from_datastore_node_value_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8, J:9);
+impl_from_datastore_node_value_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8, J:9, K:10);
+impl_from_datastore_node_value_for_tuple!(A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8, J:9, K:10, L:11);
+
 //---------------
 // Nodes iterator
 //---------------
