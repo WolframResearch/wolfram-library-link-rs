@@ -40,8 +40,8 @@ pub enum Expr {
     Assoc(Vec<(Expr, Expr)>),
     /// Boolean truth value (`True` / `False`).
     Boolean(bool),
-    /// The Wolfram `Null` object.
-    Null,
+    /// The Wolfram `None` object.
+    None,
     /// Complex number with real & imaginary parts (`Complex[re, im]`).
     Complex(f64, f64),
     /// Packed numeric array placeholder (token not currently emitted). Retained for
@@ -154,13 +154,13 @@ pub mod ser {
         Ok(buf)
     }
 
-    /// Convenience: encode an `Option<&Expr>`, mapping `None` to the `Null` tag.
+    /// Convenience: encode an `Option<&Expr>`, mapping `None` to the `None` tag.
     pub fn to_wxf_bytes_option(expr: Option<&Expr>) -> io::Result<Vec<u8>> {
         let mut buf = Vec::new();
         write_header(&mut buf)?;
         match expr {
             Some(e) => write_expr(&mut buf, e)?,
-            None => write_symbol(&mut buf, "Null")?,
+            None => write_symbol(&mut buf, "None")?,
         }
         Ok(buf)
     }
@@ -174,7 +174,7 @@ pub mod ser {
             Expr::List(items) => write_list(w, items),
             Expr::Assoc(pairs) => write_assoc(w, pairs),
             Expr::Boolean(b) => write_symbol(w, if *b { "True" } else { "False" }),
-            Expr::Null => write_symbol(w, "Null"),
+            Expr::None => write_symbol(w, "None"),
             Expr::Complex(re, im) => write_complex(w, *re, *im),
             Expr::PackedArray(pa) => write_packed_array(w, pa),
             Expr::Date(_) => Err(io::Error::new(io::ErrorKind::InvalidData, "Date unsupported in spec subset")),

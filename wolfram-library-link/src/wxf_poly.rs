@@ -3,7 +3,7 @@
 //!
 //! Supported tokens (subset): integers (C/j/i/L), reals (r), strings (S), symbols (s),
 //! functions (f) for `List` and `Complex`, associations (A + - rules), big integers (I).
-//! Booleans and Null are emitted as symbols `True`, `False`, `Null`.
+//! Booleans and None are emitted as symbols `True`, `False`, `None`. Option::None emits symbol `None`.
 //!
 //! Unsupported here: DateObject, PackedArray/NumericArray, delayed rules (:), big reals (R).
 //!
@@ -65,7 +65,14 @@ impl_int!(i64, i32, i16, i8, u64, u32, u16, u8);
 impl WxfEncode for f64 { fn encode_wxf<W: Write>(&self, w: &mut W) -> io::Result<()> { write_real(w, *self) } }
 impl WxfEncode for f32 { fn encode_wxf<W: Write>(&self, w: &mut W) -> io::Result<()> { write_real(w, *self as f64) } }
 impl WxfEncode for bool { fn encode_wxf<W: Write>(&self, w: &mut W) -> io::Result<()> { write_symbol(w, if *self {"True"} else {"False"}) } }
-impl WxfEncode for () { fn encode_wxf<W: Write>(&self, w: &mut W) -> io::Result<()> { write_symbol(w, "Null") } }
+impl WxfEncode for () {
+    fn encode_wxf<W: Write>(&self, w: &mut W) -> io::Result<()> {
+        // Emit empty List: f + 0 args + List head
+        w.write_all(&[b'f'])?;
+        write_varint(w, 0)?;
+        write_symbol(w, "List")
+    }
+}
 impl WxfEncode for Complex64 { fn encode_wxf<W: Write>(&self, w: &mut W) -> io::Result<()> {
     // f + 2 args, head Complex
     w.write_all(&[b'f'])?; write_varint(w, 2)?; write_symbol(w, "Complex")?; write_real(w, self.re)?; write_real(w, self.im)
@@ -130,7 +137,7 @@ impl WxfEncode for crate::wxf::Expr {
                 Ok(())
             },
             E::Boolean(b) => write_symbol(w, if *b {"True"} else {"False"}),
-            E::Null => write_symbol(w, "Null"),
+            E::None => write_symbol(w, "None"),
             E::Complex(re, im) => { w.write_all(&[b'f'])?; write_varint(w, 2)?; write_symbol(w, "Complex")?; write_real(w, *re)?; write_real(w, *im) },
             E::PackedArray(_) => Err(io::Error::new(io::ErrorKind::InvalidData, "PackedArray unsupported")),
             E::Date(_) => Err(io::Error::new(io::ErrorKind::InvalidData, "Date unsupported")),
@@ -144,10 +151,10 @@ impl WxfEncode for crate::wxf::Expr {
 }
 
 //============================
-// Option<T> -> Null if None
+// Option<T> -> None symbol if None
 //============================
 impl<T: WxfEncode> WxfEncode for Option<T> {
-    fn encode_wxf<W: Write>(&self, w: &mut W) -> io::Result<()> { match self { Some(v) => v.encode_wxf(w), None => write_symbol(w, "Null"), } }
+    fn encode_wxf<W: Write>(&self, w: &mut W) -> io::Result<()> { match self { Some(v) => v.encode_wxf(w), None => write_symbol(w, "None"), } }
 }
 
 //============================
