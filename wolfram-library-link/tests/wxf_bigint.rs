@@ -31,17 +31,27 @@ fn bigint_zero_roundtrip() {
 
 #[test]
 fn bigint_canonical_encoding() {
-    let val = BigInt::parse_bytes(b"255", 10).unwrap(); // 0xFF
+    // Canonical spec-subset encoding used by current serializer: 'I' token + varint length + ASCII decimal digits.
+    let val = BigInt::parse_bytes(b"255", 10).unwrap(); // fits in machine int but Expr::BigInt forces big-int path
     let expr = Expr::BigInt(val.clone());
     let bytes = ser::to_wxf_bytes(&expr).expect("serialize");
-    // Scan for tag 0x0C then verify length is 1 and magnitude single byte 0xFF.
-    let pos = bytes.iter().position(|b| *b == 0x0C).expect("find bigint tag");
-    // Structure: [0x0C][sign][len u32][mag bytes]
-    let sign = bytes[pos + 1];
-    assert_eq!(sign, 1, "expected positive sign");
-    let len_bytes = &bytes[pos + 2 .. pos + 6];
-    let mag_len = u32::from_le_bytes(len_bytes.try_into().unwrap());
-    assert_eq!(mag_len, 1, "expected single byte magnitude");
-    let mag = bytes[pos + 6];
-    assert_eq!(mag, 0xFF);
+    // Header should start with 8:
+    assert!(bytes.starts_with(b"8:"));
+    // Find 'I' token (ASCII 0x49)
+    let pos = bytes.iter().position(|b| *b == b'I').expect("find bigint I token");
+    // Parse varint length immediately after token.
+    let mut idx = pos + 1;
+    let mut len: u64 = 0;
+    let mut shift = 0u32;
+    loop {
+        let byte = bytes[idx];
+        idx += 1;
+        len |= ((byte & 0x7F) as u64) << shift;
+        if byte & 0x80 == 0 { break; }
+        shift += 7;
+        assert!(shift < 64, "varint overflow");
+    }
+    assert_eq!(len, 3, "length should be number of decimal digits");
+    let digits = &bytes[idx .. idx + (len as usize)];
+    assert_eq!(digits, b"255");
 }

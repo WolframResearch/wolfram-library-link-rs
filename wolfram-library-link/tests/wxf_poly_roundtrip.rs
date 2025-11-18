@@ -62,7 +62,7 @@ fn roundtrip_bool_null() {
     let bbytes = wxf_poly::to_wxf_bytes(&true).unwrap();
     assert_eq!(decode(bbytes), Expr::Boolean(true));
     let nbytes = wxf_poly::to_wxf_bytes(&()).unwrap();
-    assert_eq!(decode(nbytes), Expr::Null);
+    assert_eq!(decode(nbytes), Expr::None);
 }
 
 #[test]
@@ -84,7 +84,7 @@ fn roundtrip_option_some_none() {
     let some_bytes = wxf_poly::to_wxf_bytes(&Some(5i64)).unwrap();
     assert_eq!(decode(some_bytes), Expr::Integer(5));
     let none_bytes = wxf_poly::to_wxf_bytes(&Option::<i64>::None).unwrap();
-    assert_eq!(decode(none_bytes), Expr::Null);
+    assert_eq!(decode(none_bytes), Expr::None);
 }
 
 #[test]

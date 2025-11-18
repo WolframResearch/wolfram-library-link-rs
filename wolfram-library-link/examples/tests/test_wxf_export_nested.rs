@@ -8,8 +8,8 @@ use num_bigint::BigUint;
 
 #[export(name = "test_wxf_export_nested_biguint")]
 pub fn wxf_export_nested_biguint() -> NumericArray<u8> {
-    // Construct nested data: {{ {42, big}, Null }, { Null, {7, 99} }} where
-    // tuple -> List, None -> Null; BigUint large value exercises arbitrary precision.
+    // Construct nested data: {{ {42, big}, None }, { None, {7, 99} }} where
+    // tuple -> List, None -> None; BigUint large value exercises arbitrary precision.
     let big = BigUint::parse_bytes(b"123456789012345678901234567890", 10).unwrap();
     let data: Vec<Vec<Option<(u64, BigUint)>>> = vec![
         vec![Some((42u64, big.clone())), None],

@@ -25,7 +25,7 @@ Test[roundtripThroughRust[{1,2,"a"}], {1,2,"a"}, TestID -> "List"]
 Test[roundtripThroughRust[<|"a"->1, "b"->2.5|>], <|"a"->1, "b"->2.5|>, TestID -> "Association"]
 Test[roundtripThroughRust[True], True, TestID -> "BooleanTrue"]
 Test[roundtripThroughRust[False], False, TestID -> "BooleanFalse"]
-Test[roundtripThroughRust[Null], Null, TestID -> "Null"]
+Test[roundtripThroughRust[None], None, TestID -> "None"]
 Test[roundtripThroughRust[1+2 I], 1+2 I, TestID -> "Complex"]
 
 (* PackedArray *)

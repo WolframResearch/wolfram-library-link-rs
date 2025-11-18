@@ -6,7 +6,7 @@ use wolfram_library_link::wxf_poly; // WxfEncode trait used implicitly
 fn option_none_serializes_to_null() {
     let bytes = ser::to_wxf_bytes_option(None).unwrap();
     let decoded = de::from_wxf_bytes(&bytes).unwrap();
-    assert!(matches!(decoded, Expr::Null));
+    assert!(matches!(decoded, Expr::None));
 }
 
 #[test]
@@ -25,5 +25,5 @@ fn polymorphic_option_expr() {
     assert_eq!(some_decoded, expr);
     let none_bytes = wxf_poly::to_wxf_bytes(&Option::<Expr>::None).unwrap();
     let none_decoded = de::from_wxf_bytes(&none_bytes).unwrap();
-    assert!(matches!(none_decoded, Expr::Null));
+    assert!(matches!(none_decoded, Expr::None));
 }
