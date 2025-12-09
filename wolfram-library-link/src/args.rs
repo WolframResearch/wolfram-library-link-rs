@@ -513,7 +513,7 @@ impl<'a> FromArg<'a> for &'a DataStore {
 impl<T: for<'a> From<DataStoreNodeValue<'a>>> FromArg<'_> for Vec<T> {
     unsafe fn from_arg(arg: &MArgument) -> Vec<T> {
         let mut vec = Vec::new();
-        DataStore::from_arg(arg)
+        <&DataStore>::from_arg(arg)
             .nodes()
             .for_each(|node| vec.push(T::from(node.value())));
         vec
@@ -532,7 +532,7 @@ impl<
 {
     unsafe fn from_arg(arg: &MArgument) -> HashMap<K, V, S> {
         let mut dict = HashMap::default();
-        DataStore::from_arg(arg)
+        <&DataStore>::from_arg(arg)
             .nodes()
             .for_each(|node| match node.value() {
                 DataStoreNodeValue::DataStore(rule) => {
@@ -554,7 +554,7 @@ impl<
 
 impl<T: for<'a> From<DataStoreNodeValue<'a>>> FromArg<'_> for Option<T> {
     unsafe fn from_arg(arg: &MArgument) -> Option<T> {
-        match DataStore::from_arg(arg).nodes().next() {
+        match <&DataStore>::from_arg(arg).nodes().next() {
             None => None,
             Some(v) => Some(T::from(v.value())),
         }

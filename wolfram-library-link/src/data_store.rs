@@ -464,6 +464,10 @@ impl DataStore {
     pub fn first_node<'s>(&'s self) -> Option<DataStoreNode<'s>> {
         let DataStore(raw) = *self;
 
+        if raw.is_null() {
+            return None;
+        }
+
         let node = unsafe { rtl::DataStore_getFirstNode(raw) };
 
         if node.is_null() {
