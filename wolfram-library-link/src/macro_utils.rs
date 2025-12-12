@@ -263,6 +263,96 @@ pub unsafe fn load_library_functions_impl(
     })
 }
 
+/// Native loader implementation that returns function load specifications as a DataStore.
+///
+/// Accepts the library path as a string argument and returns a `DataStore` containing:
+/// - Function names as keys
+/// - For each function: `DataStore[path, name, DataStore[args...], return]`
+///
+/// This mirrors the structure of LibraryFunctionLoad arguments, making it easy to
+/// process on the Wolfram side.
+#[cfg(feature = "automate-function-loading-boilerplate")]
+pub unsafe fn load_library_functions_native_impl(
+    lib_data: sys::WolframLibraryData,
+    argc: sys::mint,
+    args: *mut MArgument,
+    res: MArgument,
+) -> c_int {
+    use std::ffi::CStr;
+
+    // Initialize the library
+    if crate::initialize(lib_data).is_err() {
+        return error_code::FAILED_TO_INIT;
+    }
+
+    // Get the library path from arguments
+    if argc != 1 {
+        return sys::LIBRARY_FUNCTION_ERROR as c_int;
+    }
+
+    let library_path = {
+        let arg = *args;
+        let c_str = CStr::from_ptr(*arg.utf8string);
+        c_str.to_str().unwrap_or("").to_owned()
+    };
+
+    // Build the DataStore with function load specifications
+    let ds = build_function_load_datastore(&library_path);
+
+    // Return via MArgument (DataStore uses the tensor field)
+    *res.tensor = ds.into_raw() as *mut _;
+
+    sys::LIBRARY_NO_ERROR as c_int
+}
+
+/// Build a DataStore containing LibraryFunctionLoad-compatible specifications.
+///
+/// Each function is stored as: `name -> DataStore[path, name, args_ds, return_type]`
+#[cfg(feature = "automate-function-loading-boilerplate")]
+fn build_function_load_datastore(library_path: &str) -> crate::DataStore {
+    use crate::DataStore;
+
+    let mut ds = DataStore::new();
+
+    for func in inventory::iter::<LibraryLinkFunction> {
+        let mut func_ds = DataStore::new();
+
+        match func {
+            LibraryLinkFunction::Native { name, signature } => {
+                // Add: path, name, args, return
+                func_ds.add_str(library_path);
+                func_ds.add_str(name);
+
+                if let Ok((args, ret)) = signature() {
+                    let mut args_ds = DataStore::new();
+                    for arg in args.iter() {
+                        args_ds.add_str(&format!("{}", arg));
+                    }
+                    func_ds.add_data_store(args_ds);
+                    func_ds.add_str(&format!("{}", ret));
+                }
+
+                ds.add_named_data_store(name, func_ds);
+            },
+            #[cfg(feature = "wstp")]
+            LibraryLinkFunction::Wstp { name } => {
+                // WSTP: path, name, LinkObject, LinkObject
+                func_ds.add_str(library_path);
+                func_ds.add_str(name);
+
+                let mut args_ds = DataStore::new();
+                args_ds.add_str("LinkObject");
+                func_ds.add_data_store(args_ds);
+                func_ds.add_str("LinkObject");
+
+                ds.add_named_data_store(name, func_ds);
+            }
+        }
+    }
+
+    ds
+}
+
 /// Returns an [`Association`][Association] containing the names and `LibraryFunctionLoad`
 /// calls for every function in this library marked with [`#[export(..)]`][crate::export].
 ///

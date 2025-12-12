@@ -34,18 +34,19 @@ ref-cast = "1.0.6"
 backtrace = { version = "^0.3.46", optional = true }
 inventory = { version = "0.2.1", optional = true }
 process_path = { version = "0.1.3", optional = true }
+paste = { version = "1.0", optional = true }
 
 num-bigint = "0.4"
 
 [dev-dependencies]
 
 [features]
-default = ["wstp", "panic-failure-backtraces", "automate-function-loading-boilerplate"]
+default = ["panic-failure-backtraces", "automate-function-loading-boilerplate"]
 nightly = []
 
 wstp = ["dep:wstp", "wolfram-library-link-macros/wstp"]
 panic-failure-backtraces = ["backtrace"]
-automate-function-loading-boilerplate = ["inventory", "process_path", "wolfram-library-link-macros/automate-function-loading-boilerplate"]
+automate-function-loading-boilerplate = ["inventory", "process_path", "paste", "wolfram-library-link-macros/automate-function-loading-boilerplate"]
 
 
 
@@ -130,6 +131,7 @@ crate-type = ["cdylib"]
 name = "wll_docs"
 path = "examples/docs/main.rs"
 crate-type = ["cdylib"]
+required-features = ["wstp"]
 
 #---------------
 # Tests -- see example/tests/README.md
@@ -139,3 +141,4 @@ crate-type = ["cdylib"]
 name = "library_tests"
 path = "examples/tests/main.rs"
 crate-type = ["cdylib"]
+required-features = ["wstp"]

@@ -257,6 +257,9 @@ pub use wstp;
 #[cfg(feature = "automate-function-loading-boilerplate")]
 #[doc(hidden)]
 pub use inventory;
+#[cfg(feature = "automate-function-loading-boilerplate")]
+#[doc(hidden)]
+pub use paste;
 
 #[cfg(feature = "automate-function-loading-boilerplate")]
 pub use self::macro_utils::exported_library_functions_association;
@@ -924,19 +927,61 @@ fn bool_from_mbool(boole: sys::mbool) -> bool {
 /// ```
 ///
 /// [ref/LibraryFunctionLoad]: https://reference.wolfram.com/language/ref/LibraryFunctionLoad.html
-#[cfg(feature = "automate-function-loading-boilerplate")]
+//
+// When `wstp` feature is ENABLED: Generate both native and WSTP loaders
+//
+#[cfg(all(feature = "automate-function-loading-boilerplate", feature = "wstp"))]
 #[macro_export]
 macro_rules! generate_loader {
     ($name:ident) => {
-        // TODO: Use this anonymous `const` trick in #[export(..)] too.
+        // Native loader (DataStore based)
+        $crate::paste::paste! {
+            #[no_mangle]
+            pub unsafe extern "C" fn [<$name _native>](
+                lib: $crate::sys::WolframLibraryData,
+                argc: $crate::sys::mint,
+                args: *mut $crate::sys::MArgument,
+                res: $crate::sys::MArgument,
+            ) -> std::os::raw::c_int {
+                unsafe { $crate::macro_utils::load_library_functions_native_impl(lib, argc, args, res) }
+            }
+        }
+
+        // WSTP loader (Association based)
         const _: () = {
             #[no_mangle]
             pub unsafe extern "C" fn $name(
                 lib: $crate::sys::WolframLibraryData,
                 raw_link: $crate::wstp::sys::WSLINK,
             ) -> std::os::raw::c_int {
-                $crate::macro_utils::load_library_functions_impl(lib, raw_link)
+                unsafe { $crate::macro_utils::load_library_functions_impl(lib, raw_link) }
             }
         };
+    };
+}
+
+//
+// When `wstp` feature is DISABLED: Generate ONLY native loader
+//
+/// Generates a loader function for exported library functions.
+///
+/// This version only generates the native DataStore-based loader because the `wstp`
+/// feature is disabled.
+#[cfg(all(feature = "automate-function-loading-boilerplate", not(feature = "wstp")))]
+#[macro_export]
+macro_rules! generate_loader {
+    ($name:ident) => {
+        // Native loader (DataStore based)
+        $crate::paste::paste! {
+            #[no_mangle]
+            pub unsafe extern "C" fn [<$name _native>](
+                lib: $crate::sys::WolframLibraryData,
+                argc: $crate::sys::mint,
+                args: *mut $crate::sys::MArgument,
+                res: $crate::sys::MArgument,
+            ) -> std::os::raw::c_int {
+                unsafe { $crate::macro_utils::load_library_functions_native_impl(lib, argc, args, res) }
+            }
+        }
     };
 }
