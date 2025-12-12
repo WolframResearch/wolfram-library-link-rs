@@ -141,7 +141,17 @@ pub(crate) fn export(
     let params = func.sig.inputs.clone();
 
     let wrapper = if use_wstp {
-        export_wstp_function(&name, &exported_name, params, hidden)
+        #[cfg(feature = "wstp")]
+        {
+            export_wstp_function(&name, &exported_name, params, hidden)
+        }
+        #[cfg(not(feature = "wstp"))]
+        {
+            return Err(Error::new(
+                proc_macro2::Span::call_site(),
+                "#[export(wstp)] requires the 'wstp' feature of wolfram-library-link",
+            ));
+        }
     } else {
         export_native_function(&name, &exported_name, params.len(), hidden)
     };
@@ -217,6 +227,7 @@ fn export_native_function(
 // #[export(wstp): export WstpFunction
 //--------------------------------------
 
+#[cfg(feature = "wstp")]
 fn export_wstp_function(
     name: &Ident,
     exported_name: &Ident,

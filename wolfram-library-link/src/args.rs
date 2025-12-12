@@ -57,9 +57,11 @@ use crate::{
     expr::{Expr, Symbol},
     rtl,
     sys::{self, mint, mreal, MArgument},
-    wstp::Link,
     DataStore, Image, NumericArray,
 };
+
+#[cfg(feature = "wstp")]
+use crate::wstp::Link;
 
 /// Trait implemented for types that can be passed via an [`MArgument`].
 pub trait FromArg<'a> {
@@ -150,6 +152,7 @@ pub trait NativeFunction<'a> {
 /// * `fn(_: &mut Link)`
 /// * `fn(_: Vec<Expr>) -> Expr`
 /// * `fn(_: Vec<Expr>)`
+#[cfg(feature = "wstp")]
 pub trait WstpFunction {
     /// Call the function using the [`Link`] object passed by the Kernel.
     unsafe fn call(&self, link: &mut Link);
@@ -1113,6 +1116,7 @@ impl_NativeFunction!(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12);
 /// ```wolfram
 /// LibraryFunctionLoad["...", "add2_link", LinkObject, LinkObject]
 /// ```
+#[cfg(feature = "wstp")]
 impl WstpFunction for fn(&mut Link) {
     unsafe fn call(&self, link: &mut Link) {
         self(link)
@@ -1151,6 +1155,7 @@ impl WstpFunction for fn(&mut Link) {
 /// ```wolfram
 /// LibraryFunctionLoad["...", "add2", LinkObject, LinkObject]
 /// ```
+#[cfg(feature = "wstp")]
 impl WstpFunction for fn(Vec<Expr>) -> Expr {
     unsafe fn call(&self, link: &mut Link) {
         let args: Vec<Expr> = match get_args_list(link) {
@@ -1170,6 +1175,7 @@ impl WstpFunction for fn(Vec<Expr>) -> Expr {
     }
 }
 
+#[cfg(feature = "wstp")]
 impl WstpFunction for fn(Vec<Expr>) {
     unsafe fn call(&self, link: &mut Link) {
         let args: Vec<Expr> = match get_args_list(link) {
@@ -1193,12 +1199,14 @@ impl WstpFunction for fn(Vec<Expr>) {
 // Utilities
 //----------------------------
 
+#[cfg(feature = "wstp")]
 fn get_args_list(link: &mut Link) -> Result<Vec<Expr>, String> {
     get_args_list_impl(link).map_err(|err: wstp::Error| {
         format!("WSTP error reading argument List expression: {}", err)
     })
 }
 
+#[cfg(feature = "wstp")]
 fn get_args_list_impl(link: &mut Link) -> Result<Vec<Expr>, wstp::Error> {
     let arg_count: usize = match link.test_head("List") {
         Ok(count) => Ok(count),

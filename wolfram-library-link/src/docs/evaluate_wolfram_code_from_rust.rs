@@ -36,4 +36,5 @@ Wolfram to evaluate that expression.
 
 */
 
+#[cfg(feature = "wstp")]
 use crate::{evaluate, expr::Expr};

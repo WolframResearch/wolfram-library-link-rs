@@ -1,13 +1,22 @@
 use std::os::raw::c_int;
 
+#[cfg(feature = "wstp")]
 use wstp::{self, Link};
 
+#[cfg(feature = "wstp")]
+use crate::catch_panic::CaughtPanic;
 use crate::{
-    catch_panic::{call_and_catch_panic, CaughtPanic},
+    catch_panic::call_and_catch_panic,
     expr::{Expr, Symbol},
-    sys::{self, MArgument, LIBRARY_NO_ERROR},
-    NativeFunction, WstpFunction,
+    sys::{self, MArgument},
+    NativeFunction,
 };
+
+#[cfg(feature = "wstp")]
+use crate::sys::LIBRARY_NO_ERROR;
+
+#[cfg(feature = "wstp")]
+use crate::WstpFunction;
 
 /// Error codes returned by macro-generated wrapper code.
 ///
@@ -38,6 +47,7 @@ mod error_code {
 // WSTP helpers
 //==================
 
+#[cfg(feature = "wstp")]
 unsafe fn call_wstp_link_wolfram_library_function<
     F: FnOnce(&mut Link) + std::panic::UnwindSafe,
 >(
@@ -71,6 +81,7 @@ unsafe fn call_wstp_link_wolfram_library_function<
     }
 }
 
+#[cfg(feature = "wstp")]
 fn write_panic_failure_to_link(
     link: &mut Link,
     caught_panic: CaughtPanic,
@@ -159,6 +170,7 @@ pub unsafe fn call_native_wolfram_library_function<'a, F: NativeFunction<'a>>(
     sys::LIBRARY_NO_ERROR as c_int
 }
 
+#[cfg(feature = "wstp")]
 pub unsafe fn call_wstp_wolfram_library_function<
     F: WstpFunction + std::panic::UnwindSafe,
 >(
@@ -212,6 +224,7 @@ pub enum LibraryLinkFunction {
         /// return the `NativeFunction` trait object.
         signature: fn() -> Result<(Vec<Expr>, Expr), String>,
     },
+    #[cfg(feature = "wstp")]
     Wstp {
         name: &'static str,
     },
@@ -220,7 +233,7 @@ pub enum LibraryLinkFunction {
 #[cfg(feature = "automate-function-loading-boilerplate")]
 inventory::collect!(LibraryLinkFunction);
 
-#[cfg(feature = "automate-function-loading-boilerplate")]
+#[cfg(all(feature = "automate-function-loading-boilerplate", feature = "wstp"))]
 pub unsafe fn load_library_functions_impl(
     lib_data: sys::WolframLibraryData,
     raw_link: wstp::sys::WSLINK,
@@ -474,6 +487,7 @@ impl LibraryLinkFunction {
     fn name(&self) -> &str {
         match self {
             LibraryLinkFunction::Native { name, .. } => name,
+            #[cfg(feature = "wstp")]
             LibraryLinkFunction::Wstp { name } => name,
         }
     }
@@ -517,6 +531,7 @@ impl LibraryLinkFunction {
                     ]
                 ]
             */
+            #[cfg(feature = "wstp")]
             LibraryLinkFunction::Wstp { name } => {
                 let load_call = Expr::normal(&lib_func_load, vec![
                     library.clone(),

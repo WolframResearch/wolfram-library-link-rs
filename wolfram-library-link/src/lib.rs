@@ -249,6 +249,7 @@ pub mod docs;
 #[doc(inline)]
 pub use wolfram_expr as expr;
 pub use wolfram_library_link_sys as sys;
+#[cfg(feature = "wstp")]
 pub use wstp;
 
 
@@ -262,7 +263,7 @@ pub use self::macro_utils::exported_library_functions_association;
 
 
 pub use self::{
-    args::{FromArg, IntoArg, NativeFunction, WstpFunction},
+    args::{FromArg, IntoArg, NativeFunction},
     async_tasks::AsyncTaskObject,
     data_store::{DataStore, DataStoreNode, DataStoreNodeValue, Nodes},
     image::{ColorSpace, Image, ImageData, ImageType, Pixel, UninitImage},
@@ -273,17 +274,27 @@ pub use self::{
     },
 };
 
+#[cfg(feature = "wstp")]
+pub use self::args::WstpFunction;
 
 
+
+#[cfg(feature = "wstp")]
 use std::sync::Mutex;
 
+#[cfg(feature = "wstp")]
 use once_cell::sync::Lazy;
 
 use wolfram_library_link_sys::mint;
+#[cfg(feature = "wstp")]
 use wstp::Link;
 
+#[cfg(feature = "wstp")]
 pub(crate) use self::library_data::assert_main_thread;
-use crate::expr::{Expr, ExprKind, Symbol};
+use crate::expr::{Expr, Symbol};
+
+#[cfg(feature = "wstp")]
+use crate::expr::ExprKind;
 
 //--------------------------------------
 // Re-exported items
@@ -673,6 +684,7 @@ const BACKTRACE_ENV_VAR: &str = "LIBRARY_LINK_RUST_BACKTRACE";
 ///
 /// TODO: Specify and document what happens if the evaluation of `expr` triggers a
 ///       kernel abort (such as a `Throw[]` in the code).
+#[cfg(feature = "wstp")]
 pub fn evaluate(expr: &Expr) -> Expr {
     match try_evaluate(expr) {
         Ok(returned) => returned,
@@ -685,6 +697,7 @@ pub fn evaluate(expr: &Expr) -> Expr {
 
 /// Attempt to evaluate `expr`, returning an error if a WSTP transport error occurred
 /// or evaluation failed.
+#[cfg(feature = "wstp")]
 pub fn try_evaluate(expr: &Expr) -> Result<Expr, String> {
     with_link(|link: &mut Link| {
         // Send an EvaluatePacket['expr].
@@ -742,6 +755,7 @@ pub fn aborted() -> bool {
 
 // TODO: Instead of making these public, add new evaluate(..) alternative that
 //       takes a WstpExpr type.
+#[cfg(feature = "wstp")]
 fn process_wstp_link(link: &mut Link) -> Result<(), String> {
     assert_main_thread();
 
@@ -762,6 +776,7 @@ fn process_wstp_link(link: &mut Link) -> Result<(), String> {
 }
 
 /// Enforce exclusive access to the link returned by `getWSLINK()`.
+#[cfg(feature = "wstp")]
 fn with_link<F: FnOnce(&mut Link) -> R, R>(f: F) -> R {
     assert_main_thread();
 

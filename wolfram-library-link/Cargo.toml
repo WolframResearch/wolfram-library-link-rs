@@ -24,7 +24,7 @@ wolfram-library-link-macros    = { version = "0.2.10", path = "./wolfram-library
 
 wolfram-library-link-sys       = { version = "0.2.10", path = "../wolfram-library-link-sys" }
 
-wstp         = "0.2.8"
+wstp         = { version = "0.2.8", optional = true }
 wolfram-expr = "0.1.0"
 
 once_cell = "1.8.0"
@@ -40,11 +40,14 @@ num-bigint = "0.4"
 [dev-dependencies]
 
 [features]
-default = ["panic-failure-backtraces", "automate-function-loading-boilerplate"]
+default = ["wstp", "panic-failure-backtraces", "automate-function-loading-boilerplate"]
 nightly = []
 
+wstp = ["dep:wstp", "wolfram-library-link-macros/wstp"]
 panic-failure-backtraces = ["backtrace"]
 automate-function-loading-boilerplate = ["inventory", "process_path", "wolfram-library-link-macros/automate-function-loading-boilerplate"]
+
+
 
 
 #=======================================
@@ -54,7 +57,7 @@ automate-function-loading-boilerplate = ["inventory", "process_path", "wolfram-l
 [[example]]
 name = "basic_types"
 crate-type = ["cdylib"]
-required-features = ["automate-function-loading-boilerplate"]
+required-features = ["wstp", "automate-function-loading-boilerplate"]
 
 [[example]]
 name = "numeric_arrays"
@@ -72,7 +75,7 @@ crate-type = ["cdylib"]
 name = "wstp_example" # avoid "libwstp.dylib", which seems too generic.
 path = "examples/wstp.rs"
 crate-type = ["cdylib"]
-required-features = ["automate-function-loading-boilerplate"]
+required-features = ["wstp", "automate-function-loading-boilerplate"]
 
 #-----------------------------
 # Raw (unsafe, low-level) APIs
@@ -82,6 +85,7 @@ required-features = ["automate-function-loading-boilerplate"]
 name = "raw_wstp_function"
 path = "examples/raw/raw_wstp_function.rs"
 crate-type = ["cdylib"]
+required-features = ["wstp"]
 
 [[example]]
 name = "raw_librarylink_function"
@@ -96,12 +100,13 @@ crate-type = ["cdylib"]
 name = "basic_expressions"
 path = "examples/exprs/basic_expressions.rs"
 crate-type = ["cdylib"]
+required-features = ["wstp"]
 
 [[example]]
 name = "managed_exprs"
 path = "examples/exprs/managed.rs"
 crate-type = ["cdylib"]
-required-features = ["automate-function-loading-boilerplate"]
+required-features = ["wstp", "automate-function-loading-boilerplate"]
 
 #---------------
 # Async examples
