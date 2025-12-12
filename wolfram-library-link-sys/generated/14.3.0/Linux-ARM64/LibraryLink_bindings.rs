@@ -15,7 +15,7 @@ pub const MType_Image: u32 = 8;
 pub const MType_UTF8String: u32 = 9;
 pub const MType_DataStore: u32 = 10;
 pub const MType_TabularColumn: u32 = 11;
-pub type wchar_t = ::std::os::raw::c_int;
+pub type wchar_t = ::std::os::raw::c_uint;
 #[doc = " Define 'max_align_t' to match the GCC definition."]
 #[repr(C)]
 #[repr(align(16))]

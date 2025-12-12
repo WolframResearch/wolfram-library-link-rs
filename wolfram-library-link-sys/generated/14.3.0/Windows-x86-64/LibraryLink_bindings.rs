@@ -15,56 +15,8 @@ pub const MType_Image: u32 = 8;
 pub const MType_UTF8String: u32 = 9;
 pub const MType_DataStore: u32 = 10;
 pub const MType_TabularColumn: u32 = 11;
-pub type wchar_t = ::std::os::raw::c_int;
-#[doc = " Define 'max_align_t' to match the GCC definition."]
-#[repr(C)]
-#[repr(align(16))]
-#[derive(Debug, Copy, Clone)]
-pub struct max_align_t {
-    pub __clang_max_align_nonce1: ::std::os::raw::c_longlong,
-    pub __bindgen_padding_0: u64,
-    pub __clang_max_align_nonce2: u128,
-}
-#[test]
-fn bindgen_test_layout_max_align_t() {
-    const UNINIT: ::std::mem::MaybeUninit<max_align_t> =
-        ::std::mem::MaybeUninit::uninit();
-    let ptr = UNINIT.as_ptr();
-    assert_eq!(
-        ::std::mem::size_of::<max_align_t>(),
-        32usize,
-        concat!("Size of: ", stringify!(max_align_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<max_align_t>(),
-        16usize,
-        concat!("Alignment of ", stringify!(max_align_t))
-    );
-    assert_eq!(
-        unsafe {
-            ::std::ptr::addr_of!((*ptr).__clang_max_align_nonce1) as usize - ptr as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(max_align_t),
-            "::",
-            stringify!(__clang_max_align_nonce1)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            ::std::ptr::addr_of!((*ptr).__clang_max_align_nonce2) as usize - ptr as usize
-        },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(max_align_t),
-            "::",
-            stringify!(__clang_max_align_nonce2)
-        )
-    );
-}
+pub type wchar_t = ::std::os::raw::c_ushort;
+pub type max_align_t = f64;
 pub type int_least64_t = i64;
 pub type uint_least64_t = u64;
 pub type int_fast64_t = i64;
@@ -82,8 +34,8 @@ pub type uint_least8_t = u8;
 pub type int_fast8_t = i8;
 pub type uint_fast8_t = u8;
 #[doc = " C99 7.18.1.5 Greatest-width integer types."]
-pub type intmax_t = ::std::os::raw::c_long;
-pub type uintmax_t = ::std::os::raw::c_ulong;
+pub type intmax_t = ::std::os::raw::c_longlong;
+pub type uintmax_t = ::std::os::raw::c_ulonglong;
 pub type mint = i64;
 pub type umint = u64;
 pub type mbool = ::std::os::raw::c_int;
@@ -299,7 +251,7 @@ pub const LIBRARY_MEMORY_ERROR: _bindgen_ty_1 = 5;
 pub const LIBRARY_FUNCTION_ERROR: _bindgen_ty_1 = 6;
 pub const LIBRARY_VERSION_ERROR: _bindgen_ty_1 = 7;
 #[doc = " Error types for LibraryErrorHandler"]
-pub type _bindgen_ty_1 = ::std::os::raw::c_uint;
+pub type _bindgen_ty_1 = ::std::os::raw::c_int;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct st_DataStore {
@@ -1251,7 +1203,7 @@ fn bindgen_test_layout_st_WolframLibraryData() {
     );
 }
 pub mod MNumericArray_Data_Type {
-    pub type Type = ::std::os::raw::c_uint;
+    pub type Type = ::std::os::raw::c_int;
     pub const MNumericArray_Type_Undef: Type = 0;
     pub const MNumericArray_Type_Bit8: Type = 1;
     pub const MNumericArray_Type_UBit8: Type = 2;
@@ -1270,7 +1222,7 @@ pub mod MNumericArray_Data_Type {
 }
 pub use self::MNumericArray_Data_Type::Type as numericarray_data_t;
 pub mod MNumericArray_Convert_Method {
-    pub type Type = ::std::os::raw::c_uint;
+    pub type Type = ::std::os::raw::c_int;
     pub const MNumericArray_Convert_Check: Type = 1;
     pub const MNumericArray_Convert_Clip_Check: Type = 2;
     pub const MNumericArray_Convert_Coerce: Type = 3;
