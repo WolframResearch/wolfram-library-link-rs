@@ -36,8 +36,10 @@ pub enum Expr {
     Symbol(String),
     /// Ordered sequence (`List`).
     List(Vec<Expr>),
-    /// Association key/value pairs (`Association`).
+    /// Association key/value pairs with `Rule` (`Association[key -> val, ...]`).
     Assoc(Vec<(Expr, Expr)>),
+    /// Association key/value pairs with `RuleDelayed` (`Association[key :> val, ...]`).
+    DelayedAssoc(Vec<(Expr, Expr)>),
     /// Boolean truth value (`True` / `False`).
     Boolean(bool),
     /// The Wolfram `None` object.
@@ -173,6 +175,7 @@ pub mod ser {
             Expr::Symbol(s) => write_symbol(w, s),
             Expr::List(items) => write_list(w, items),
             Expr::Assoc(pairs) => write_assoc(w, pairs),
+            Expr::DelayedAssoc(pairs) => write_delayed_assoc(w, pairs),
             Expr::Boolean(b) => write_symbol(w, if *b { "True" } else { "False" }),
             Expr::None => write_symbol(w, "None"),
             Expr::Complex(re, im) => write_complex(w, *re, *im),
@@ -229,6 +232,11 @@ pub mod ser {
     pub(crate) fn write_assoc<W: Write>(w: &mut W, pairs: &[(Expr, Expr)]) -> io::Result<()> {
         w.write_all(&[b'A'])?; write_varint(w, pairs.len() as u64)?;
         for (k,v) in pairs { w.write_all(&[b'-'])?; write_expr(w, k)?; write_expr(w, v)?; }
+        Ok(())
+    }
+    pub(crate) fn write_delayed_assoc<W: Write>(w: &mut W, pairs: &[(Expr, Expr)]) -> io::Result<()> {
+        w.write_all(&[b'A'])?; write_varint(w, pairs.len() as u64)?;
+        for (k,v) in pairs { w.write_all(&[b':'])?; write_expr(w, k)?; write_expr(w, v)?; }
         Ok(())
     }
     pub(crate) fn write_bigint<W: Write>(w: &mut W, bi: &num_bigint::BigInt) -> io::Result<()> {

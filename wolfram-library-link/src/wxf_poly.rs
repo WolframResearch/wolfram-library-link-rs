@@ -136,6 +136,11 @@ impl WxfEncode for crate::wxf::Expr {
                 for (k,v) in pairs { w.write_all(&[b'-'])?; k.encode_wxf(w)?; v.encode_wxf(w)?; }
                 Ok(())
             },
+            E::DelayedAssoc(pairs) => {
+                w.write_all(&[b'A'])?; write_varint(w, pairs.len() as u64)?;
+                for (k,v) in pairs { w.write_all(&[b':'])?; k.encode_wxf(w)?; v.encode_wxf(w)?; }
+                Ok(())
+            },
             E::Boolean(b) => write_symbol(w, if *b {"True"} else {"False"}),
             E::None => write_symbol(w, "None"),
             E::Complex(re, im) => { w.write_all(&[b'f'])?; write_varint(w, 2)?; write_symbol(w, "Complex")?; write_real(w, *re)?; write_real(w, *im) },

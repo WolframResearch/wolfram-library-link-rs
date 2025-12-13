@@ -1134,13 +1134,14 @@ fn add_expr_to_datastore(ds: &mut DataStore, expr: &crate::wxf::Expr) {
             ds.add_complex_f64(crate::sys::mcomplex { ri: [*re, *im] });
         },
         // Association - encode as Construct[Association, rules...]
-        Expr::Assoc(pairs) => {
+        Expr::Assoc(pairs) | Expr::DelayedAssoc(pairs) => {
             let mut inner = DataStore::new();
             inner.add_str("System`Association");
+            let rule_sym = if matches!(expr, Expr::DelayedAssoc(_)) { "System`RuleDelayed" } else { "System`Rule" };
             for (key, val) in pairs {
-                // Each rule becomes Construct[Rule, key, val]
+                // Each rule becomes Construct[Rule or RuleDelayed, key, val]
                 let mut rule_inner = DataStore::new();
-                rule_inner.add_str("System`Rule");
+                rule_inner.add_str(rule_sym);
                 add_expr_to_datastore(&mut rule_inner, key);
                 add_expr_to_datastore(&mut rule_inner, val);
                 inner.add_named_data_store("System`Construct", rule_inner);

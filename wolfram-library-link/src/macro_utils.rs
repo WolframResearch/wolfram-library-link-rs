@@ -395,8 +395,8 @@ fn build_function_load_wxf(library_path: &str) -> Vec<u8> {
         }
     }
 
-    // Create Association expression
-    let assoc = Expr::Assoc(pairs);
+    // Create Association expression with RuleDelayed
+    let assoc = Expr::DelayedAssoc(pairs);
     
     // Serialize to WXF
     to_wxf_bytes(&assoc).unwrap_or_else(|_| Vec::new())
