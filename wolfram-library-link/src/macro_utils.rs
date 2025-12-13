@@ -307,51 +307,101 @@ pub unsafe fn load_library_functions_native_impl(
 
 /// Build a DataStore containing LibraryFunctionLoad-compatible specifications.
 ///
-/// Each function is stored as: `name -> DataStore[path, name, args_ds, return_type]`
+/// Each function is stored as: `name -> DataStore[expr_encoded]` where expr_encoded
+/// uses the named-node Construct encoding for full expression reconstruction.
 #[cfg(feature = "automate-function-loading-boilerplate")]
 fn build_function_load_datastore(library_path: &str) -> crate::DataStore {
+    use crate::data_store::expr_to_datastore;
     use crate::DataStore;
 
     let mut ds = DataStore::new();
 
     for func in inventory::iter::<LibraryLinkFunction> {
-        let mut func_ds = DataStore::new();
-
-        match func {
-            LibraryLinkFunction::Native { name, signature } => {
-                // Add: path, name, args, return
-                func_ds.add_str(library_path);
-                func_ds.add_str(name);
-
-                if let Ok((args, ret)) = signature() {
-                    let mut args_ds = DataStore::new();
-                    for arg in args.iter() {
-                        args_ds.add_str(&format!("{}", arg));
-                    }
-                    func_ds.add_data_store(args_ds);
-                    func_ds.add_str(&format!("{}", ret));
-                }
-
-                ds.add_named_data_store(name, func_ds);
-            },
-            #[cfg(feature = "wstp")]
-            LibraryLinkFunction::Wstp { name } => {
-                // WSTP: path, name, LinkObject, LinkObject
-                func_ds.add_str(library_path);
-                func_ds.add_str(name);
-
-                let mut args_ds = DataStore::new();
-                args_ds.add_str("LinkObject");
-                func_ds.add_data_store(args_ds);
-                func_ds.add_str("LinkObject");
-
-                ds.add_named_data_store(name, func_ds);
-            }
+        // Build the loading expression (LibraryFunction[...] or wrapped WSTP)
+        let loading_expr_result = func.loading_code(&std::path::PathBuf::from(library_path));
+        
+        if let Ok(loading_expr) = loading_expr_result {
+            // Convert wolfram_expr::Expr to wxf::Expr
+            let wxf_expr: crate::wxf::Expr = (&loading_expr).into();
+            // Encode to DataStore
+            let expr_ds = expr_to_datastore(&wxf_expr);
+            ds.add_named_data_store(func.name(), expr_ds);
         }
     }
 
     ds
 }
+
+/// Native loader implementation that returns function load specifications as WXF bytes.
+///
+/// Accepts the library path as a string argument and returns a NumericArray[..., "UnsignedInteger8"]
+/// containing WXF-serialized expression data. This can be decoded using `BinaryDeserialize`.
+///
+/// The returned expression is an Association of function names to their loading code.
+#[cfg(feature = "automate-function-loading-boilerplate")]
+pub unsafe fn load_library_functions_wxf_impl(
+    lib_data: sys::WolframLibraryData,
+    argc: sys::mint,
+    args: *mut MArgument,
+    res: MArgument,
+) -> c_int {
+    use std::ffi::CStr;
+    use crate::NumericArray;
+
+    // Initialize the library
+    if crate::initialize(lib_data).is_err() {
+        return error_code::FAILED_TO_INIT;
+    }
+
+    // Get the library path from arguments
+    if argc != 1 {
+        return sys::LIBRARY_FUNCTION_ERROR as c_int;
+    }
+
+    let library_path = {
+        let arg = *args;
+        let c_str = CStr::from_ptr(*arg.utf8string);
+        c_str.to_str().unwrap_or("").to_owned()
+    };
+
+    // Build the WXF bytes for the function association
+    let wxf_bytes = build_function_load_wxf(&library_path);
+
+    // Create NumericArray from the bytes
+    let array = NumericArray::<u8>::from_slice(&wxf_bytes);
+
+    // Return via MArgument
+    *res.tensor = array.into_raw() as *mut _;
+
+    sys::LIBRARY_NO_ERROR as c_int
+}
+
+/// Build WXF-serialized bytes for the function load association.
+#[cfg(feature = "automate-function-loading-boilerplate")]
+fn build_function_load_wxf(library_path: &str) -> Vec<u8> {
+    use crate::wxf::{Expr, ser::to_wxf_bytes};
+
+    let mut pairs: Vec<(Expr, Expr)> = Vec::new();
+
+    for func in inventory::iter::<LibraryLinkFunction> {
+        // Build the loading expression (LibraryFunction[...] or wrapped WSTP)
+        let loading_expr_result = func.loading_code(&std::path::PathBuf::from(library_path));
+        
+        if let Ok(loading_expr) = loading_expr_result {
+            // Convert wolfram_expr::Expr to wxf::Expr
+            let wxf_expr: Expr = (&loading_expr).into();
+            let key = Expr::String(func.name().to_string());
+            pairs.push((key, wxf_expr));
+        }
+    }
+
+    // Create Association expression
+    let assoc = Expr::Assoc(pairs);
+    
+    // Serialize to WXF
+    to_wxf_bytes(&assoc).unwrap_or_else(|_| Vec::new())
+}
+
 
 /// Returns an [`Association`][Association] containing the names and `LibraryFunctionLoad`
 /// calls for every function in this library marked with [`#[export(..)]`][crate::export].
@@ -552,7 +602,7 @@ pub fn exported_library_functions_association(
     });
 
     let mut fields = Vec::new();
-    let rule = Symbol::new("System`Rule");
+    let rule = Symbol::new("System`RuleDelayed");
 
     for func in inventory::iter::<LibraryLinkFunction> {
         let code = match func.loading_code(&library) {

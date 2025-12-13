@@ -310,3 +310,62 @@ pub mod de {
         }
     }
 }
+
+//======================================
+// Conversion from wolfram_expr::Expr
+//======================================
+
+/// Convert a [`wolfram_expr::Expr`][crate::expr::Expr] to a [`wxf::Expr`][Expr].
+///
+/// This enables using the simpler wxf::Expr for DataStore encoding.
+impl From<&crate::expr::Expr> for Expr {
+    fn from(expr: &crate::expr::Expr) -> Self {
+        use crate::expr::ExprKind;
+        
+        match expr.kind() {
+            ExprKind::Integer(i) => Expr::Integer(*i),
+            ExprKind::Real(r) => Expr::Real(r.into_inner()),
+            ExprKind::String(s) => Expr::String(s.clone()),
+            ExprKind::Symbol(sym) => Expr::Symbol(sym.as_str().to_string()),
+            ExprKind::Normal(normal) => {
+                let head_expr: Expr = normal.head().into();
+                let args: Vec<Expr> = normal.elements().iter().map(|e| e.into()).collect();
+                
+                // Check for special cases
+                match normal.head().kind() {
+                    ExprKind::Symbol(sym) if sym.as_str() == "System`List" => {
+                        Expr::List(args)
+                    },
+                    ExprKind::Symbol(sym) if sym.as_str() == "System`Complex" && args.len() == 2 => {
+                        // Try to extract re/im as f64
+                        if let (Expr::Real(re), Expr::Real(im)) = (&args[0], &args[1]) {
+                            Expr::Complex(*re, *im)
+                        } else if let (Expr::Integer(re), Expr::Integer(im)) = (&args[0], &args[1]) {
+                            Expr::Complex(*re as f64, *im as f64)
+                        } else {
+                            Expr::Function(Box::new(head_expr), args)
+                        }
+                    },
+                    ExprKind::Symbol(sym) if sym.as_str() == "System`Association" => {
+                        // Try to convert rules to pairs
+                        let mut pairs = Vec::new();
+                        for arg in &args {
+                            if let Expr::Function(head, rule_args) = arg {
+                                if let Expr::Symbol(rule_sym) = head.as_ref() {
+                                    if rule_sym == "System`Rule" && rule_args.len() == 2 {
+                                        pairs.push((rule_args[0].clone(), rule_args[1].clone()));
+                                        continue;
+                                    }
+                                }
+                            }
+                            // Not a proper association structure, fall back to function
+                            return Expr::Function(Box::new(head_expr), args);
+                        }
+                        Expr::Assoc(pairs)
+                    },
+                    _ => Expr::Function(Box::new(head_expr), args),
+                }
+            },
+        }
+    }
+}

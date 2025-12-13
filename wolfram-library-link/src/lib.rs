@@ -947,6 +947,19 @@ macro_rules! generate_loader {
             }
         }
 
+        // WXF loader (NumericArray of WXF bytes)
+        $crate::paste::paste! {
+            #[no_mangle]
+            pub unsafe extern "C" fn [<$name _wxf>](
+                lib: $crate::sys::WolframLibraryData,
+                argc: $crate::sys::mint,
+                args: *mut $crate::sys::MArgument,
+                res: $crate::sys::MArgument,
+            ) -> std::os::raw::c_int {
+                unsafe { $crate::macro_utils::load_library_functions_wxf_impl(lib, argc, args, res) }
+            }
+        }
+
         // WSTP loader (Association based)
         const _: () = {
             #[no_mangle]
@@ -960,12 +973,13 @@ macro_rules! generate_loader {
     };
 }
 
+
 //
 // When `wstp` feature is DISABLED: Generate ONLY native loader
 //
 /// Generates a loader function for exported library functions.
 ///
-/// This version only generates the native DataStore-based loader because the `wstp`
+/// This version generates native DataStore-based and WXF loaders because the `wstp`
 /// feature is disabled.
 #[cfg(all(feature = "automate-function-loading-boilerplate", not(feature = "wstp")))]
 #[macro_export]
@@ -981,6 +995,19 @@ macro_rules! generate_loader {
                 res: $crate::sys::MArgument,
             ) -> std::os::raw::c_int {
                 unsafe { $crate::macro_utils::load_library_functions_native_impl(lib, argc, args, res) }
+            }
+        }
+
+        // WXF loader (NumericArray of WXF bytes)
+        $crate::paste::paste! {
+            #[no_mangle]
+            pub unsafe extern "C" fn [<$name _wxf>](
+                lib: $crate::sys::WolframLibraryData,
+                argc: $crate::sys::mint,
+                args: *mut $crate::sys::MArgument,
+                res: $crate::sys::MArgument,
+            ) -> std::os::raw::c_int {
+                unsafe { $crate::macro_utils::load_library_functions_wxf_impl(lib, argc, args, res) }
             }
         }
     };
