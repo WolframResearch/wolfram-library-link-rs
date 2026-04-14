@@ -3,3 +3,19 @@
 Cargo.lock
 
 /build
+
+# Sibling checkouts pulled in via `scripts/bootstrap-deps.sh`.
+# The outer workspace's `[patch.crates-io]` block points at these paths; the
+# checkouts themselves live in their own repos. Committing them here (as
+# submodules or plain directories) would pin SHAs and fight the upstream
+# PR flow, so we deliberately keep them out of version control.
+/wolfram-expr-rs/
+/wstp-rs/
+
+# Local example paclets — developer scratch, not part of the published
+# tree. The canonical end-to-end tests live under RustLink/Tests/.
+/paclet-example/
+*.paclet
+
+# macOS
+.DS_Store
