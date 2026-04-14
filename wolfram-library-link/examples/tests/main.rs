@@ -6,4 +6,5 @@ mod test_bigint;
 mod test_data_store;
 mod test_images;
 mod test_numeric_array_conversions;
+mod test_type_conversions;
 mod test_wstp;
