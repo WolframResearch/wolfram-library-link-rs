@@ -235,7 +235,6 @@ pub mod macro_utils;
 pub mod managed;
 pub mod rtl;
 pub mod wxf;
-pub mod wxf_poly;
 
 pub mod docs;
 

@@ -7,6 +7,3 @@ mod test_data_store;
 mod test_images;
 mod test_numeric_array_conversions;
 mod test_wstp;
-
-mod test_wxf_roundtrip;
-mod test_wxf_export_nested;

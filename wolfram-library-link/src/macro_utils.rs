@@ -321,10 +321,8 @@ fn build_function_load_datastore(library_path: &str) -> crate::DataStore {
         let loading_expr_result = func.loading_code(&std::path::PathBuf::from(library_path));
         
         if let Ok(loading_expr) = loading_expr_result {
-            // Convert wolfram_expr::Expr to wxf::Expr
-            let wxf_expr: crate::wxf::Expr = (&loading_expr).into();
-            // Encode to DataStore
-            let expr_ds = expr_to_datastore(&wxf_expr);
+            // Encode directly from the unified `wolfram_expr::Expr`.
+            let expr_ds = expr_to_datastore(&loading_expr);
             ds.add_named_data_store(func.name(), expr_ds);
         }
     }
@@ -379,27 +377,24 @@ pub unsafe fn load_library_functions_wxf_impl(
 /// Build WXF-serialized bytes for the function load association.
 #[cfg(feature = "automate-function-loading-boilerplate")]
 fn build_function_load_wxf(library_path: &str) -> Vec<u8> {
-    use crate::wxf::{Expr, ser::to_wxf_bytes};
+    use crate::wxf::to_wxf_bytes;
+    use wolfram_expr::{Expr, Symbol};
 
-    let mut pairs: Vec<(Expr, Expr)> = Vec::new();
+    let mut rules: Vec<Expr> = Vec::new();
 
     for func in inventory::iter::<LibraryLinkFunction> {
-        // Build the loading expression (LibraryFunction[...] or wrapped WSTP)
         let loading_expr_result = func.loading_code(&std::path::PathBuf::from(library_path));
-        
+
         if let Ok(loading_expr) = loading_expr_result {
-            // Convert wolfram_expr::Expr to wxf::Expr
-            let wxf_expr: Expr = (&loading_expr).into();
-            let key = Expr::String(func.name().to_string());
-            pairs.push((key, wxf_expr));
+            rules.push(Expr::rule_delayed(
+                Expr::string(func.name()),
+                loading_expr,
+            ));
         }
     }
 
-    // Create Association expression with RuleDelayed
-    let assoc = Expr::DelayedAssoc(pairs);
-    
-    // Serialize to WXF
-    to_wxf_bytes(&assoc).unwrap_or_else(|_| Vec::new())
+    let assoc = Expr::normal(Symbol::new("System`Association"), rules);
+    to_wxf_bytes(&assoc).unwrap_or_default()
 }
 
 

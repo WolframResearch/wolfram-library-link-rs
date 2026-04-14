@@ -4,5 +4,16 @@ resolver = "2"
 members = [
     "wolfram-library-link",
     "wolfram-library-link-sys",
-    "xtask"
+    "xtask",
+    "paclet-example/WxfDemo/Libs/wxf_demo",
 ]
+
+exclude = [
+    "wstp-rs",
+    "wolfram-expr-rs",
+]
+
+[patch.crates-io]
+wstp         = { path = "wstp-rs/wstp" }
+wstp-sys     = { path = "wstp-rs/wstp-sys" }
+wolfram-expr = { path = "wolfram-expr-rs" }

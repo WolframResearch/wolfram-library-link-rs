@@ -693,6 +693,24 @@ impl DataStoreAdd for isize {
     }
 }
 
+impl DataStoreAdd for i64 {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        ds.add_i64(*self)
+    }
+}
+
+impl DataStoreAdd for f32 {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        ds.add_f64(*self as f64)
+    }
+}
+
+impl DataStoreAdd for f64 {
+    fn add_to_datastore(&self, ds: &mut DataStore) {
+        ds.add_f64(*self)
+    }
+}
+
 impl DataStoreAdd for DataStore {
     fn add_to_datastore(&self, ds: &mut DataStore) {
         ds.add_data_store(self.clone())
@@ -1067,92 +1085,73 @@ impl<'node> fmt::Debug for DataStoreNodeValue<'node> {
 // Expr to DataStore Encoding
 //======================================
 
-/// Convert a [`wxf::Expr`][crate::wxf::Expr] to a [`DataStore`] using named-node Construct encoding.
+/// Convert a [`wolfram_expr::Expr`] to a [`DataStore`] using named-node
+/// `Construct` encoding.
 ///
 /// # Encoding Rules
 ///
-/// - **Primitives**: Encoded as native DataStore values
-///   - `Integer(i64)` → `ds.add_i64(v)`
-///   - `Real(f64)` → `ds.add_f64(v)`
-///   - `String(s)` → `ds.add_str(s)`
-///   - `Boolean(b)` → `ds.add_bool(b)`
-/// - **Symbols**: Encoded as strings (full symbol name)
-///   - `Symbol("System\`Plus")` → `ds.add_str("System\`Plus")`
-/// - **Compound expressions**: Use named node with `"System\`Construct"` key
-///   - `Function(head, args)` → `DataStore["System\`Construct" -> DataStore[head_ds, arg1_ds, ...]]`
-///   - `List[elems]` → `DataStore["System\`Construct" -> DataStore["System\`List", elem1_ds, ...]]`
-///
-/// # Example
-///
-/// The expression `Plus[1, 2]` encodes as:
-/// ```wolfram
-/// DataStore["System`Construct" -> DataStore["System`Plus", 1, 2]]
-/// ```
-pub fn expr_to_datastore(expr: &crate::wxf::Expr) -> DataStore {
+/// - **Primitives**: added as native [`DataStore`] values
+///   (`Integer(i64)` → `add_i64`, `Real` → `add_f64`, `String` → `add_str`).
+/// - **`True`/`False`/`Null` symbols**: collapsed to native bool / `Null` string.
+/// - **Other symbols**: encoded as their fully-qualified string name.
+/// - **Normal expressions**: `f[args…]` → named node
+///   `"System\`Construct" -> DataStore[head, arg1, …]`.
+/// - **Arbitrary-precision numbers**: encoded as their decimal digit strings.
+pub fn expr_to_datastore(expr: &wolfram_expr::Expr) -> DataStore {
     let mut ds = DataStore::new();
     add_expr_to_datastore(&mut ds, expr);
     ds
 }
 
-/// Add an expression to an existing DataStore.
-///
-/// Primitives are added directly. Compound expressions use named nodes.
-fn add_expr_to_datastore(ds: &mut DataStore, expr: &crate::wxf::Expr) {
-    use crate::wxf::Expr;
-    
-    match expr {
-        // Primitives - add directly to the DataStore
-        Expr::Integer(i) => ds.add_i64(*i),
-        Expr::Real(r) => ds.add_f64(*r),
-        Expr::String(s) => ds.add_str(s),
-        Expr::Boolean(b) => ds.add_bool(*b),
-        // Symbols - encode as strings
-        Expr::Symbol(s) => ds.add_str(s),
-        Expr::None => ds.add_str("System`None"),
-        // List - encode as Construct[List, elems...]
-        Expr::List(items) => {
-            let mut inner = DataStore::new();
-            inner.add_str("System`List");
-            for item in items {
-                add_expr_to_datastore(&mut inner, item);
-            }
-            ds.add_named_data_store("System`Construct", inner);
+fn add_expr_to_datastore(ds: &mut DataStore, expr: &wolfram_expr::Expr) {
+    use wolfram_expr::ExprKind;
+
+    match expr.kind() {
+        &ExprKind::Integer(i) => ds.add_i64(i),
+        &ExprKind::Real(r) => ds.add_f64(r.into_inner()),
+        ExprKind::String(s) => ds.add_str(s.as_str()),
+        ExprKind::Symbol(sym) => match sym.as_str() {
+            "System`True" => ds.add_bool(true),
+            "System`False" => ds.add_bool(false),
+            other => ds.add_str(other),
         },
-        // Function - encode as Construct[head, args...]
-        Expr::Function(head, args) => {
+        ExprKind::BigInteger(bi) => ds.add_str(&bi.to_str_radix(10)),
+        ExprKind::BigReal { digits, precision } => {
+            if *precision == 0 {
+                ds.add_str(digits.as_str());
+            } else {
+                ds.add_str(&format!("{}`{}", digits, precision))
+            }
+        },
+        ExprKind::Normal(normal) => {
+            // Special-case Complex[re, im] → native mcomplex if both parts
+            // are machine-numeric.
+            if let Some(sym) = normal.head().try_as_symbol() {
+                if sym.as_str() == "System`Complex" && normal.elements().len() == 2 {
+                    let re = to_f64(&normal.elements()[0]);
+                    let im = to_f64(&normal.elements()[1]);
+                    if let (Some(re), Some(im)) = (re, im) {
+                        ds.add_complex_f64(crate::sys::mcomplex { ri: [re, im] });
+                        return;
+                    }
+                }
+            }
             let mut inner = DataStore::new();
-            // Add head first
-            add_expr_to_datastore(&mut inner, head);
-            // Then add each argument
-            for arg in args {
+            add_expr_to_datastore(&mut inner, normal.head());
+            for arg in normal.elements() {
                 add_expr_to_datastore(&mut inner, arg);
             }
             ds.add_named_data_store("System`Construct", inner);
         },
-        // Complex - use native complex type
-        Expr::Complex(re, im) => {
-            ds.add_complex_f64(crate::sys::mcomplex { ri: [*re, *im] });
-        },
-        // Association - encode as Construct[Association, rules...]
-        Expr::Assoc(pairs) | Expr::DelayedAssoc(pairs) => {
-            let mut inner = DataStore::new();
-            inner.add_str("System`Association");
-            let rule_sym = if matches!(expr, Expr::DelayedAssoc(_)) { "System`RuleDelayed" } else { "System`Rule" };
-            for (key, val) in pairs {
-                // Each rule becomes Construct[Rule or RuleDelayed, key, val]
-                let mut rule_inner = DataStore::new();
-                rule_inner.add_str(rule_sym);
-                add_expr_to_datastore(&mut rule_inner, key);
-                add_expr_to_datastore(&mut rule_inner, val);
-                inner.add_named_data_store("System`Construct", rule_inner);
-            }
-            ds.add_named_data_store("System`Construct", inner);
-        },
-        // BigInt/BigUint - encode as strings (decimal representation)
-        Expr::BigInt(bi) => ds.add_str(&bi.to_string()),
-        Expr::BigUint(bu) => ds.add_str(&bu.to_string()),
-        // PackedArray/Date - not fully supported, encode as placeholder
-        Expr::PackedArray(_) | Expr::Date(_) => ds.add_str("System`$Failed"),
+    }
+}
+
+fn to_f64(e: &wolfram_expr::Expr) -> Option<f64> {
+    use wolfram_expr::ExprKind;
+    match e.kind() {
+        &ExprKind::Integer(i) => Some(i as f64),
+        &ExprKind::Real(r) => Some(r.into_inner()),
+        _ => None,
     }
 }
 
