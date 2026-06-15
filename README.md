@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> **This repository is archived.** The `wolfram-library-link` crate now lives in the [`wolfram-rust-library`](https://github.com/WolframResearch/wolfram-rust-library) monorepo, in the [`wolfram-library-link/`](https://github.com/WolframResearch/wolfram-rust-library/tree/HEAD/wolfram-library-link) directory.
+
 # wolfram-library-link
 
 [![Crates.io](https://img.shields.io/crates/v/wolfram-library-link.svg)](https://crates.io/crates/wolfram-library-link)
